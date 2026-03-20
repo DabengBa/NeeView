@@ -23,6 +23,8 @@ namespace NeeView
     {
         private static CustomLayoutPanelManager? _current;
         public static CustomLayoutPanelManager Current => _current ?? throw new InvalidOperationException();
+        public static CustomLayoutPanelManager? CurrentOrNull => _current;
+        public static bool IsInitialized => _current is not null;
 
         public static void Initialize()
         {

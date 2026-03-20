@@ -137,12 +137,6 @@ namespace NeeView
                 _routedCommandBinding = new RoutedCommandBinding(this, RoutedCommandTable.Current);
             }
 
-            // サイドパネル初期化
-            using (App.Current.TraceStartupScope("MainWindow.Initialize.CustomLayoutPanelManager.Initialize"))
-            {
-                CustomLayoutPanelManager.Initialize();
-            }
-
             // 各コントロールとモデルを関連付け
             using (App.Current.TraceStartupScope("MainWindow.Initialize.ViewSources"))
             {
@@ -502,6 +496,7 @@ namespace NeeView
             {
                 await _vm.ContentRenderedAsync();
             }
+            App.Current.TraceStartupStamp("MainWindow.ContentRendered.ViewModel.Returned");
 
             // focus
             if (this.WindowState != WindowState.Minimized)
@@ -509,6 +504,7 @@ namespace NeeView
                 this.Focus();
             }
 
+            _vm.Model.BeginStartupWarmup();
             BeginDeferredStartupWarmup();
 
             Debug.WriteLine($"App.MainWindow.ContentRendered.Done: {App.Current.Stopwatch.ElapsedMilliseconds}ms");
@@ -537,6 +533,16 @@ namespace NeeView
                         IsMouseEventTerminated = false
                     };
                     RoutedCommandTable.Current.AddMouseInput(new MouseInput(mouseContext));
+                }
+
+                using (App.Current.TraceStartupScope("MainWindow.DeferredWarmup.SidePanelFrame.EnsureInitialized"))
+                {
+                    this.SidePanelFrame.EnsureInitialized();
+                }
+
+                using (App.Current.TraceStartupScope("MainWindow.DeferredWarmup.CustomLayoutPanelManager.Restore"))
+                {
+                    CustomLayoutPanelManager.CurrentOrNull?.Restore();
                 }
 
                 using (App.Current.TraceStartupScope("MainWindow.DeferredWarmup.ThumbnailResource.InitializeStaticImages"))
@@ -693,8 +699,8 @@ namespace NeeView
             }
 
             // パネルレイアウトの保存
-            CustomLayoutPanelManager.Current?.Store();
-            CustomLayoutPanelManager.Current?.SetIsStoreEnabled(false);
+            CustomLayoutPanelManager.CurrentOrNull?.Store();
+            CustomLayoutPanelManager.CurrentOrNull?.SetIsStoreEnabled(false);
 
             // メインビューの保存
             MainViewManager.Current?.Store();

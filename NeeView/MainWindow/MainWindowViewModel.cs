@@ -183,11 +183,21 @@ namespace NeeView
         /// </summary>
         private async ValueTask InitializeAsync()
         {
+            using var startupScope = App.Current.TraceStartupScope("MainWindowViewModel.InitializeAsync");
             if (_initialized) return;
             _initialized = true;
 
-            await _model.LoadedAsync();
-            _model.ContentRendered();
+            using (App.Current.TraceStartupScope("MainWindowViewModel.InitializeAsync.Model.LoadedAsync"))
+            {
+                await _model.LoadedAsync();
+            }
+            App.Current.TraceStartupStamp("MainWindowViewModel.InitializeAsync.Model.LoadedAsync.Returned");
+
+            App.Current.TraceStartupStamp("MainWindowViewModel.InitializeAsync.Model.ContentRendered.Call");
+            using (App.Current.TraceStartupScope("MainWindowViewModel.InitializeAsync.Model.ContentRendered"))
+            {
+                _model.ContentRendered();
+            }
         }
 
         /// <summary>
@@ -202,6 +212,7 @@ namespace NeeView
         /// </summary>
         public async ValueTask ContentRenderedAsync()
         {
+            using var startupScope = App.Current.TraceStartupScope("MainWindowViewModel.ContentRenderedAsync");
             await InitializeAsync();
         }
 

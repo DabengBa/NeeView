@@ -8,6 +8,7 @@ using NeeView.Threading;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 
@@ -29,6 +30,13 @@ namespace NeeView
         private readonly Locker _activeLocker = new();
         private readonly Locker _processLocker = new();
         private bool _isProcessing;
+        private PrintController? _printController;
+        private IViewTransformControl? _viewTransformControl;
+        private IViewLoupeControl? _viewLoupeControl;
+        private IViewAutoScrollControl? _viewAutoScrollControl;
+        private IViewWindowControl? _viewWindowControl;
+        private IViewPropertyControl? _viewPropertyControl;
+        private IViewCopyImage? _viewCopyImage;
 
         public static void Initialize()
         {
@@ -43,31 +51,32 @@ namespace NeeView
             var mouseGestureCommandCollection = MouseGestureCommandCollection.Current;
             var bookHub = BookHub.Current;
 
-            _mainView = new MainView();
-            _disposables.Add(_mainView);
+            using (App.Current.TraceStartupScope("MainViewComponent.Initialize.MainView"))
+            {
+                _mainView = new MainView();
+                _disposables.Add(_mainView);
+            }
 
             PageFrameBoxPresenter = PageFrameBoxPresenter.Current;
 
-            DragTransformControl = new DragTransformControlProxy(PageFrameBoxPresenter, new DummyDragTransformContextFactory(_mainView, Config.Current.View, Config.Current.Mouse));
-            LoupeContext = new LoupeContext(this, Config.Current.Loupe);
+            using (App.Current.TraceStartupScope("MainViewComponent.Initialize.InputContext"))
+            {
+                DragTransformControl = new DragTransformControlProxy(PageFrameBoxPresenter, new DummyDragTransformContextFactory(_mainView, Config.Current.View, Config.Current.Mouse));
+                LoupeContext = new LoupeContext(this, Config.Current.Loupe);
 
-            TouchInput = new TouchInput(new TouchInputContext(_mainView.View, _mainView, mouseGestureCommandCollection, PageFrameBoxPresenter, PageFrameBoxPresenter, DragTransformControl, LoupeContext, ViewScrollContext));
-            MouseInput = new MouseInput(new MouseInputContext(_mainView.View, _mainView, mouseGestureCommandCollection, PageFrameBoxPresenter, PageFrameBoxPresenter, DragTransformControl, LoupeContext, ViewScrollContext));
-
-            PrintController = new PrintController(this, _mainView, PageFrameBoxPresenter);
-            ViewTransformControl = new ViewTransformControl(PageFrameBoxPresenter);
-            ViewLoupeControl = new ViewLoupeControl(this);
-            ViewAutoScrollControl = new ViewAutoScrollControl(this);
-            ViewWindowControl = new ViewWindowControl(this);
-            ViewPropertyControl = new ViewPropertyControl(Config.Current.View, Config.Current.BookSetting);
-            ViewCopyImage = new ViewCopyImage(PageFrameBoxPresenter);
+                TouchInput = new TouchInput(new TouchInputContext(_mainView.View, _mainView, mouseGestureCommandCollection, PageFrameBoxPresenter, PageFrameBoxPresenter, DragTransformControl, LoupeContext, ViewScrollContext));
+                MouseInput = new MouseInput(new MouseInputContext(_mainView.View, _mainView, mouseGestureCommandCollection, PageFrameBoxPresenter, PageFrameBoxPresenter, DragTransformControl, LoupeContext, ViewScrollContext));
+            }
 
             PageFrameBoxPresenter.SelectedRangeChanged += PageFrameBoxPresenter_SelectedRangeChanged;
             PageFrameBoxPresenter.SelectedContainerLayoutChanged += PageFrameBoxPresenter_SelectedContainerLayoutChanged;
             PageFrameBoxPresenter.SelectedContentSizeChanged += PageFrameBoxPresenter_SelectedContentSizeChanged;
             PageFrameBoxPresenter.ViewContentChanged += PageFrameBoxPresenter_ViewContentChanged;
 
-            _mainView.DataContext = new MainViewViewModel(this);
+            using (App.Current.TraceStartupScope("MainViewComponent.Initialize.ViewModel"))
+            {
+                _mainView.DataContext = new MainViewViewModel(this);
+            }
 
             _activeLocker.LockCountChanged += ActiveLocker_LockCountChanged;
             _processLocker.LockCountChanged += ProcessLocker_LockCountChanged;
@@ -107,14 +116,14 @@ namespace NeeView
         public MouseInput MouseInput { get; private set; }
         public TouchInput TouchInput { get; private set; }
 
-        public PrintController PrintController { get; private set; }
+        public PrintController PrintController => EnsureLazy(ref _printController, "MainViewComponent.Lazy.PrintController", () => new PrintController(this, _mainView, PageFrameBoxPresenter));
 
-        public IViewTransformControl ViewTransformControl { get; private set; }
-        public IViewLoupeControl ViewLoupeControl { get; private set; }
-        public IViewAutoScrollControl ViewAutoScrollControl { get; private set; }
-        public IViewWindowControl ViewWindowControl { get; private set; }
-        public IViewPropertyControl ViewPropertyControl { get; private set; }
-        public IViewCopyImage ViewCopyImage { get; private set; }
+        public IViewTransformControl ViewTransformControl => EnsureLazy(ref _viewTransformControl, "MainViewComponent.Lazy.ViewTransformControl", () => new ViewTransformControl(PageFrameBoxPresenter));
+        public IViewLoupeControl ViewLoupeControl => EnsureLazy(ref _viewLoupeControl, "MainViewComponent.Lazy.ViewLoupeControl", () => new ViewLoupeControl(this));
+        public IViewAutoScrollControl ViewAutoScrollControl => EnsureLazy(ref _viewAutoScrollControl, "MainViewComponent.Lazy.ViewAutoScrollControl", () => new ViewAutoScrollControl(this));
+        public IViewWindowControl ViewWindowControl => EnsureLazy(ref _viewWindowControl, "MainViewComponent.Lazy.ViewWindowControl", () => new ViewWindowControl(this));
+        public IViewPropertyControl ViewPropertyControl => EnsureLazy(ref _viewPropertyControl, "MainViewComponent.Lazy.ViewPropertyControl", () => new ViewPropertyControl(Config.Current.View, Config.Current.BookSetting));
+        public IViewCopyImage ViewCopyImage => EnsureLazy(ref _viewCopyImage, "MainViewComponent.Lazy.ViewCopyImage", () => new ViewCopyImage(PageFrameBoxPresenter));
 
         public bool IsLoupeMode => ViewLoupeControl.GetLoupeMode();
 
@@ -225,6 +234,35 @@ namespace NeeView
         public void TouchInputEmulate(object? sender)
         {
             _touchEmulateController.Execute(sender);
+        }
+
+        private static T EnsureLazy<T>(ref T? field, string label, Func<T> factory) where T : class
+        {
+            if (field is not null) return field;
+
+            using (App.Current.TraceStartupScope(label))
+            {
+                field = factory();
+            }
+
+            Trace.WriteLine($"Startup.LazyInit|{label}|callers={GetLazyInitCallers()}");
+            return field;
+        }
+
+        private static string GetLazyInitCallers()
+        {
+            var stack = new StackTrace(2, false);
+            var frames = stack.GetFrames();
+            if (frames is null) return "";
+
+            return string.Join(" > ",
+                frames
+                    .Select(e => e.GetMethod())
+                    .Where(e => e?.DeclaringType is not null)
+                    .Where(e => e!.DeclaringType != typeof(MainViewComponent))
+                    .Where(e => e!.DeclaringType!.Namespace?.StartsWith("NeeView") == true)
+                    .Take(6)
+                    .Select(e => $"{e!.DeclaringType!.Name}.{e.Name}"));
         }
 
         /// <summary>

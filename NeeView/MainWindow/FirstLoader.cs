@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Threading;
 
 namespace NeeView
 {
@@ -14,9 +15,24 @@ namespace NeeView
         private BookProfile? _book;
         private FolderProfile? _folder;
         private BookLoadOption _bookLoadOptions;
+        private bool _isInitialized;
 
-        public void Load()
+        public void LoadBook()
         {
+            EnsureInitialized();
+            LoadBookCore();
+        }
+
+        public void LoadFolder(DispatcherPriority priority = DispatcherPriority.Normal)
+        {
+            EnsureInitialized();
+            LoadFolderCore(priority);
+        }
+
+        private void EnsureInitialized()
+        {
+            if (_isInitialized) return;
+
             _book = null;
             _folder = FolderProfile.Create(App.Current.Option.FolderListQuery?.SimpleQuery);
 
@@ -25,8 +41,7 @@ namespace NeeView
 
             SetBookPlace();
             SetFolderPlace();
-            LoadBook();
-            LoadFolder();
+            _isInitialized = true;
         }
 
         private static BookProfile? GetLastBookProfile()
@@ -109,7 +124,7 @@ namespace NeeView
             }
         }
 
-        private void LoadBook()
+        private void LoadBookCore()
         {
             if (_book is null) return;
 
@@ -117,7 +132,7 @@ namespace NeeView
             BookHubTools.RequestLoad(this, _book.Paths, options, _folder == null, _book.BookMemento);
         }
 
-        private void LoadFolder()
+        private void LoadFolderCore(DispatcherPriority priority)
         {
             if (_folder is null) return;
 
@@ -125,7 +140,7 @@ namespace NeeView
             var select = path is not null ? new FolderItemPosition(new QueryPath(path)) : null;
 
             _folder.FolderMemento?.Register();
-            BookshelfFolderList.Current.RequestPlace(new QueryPath(_folder.Path), select, FolderSetPlaceOption.UpdateHistory);
+            BookshelfFolderList.Current.RequestPlace(new QueryPath(_folder.Path), select, FolderSetPlaceOption.UpdateHistory, priority);
         }
 
 

@@ -87,7 +87,7 @@ namespace NeeView
         {
             if (d is SidePanelFrameView control)
             {
-                control.InitializeViewModel(control.Source);
+                control._pendingSource = control.Source;
             }
         }
 
@@ -182,6 +182,8 @@ namespace NeeView
 
         // パネル幅自動調整用
         private AdjustPanelWidthOrder _adjustPanelWidthOrder;
+        private SidePanelFrame? _pendingSource;
+        private bool _isViewModelInitialized;
 
         /// <summary>
         /// コンストラクター
@@ -189,8 +191,6 @@ namespace NeeView
         public SidePanelFrameView()
         {
             InitializeComponent();
-
-            InitializeViewModel(this.Source);
 
             this.Root.DataContext = this;
         }
@@ -225,9 +225,18 @@ namespace NeeView
         }
 
 
+        public void EnsureInitialized()
+        {
+            if (_isViewModelInitialized) return;
+            if (_pendingSource is null) return;
+
+            InitializeViewModel(_pendingSource);
+        }
+
         private void InitializeViewModel(SidePanelFrame model)
         {
             if (model == null) return;
+            if (_isViewModelInitialized) return;
 
             CustomLayoutPanelManager.Initialize();
             var leftPanelViewModel = new LeftPanelViewModel(this.LeftIconList, CustomLayoutPanelManager.Current.LeftDock, LeftPanelElementContains);
@@ -241,6 +250,8 @@ namespace NeeView
 
             UpdateLeftAutoHide();
             UpdateRightAutoHide();
+            UpdateCanvas();
+            _isViewModelInitialized = true;
         }
 
 

@@ -59,6 +59,11 @@ namespace NeeView
             return UIDispatcher.BeginInvoke(action);
         }
 
+        public static DispatcherOperation BeginInvoke(Action action, DispatcherPriority priority)
+        {
+            return UIDispatcher.BeginInvoke(action, priority);
+        }
+
         public static EventHandler BeginInvokeHandler(EventHandler eventHandler)
         {
             return (s, e) => UIDispatcher.BeginInvoke(() => eventHandler(s, e));

@@ -33,6 +33,12 @@
 - [x] 启动脚本命令扫描后移到主窗口显示后
 - [x] `MainViewBay` 改为按需创建
 - [x] `ThumbnailResource` / `MouseTerminator` 预热后移到首帧之后
+- [x] `Measure-StartupTrace.ps1` 已适配“当前工作树 vs BaselineRef”精确对比
+- [x] `MainViewComponent` 非首屏控制器按需创建已进入实验态
+- [x] SidePanel 初始化/恢复后移已进入实验态
+- [x] `MainWindow.ContentRendered.ViewModel` / `LoadedAsync.Returned` 细分 trace 已接入
+- [x] `FirstLoader.LoadFolder` / `BookmarkFolderList.UpdateItems` 已后移到 `T5` 之后
+- [x] `Measure-StartupTrace.ps1` 已支持 `LoadedAsyncTail` 指标与超时重试
 
 **ReadyToRun 实测结果**
 
@@ -117,6 +123,59 @@
 
 ---
 
+**当前实验波次（未提交工作树 vs `HEAD`, ReadyToRun=On, `Runs=5`）**
+
+> 口径同上；`trace-baseline = HEAD`，`current-optimized = 当前工作树`
+
+| Variant | T3 | T4 | T5 | `LoadedAsync()` | `LoadedAsync tail` |
+|--|--:|--:|--:|--:|--:|
+| `trace-baseline` | 1754.6 ms | 2047.6 ms | 2086.0 ms | 37.6 ms | 0.2 ms |
+| `current-optimized` | 1705.8 ms | 1996.2 ms | 2019.4 ms | 19.4 ms | 2.8 ms |
+
+**这波改造的量化结果**
+
+- `T3`：`-48.8 ms`，约 `-2.8%`
+- `T4`：`-51.4 ms`，约 `-2.5%`
+- `T5`：`-66.6 ms`，约 `-3.2%`
+- `LoadedAsync()`：`-18.2 ms`，约 `-48.4%`
+- `LoadedAsync tail`：`+2.6 ms`，`LoadedAsync -> ViewModel returned` 的尾段已基本收敛到接近基线
+
+**分段结论**
+
+- `MainViewComponent` lazy 化并不是 `LoadedAsync()` 结束后的主因；目前只观测到一次启动期 lazy init：
+  - `MainViewComponent.Lazy.ViewPropertyControl`
+  - caller: `MainMenu.CreateMainMenu -> MenuTreeTools.CreateCommandMenuControl -> ToggleIsAutoRotateLeftCommand.CreateIsCheckedBinding`
+  - 发生时机：`MainWindow.Initialize.ViewSources` 阶段，而不是 `LoadedAsync()` 之后
+- 真正把 `ContentRendered.ViewModel` 尾段拉长的是启动期的 `FolderList.RequestPlace()`：
+  - `FirstLoader.LoadFolder()`
+  - `BookmarkFolderList.UpdateItems()`
+  这两条链原本在 `LoadedAsync()` 里排队到 UI Dispatcher，偶发会抢在 `LoadedAsync` continuation 之前执行
+- 本轮修正后，这两项已统一后移到 `BeginStartupWarmup()`，并保留 `FolderList.StartupRequestPlace.*` trace
+- `LoadedAsyncResumeGap` 均值已收敛到 `1.8 ms`
+- `LoadedAsyncTail` 均值已收敛到 `2.8 ms`
+
+**当前工作树主链路拆解（`current-optimized`, `Runs=5`）**
+
+- `MainWindow.Initialize.InitializeComponent`: 约 `394.0 ms`
+- `MainWindow.Initialize.ViewSources`: 约 `53.0 ms`
+- `MainWindow.Initialize.MainViewComponent.Initialize`: 约 `30 ms` 量级
+- `MainWindow.DeferredWarmup.SidePanelFrame.EnsureInitialized`: 约 `27~28 ms`
+- `MainWindow.DeferredWarmup.CustomLayoutPanelManager.Restore`: 约 `6 ms`
+- `MainWindow.DeferredWarmup.ThumbnailResource.InitializeStaticImages`: 约 `7~8 ms`
+- `FolderList.StartupRequestPlace.BookmarkFolderList`: 平均 `175.0 ms`
+- `FolderList.StartupRequestPlace.BookshelfFolderList`: 平均 `294.2 ms`
+- 但这两段现在已经落到 `T5` 之后：
+  - `BookmarkFolderList` 平均排队延迟约 `140.8 ms`
+  - `BookshelfFolderList` 平均排队延迟约 `22.2 ms`
+
+**当前判断**
+
+- 这波改造已经恢复为可提交状态
+- `T3/T4/T5` 都重新回到正向收益，且 `LoadedAsync tail` 已基本压平
+- 下一轮不再优先盯 `ContentRendered.ViewModel` 空档，而应回到 `T0 -> T4` 主链路瘦身
+
+---
+
 ## P0：优先落地项
 
 ### 1. 启动链路埋点补齐
@@ -140,9 +199,17 @@
   - [x] `LoadHistory`
   - [x] `LoadBookmark`
   - [x] `PlaylistHub.Initialize`
-  - [x] `FirstLoader.Load`
+  - [x] `FirstLoader.LoadBook`
   - [x] `BookmarkFolderList.WaitAsync`
   - [x] `BookshelfFolderList.WaitAsync`
+- [x] 在 `MainWindow.ContentRendered.ViewModel` 内拆分埋点
+  - [x] `MainWindowViewModel.InitializeAsync.Model.LoadedAsync.Returned`
+  - [x] `MainWindowViewModel.InitializeAsync.Model.ContentRendered.Call`
+- [x] 为启动期 FolderList 排队链增加 trace
+  - [x] `FolderList.StartupRequestPlace.BookmarkFolderList`
+  - [x] `FolderList.StartupRequestPlace.BookshelfFolderList`
+  - [x] `MainWindowModel.StartupWarmup.FirstLoader.LoadFolder`
+  - [x] `MainWindowModel.StartupWarmup.BookmarkFolderList.UpdateItems`
 
 **涉及文件**
 
@@ -376,14 +443,15 @@
 
 ### Next Iteration
 
-1. 继续拆 `MainWindow.Initialize.InitializeComponent` 内部大块，确认是否是 `SidePanelFrameView` / `MenuBar` / `AddressBar` / `MainView` 相关 XAML 在吃首帧
-2. 评估 `CustomLayoutPanelManager.Initialize` 是否还能进一步 lazy 化，只保留首屏必需的 dock 元数据
-3. 细拆 `ViewSources`，确认 `MenuBar` / `AddressBar` / `ThumbnailListArea` 是否都必须在首帧前绑定
-4. 为 FolderList 增加“加载中”状态与完成回调，补齐 UI 反馈和选中/聚焦收敛
+1. 继续深拆 `MainWindow.Initialize.InitializeComponent` / `ViewSources` / `MainViewComponent.Initialize.ViewModel`，把下一轮优化重点放回 `T0 -> T4`
+2. 评估 `SidePanelFrame.EnsureInitialized` / `CustomLayoutPanelManager.Restore` 是否还能继续后移或减量，避免首帧后立刻出现新的 UI 热点
+3. 为 FolderList 增加“加载中”状态与完成回调，补齐 UI 反馈和选中/聚焦收敛
+4. 单独跟踪 `ProcessJobEngine.WaitPropertyAsync` 的偶发超时，确认这是测量噪声还是仍有真实启动不稳定点
 
 ### Next Success Criteria
 
-- 在相同 `Startup.Trace` 口径下，把 `T4` 再稳定压低一个清晰量级，而不只是 `T5` 优化
+- 在保持当前 `T5` 不回退的前提下，继续压低 `T3/T4`
+- 新一轮优化不能重新引入 `LoadedAsync tail` 的明显回升
 - 大目录/网络目录恢复时首屏不再被列表稳定等待阻塞
 - 功能行为与现有多开、脚本、Susie 使用路径保持一致
 
@@ -394,8 +462,8 @@
 1. 启动埋点补齐
 2. `T0 -> T4` 主链路瘦身
 3. FolderList 完成回调 / 加载中反馈
-4. `InitializeComponent` / `CustomLayoutPanelManager` 深拆
-5. `MainViewComponent` lazy 化
+4. `InitializeComponent` / `ViewSources` 深拆
+5. `ProcessJobEngine` 波动排查
 6. 侧边栏深度 lazy / 命令系统瘦身
 
 **已完成但不再作为当前重点**

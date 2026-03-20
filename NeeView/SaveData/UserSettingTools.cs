@@ -20,7 +20,7 @@ namespace NeeView
             // 情報の確定
             MainWindow.Current.StoreWindowPlacement();
             MainViewManager.Current.Store();
-            CustomLayoutPanelManager.Current.Store();
+            CustomLayoutPanelManager.CurrentOrNull?.Store();
 
             return new UserSetting()
             {

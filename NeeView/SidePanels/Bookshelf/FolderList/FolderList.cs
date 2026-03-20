@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 
 namespace NeeView
 {
@@ -88,6 +89,7 @@ namespace NeeView
         private readonly DisposableCollection _disposables = new();
 
         private SearchBoxModel? _searchBoxModel;
+        private int _startupRequestTraceState;
 
         protected FolderList(bool isSyncBookHub, bool isOverlayEnabled, FolderListConfig folderListConfig)
         {
@@ -562,7 +564,7 @@ namespace NeeView
         /// <summary>
         /// フォルダーリスト更新要求
         /// </summary>
-        public void RequestPlace(QueryPath path, FolderItemPosition? select, FolderSetPlaceOption options)
+        public void RequestPlace(QueryPath path, FolderItemPosition? select, FolderSetPlaceOption options, DispatcherPriority priority = DispatcherPriority.Normal)
         {
             if (_disposedValue) return;
 
@@ -571,7 +573,35 @@ namespace NeeView
                 return;
             }
 
-            AppDispatcher.BeginInvoke(async () => await SetPlaceAsync(path, select, options));
+            var startupTraceLabel = TryGetStartupRequestTraceLabel();
+            if (startupTraceLabel is not null)
+            {
+                App.Current.TraceStartupStamp($"{startupTraceLabel}.Queued");
+            }
+
+            AppDispatcher.BeginInvoke(async () =>
+            {
+                if (startupTraceLabel is null)
+                {
+                    await SetPlaceAsync(path, select, options);
+                    return;
+                }
+
+                using var startupScope = App.Current.TraceStartupScope(startupTraceLabel);
+                await SetPlaceAsync(path, select, options);
+            }, priority);
+        }
+
+        private string? TryGetStartupRequestTraceLabel()
+        {
+            if (App.Current.Stopwatch.ElapsedMilliseconds > 4000)
+            {
+                return null;
+            }
+
+            return Interlocked.Exchange(ref _startupRequestTraceState, 1) == 0
+                ? $"FolderList.StartupRequestPlace.{GetType().Name}"
+                : null;
         }
 
         /// <summary>

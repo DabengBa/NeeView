@@ -5,6 +5,8 @@ Param(
     [string]$BaselineRef = "HEAD",
     [string]$OutputRoot = "",
     [string]$SeedProfilePath = "",
+    [int]$TraceTimeoutSeconds = 90,
+    [int]$TraceRetryCount = 1,
     [switch]$SkipPublish
 )
 
@@ -159,6 +161,82 @@ function Write-GitTextFile {
     Set-Content -Path $DestinationPath -Value $normalized -Encoding UTF8
 }
 
+function Remove-WorkspacePathIfExists {
+    param(
+        [string]$WorkspaceDir,
+        [string]$RepoRelativePath
+    )
+
+    $fullPath = Join-Path $WorkspaceDir $RepoRelativePath
+    if (Test-Path $fullPath) {
+        Remove-Item $fullPath -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
+function Restore-WorkspaceToGitRef {
+    param(
+        [string]$Ref,
+        [string]$WorkspaceDir
+    )
+
+    $diffLines = & git -C $solutionDir diff --name-status --find-renames $Ref --
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to diff working tree against git ref '$Ref'."
+    }
+
+    foreach ($line in $diffLines) {
+        if ([string]::IsNullOrWhiteSpace($line)) {
+            continue
+        }
+
+        $parts = $line -split "`t"
+        $status = $parts[0]
+
+        if ($status.StartsWith("R")) {
+            $oldPath = $parts[1]
+            $newPath = $parts[2]
+            Remove-WorkspacePathIfExists -WorkspaceDir $WorkspaceDir -RepoRelativePath $newPath
+            $destinationPath = Join-Path $WorkspaceDir $oldPath
+            New-Item -ItemType Directory -Force -Path (Split-Path -Parent $destinationPath) | Out-Null
+            Write-GitTextFile -Ref $Ref -RepoRelativePath $oldPath -DestinationPath $destinationPath
+            continue
+        }
+
+        $path = $parts[1]
+        switch -Regex ($status) {
+            '^A' {
+                Remove-WorkspacePathIfExists -WorkspaceDir $WorkspaceDir -RepoRelativePath $path
+                continue
+            }
+            '^D' {
+                $destinationPath = Join-Path $WorkspaceDir $path
+                New-Item -ItemType Directory -Force -Path (Split-Path -Parent $destinationPath) | Out-Null
+                Write-GitTextFile -Ref $Ref -RepoRelativePath $path -DestinationPath $destinationPath
+                continue
+            }
+            default {
+                $destinationPath = Join-Path $WorkspaceDir $path
+                New-Item -ItemType Directory -Force -Path (Split-Path -Parent $destinationPath) | Out-Null
+                Write-GitTextFile -Ref $Ref -RepoRelativePath $path -DestinationPath $destinationPath
+                continue
+            }
+        }
+    }
+
+    $untrackedLines = & git -C $solutionDir ls-files --others --exclude-standard
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to enumerate untracked files in working tree."
+    }
+
+    foreach ($path in $untrackedLines) {
+        if ([string]::IsNullOrWhiteSpace($path)) {
+            continue
+        }
+
+        Remove-WorkspacePathIfExists -WorkspaceDir $WorkspaceDir -RepoRelativePath $path
+    }
+}
+
 function New-TraceBaselineWorkspace {
     param(
         [string]$Ref,
@@ -172,72 +250,7 @@ function New-TraceBaselineWorkspace {
     New-Item -ItemType Directory -Path (Split-Path -Parent $WorktreePath) -Force | Out-Null
     Write-Host "> Create baseline workspace at $WorktreePath" -ForegroundColor Cyan
     Copy-WorkspaceSnapshot -Source $solutionDir -Destination $WorktreePath
-
-    $currentAppPath = Join-Path $solutionDir "NeeView\App.xaml.cs"
-    $currentMainWindowPath = Join-Path $solutionDir "NeeView\MainWindow\MainWindow.xaml.cs"
-    $currentMainWindowModelPath = Join-Path $solutionDir "NeeView\MainWindow\MainWindowModel.cs"
-
-    Copy-Item $currentAppPath (Join-Path $WorktreePath "NeeView\App.xaml.cs") -Force
-    Copy-Item $currentMainWindowPath (Join-Path $WorktreePath "NeeView\MainWindow\MainWindow.xaml.cs") -Force
-
-    $baselineModel = Get-Content -Raw $currentMainWindowModelPath
-
-    $restoreBlock = @"
-            using (App.Current.TraceStartupScope("MainWindowModel.LoadedAsync.CustomLayoutPanelManager.Restore"))
-            {
-                CustomLayoutPanelManager.Current.Restore();
-            }
-
-"@
-
-    $susieBlock = @"
-            using (App.Current.TraceStartupScope("MainWindowModel.LoadedAsync.SusiePluginManager.Initialize"))
-            {
-                SusiePluginManager.Current.Initialize();
-            }
-
-"@
-
-    if (-not $baselineModel.Contains($restoreBlock)) {
-        throw "Cannot find restore block in MainWindowModel.cs while creating baseline workspace."
-    }
-
-    $baselineModel = $baselineModel.Replace($restoreBlock, $restoreBlock + $susieBlock)
-
-    $optimizedWarmupBlock = @"
-            _ = WarmupStartupPanelsAsync();
-
-            using (App.Current.TraceStartupScope("MainWindowModel.LoadedAsync.UserSettingTools.ApplyDeferredCommandCollection"))
-            {
-                UserSettingTools.ApplyDeferredCommandCollection();
-            }
-
-"@
-
-    $baselineWaitBlock = @"
-            using (App.Current.TraceStartupScope("MainWindowModel.LoadedAsync.BookmarkFolderList.WaitAsync"))
-            {
-                await BookmarkFolderList.Current.WaitAsync(CancellationToken.None);
-            }
-
-            using (App.Current.TraceStartupScope("MainWindowModel.LoadedAsync.BookshelfFolderList.WaitAsync"))
-            {
-                await BookshelfFolderList.Current.WaitAsync(CancellationToken.None);
-            }
-
-"@
-
-    if (-not $baselineModel.Contains($optimizedWarmupBlock)) {
-        throw "Cannot find optimized warmup block in MainWindowModel.cs while creating baseline workspace."
-    }
-
-    $baselineModel = $baselineModel.Replace($optimizedWarmupBlock, $baselineWaitBlock)
-
-    Write-GitTextFile -Ref $Ref -RepoRelativePath "NeeView/Command/CommandTable.cs" -DestinationPath (Join-Path $WorktreePath "NeeView\Command\CommandTable.cs")
-    Write-GitTextFile -Ref $Ref -RepoRelativePath "NeeView/SaveData/UserSettingTools.cs" -DestinationPath (Join-Path $WorktreePath "NeeView\SaveData\UserSettingTools.cs")
-    Write-GitTextFile -Ref $Ref -RepoRelativePath "NeeView/Setting/SettingPageFileTypes.cs" -DestinationPath (Join-Path $WorktreePath "NeeView\Setting\SettingPageFileTypes.cs")
-    Write-GitTextFile -Ref $Ref -RepoRelativePath "NeeView/Susie/Client/SusiePluginManager.cs" -DestinationPath (Join-Path $WorktreePath "NeeView\Susie\Client\SusiePluginManager.cs")
-    Set-Content -Path (Join-Path $WorktreePath "NeeView\MainWindow\MainWindowModel.cs") -Value $baselineModel -Encoding UTF8
+    Restore-WorkspaceToGitRef -Ref $Ref -WorkspaceDir $WorktreePath
 }
 
 function Publish-Variant {
@@ -386,6 +399,10 @@ function Get-TraceMetricValue {
         [string]$Key
     )
 
+    if ($null -eq $TraceEntries) {
+        return $null
+    }
+
     if (-not $TraceEntries.ContainsKey($Label)) {
         return $null
     }
@@ -396,6 +413,37 @@ function Get-TraceMetricValue {
     }
 
     return [double]$entry[$Key]
+}
+
+function Get-TraceMetricDelta {
+    param(
+        [hashtable]$TraceEntries,
+        [string]$StartLabel,
+        [string]$StartKey,
+        [string]$EndLabel,
+        [string]$EndKey
+    )
+
+    $start = Get-TraceMetricValue -TraceEntries $TraceEntries -Label $StartLabel -Key $StartKey
+    $end = Get-TraceMetricValue -TraceEntries $TraceEntries -Label $EndLabel -Key $EndKey
+    if ($null -eq $start -or $null -eq $end) {
+        return $null
+    }
+
+    return [double]($end - $start)
+}
+
+function Convert-ToRoundedNullable {
+    param(
+        $Value,
+        [int]$Digits = 1
+    )
+
+    if ($null -eq $Value) {
+        return $null
+    }
+
+    return [math]::Round([double]$Value, $Digits)
 }
 
 function Stop-ProcessGracefully {
@@ -455,7 +503,7 @@ function Start-TraceRun {
     $privateMemoryMB = $null
 
     try {
-        $trace = Wait-TraceMetrics -LogPath $logPath -RequiredLabelKeys $requiredLabels
+        $trace = Wait-TraceMetrics -LogPath $logPath -RequiredLabelKeys $requiredLabels -TimeoutSeconds $TraceTimeoutSeconds
         Start-Sleep -Milliseconds 300
         $process.Refresh()
         $workingSetMB = [math]::Round($process.WorkingSet64 / 1MB, 1)
@@ -471,12 +519,22 @@ function Start-TraceRun {
         $trace = $finalTrace
     }
 
+    if ($null -eq $trace) {
+        throw "Startup trace parse returned null for '$logPath'."
+    }
+
     $result = [ordered]@{
         T3LoadedEndMs = [math]::Round((Get-TraceMetricValue -TraceEntries $trace -Label "MainWindow.Loaded" -Key "end_ms"), 1)
         T4ContentRenderedStartMs = [math]::Round((Get-TraceMetricValue -TraceEntries $trace -Label "MainWindow.ContentRendered" -Key "start_ms"), 1)
         T5ViewModelEndMs = [math]::Round((Get-TraceMetricValue -TraceEntries $trace -Label "MainWindow.ContentRendered.ViewModel" -Key "end_ms"), 1)
         ContentRenderedEndMs = [math]::Round((Get-TraceMetricValue -TraceEntries $trace -Label "MainWindow.ContentRendered" -Key "end_ms"), 1)
         LoadedAsyncDurationMs = [math]::Round((Get-TraceMetricValue -TraceEntries $trace -Label "MainWindowModel.LoadedAsync" -Key "duration_ms"), 1)
+        LoadedAsyncTailMs = [math]::Round((Get-TraceMetricDelta -TraceEntries $trace -StartLabel "MainWindowModel.LoadedAsync" -StartKey "end_ms" -EndLabel "MainWindow.ContentRendered.ViewModel" -EndKey "end_ms"), 1)
+        LoadedAsyncResumeGapMs = $(Convert-ToRoundedNullable -Value (Get-TraceMetricDelta -TraceEntries $trace -StartLabel "MainWindowModel.LoadedAsync" -StartKey "end_ms" -EndLabel "MainWindowViewModel.InitializeAsync.Model.LoadedAsync.Returned" -EndKey "mark_ms"))
+        StartupRequestBookmarkMs = $(Convert-ToRoundedNullable -Value (Get-TraceMetricValue -TraceEntries $trace -Label "FolderList.StartupRequestPlace.BookmarkFolderList" -Key "duration_ms"))
+        StartupRequestBookshelfMs = $(Convert-ToRoundedNullable -Value (Get-TraceMetricValue -TraceEntries $trace -Label "FolderList.StartupRequestPlace.BookshelfFolderList" -Key "duration_ms"))
+        StartupRequestBookmarkQueueMs = $(Convert-ToRoundedNullable -Value (Get-TraceMetricDelta -TraceEntries $trace -StartLabel "FolderList.StartupRequestPlace.BookmarkFolderList.Queued" -StartKey "mark_ms" -EndLabel "FolderList.StartupRequestPlace.BookmarkFolderList" -EndKey "start_ms"))
+        StartupRequestBookshelfQueueMs = $(Convert-ToRoundedNullable -Value (Get-TraceMetricDelta -TraceEntries $trace -StartLabel "FolderList.StartupRequestPlace.BookshelfFolderList.Queued" -StartKey "mark_ms" -EndLabel "FolderList.StartupRequestPlace.BookshelfFolderList" -EndKey "start_ms"))
         WorkingSetMB = $workingSetMB
         PrivateMemoryMB = $privateMemoryMB
         Trace = $trace
@@ -484,6 +542,35 @@ function Start-TraceRun {
     }
 
     return [pscustomobject]$result
+}
+
+function Invoke-TraceRunWithRetry {
+    param(
+        [pscustomobject]$Variant,
+        [string]$SeedProfileDir,
+        [string]$ProfileDir,
+        [string]$DisplayName
+    )
+
+    $maxAttempts = [Math]::Max(1, $TraceRetryCount + 1)
+    for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
+        New-CleanDirectory $ProfileDir
+        Copy-DirectoryContents -Source $SeedProfileDir -Destination $ProfileDir
+
+        $attemptSuffix = if ($maxAttempts -gt 1) { " (attempt $attempt/$maxAttempts)" } else { "" }
+        Write-Host "$DisplayName$attemptSuffix" -ForegroundColor Yellow
+
+        try {
+            return Start-TraceRun -Variant $Variant -ProfileDir $ProfileDir
+        }
+        catch {
+            if ($attempt -ge $maxAttempts) {
+                throw
+            }
+
+            Write-Warning "$DisplayName failed: $($_.Exception.Message). Retrying..."
+        }
+    }
 }
 
 function Measure-Variant {
@@ -497,10 +584,8 @@ function Measure-Variant {
     $warmedTemplate = Join-Path $variantRoot "warmed-template"
 
     New-CleanDirectory $variantRoot
-    Copy-DirectoryContents -Source $BaseProfileTemplate -Destination $warmupProfile
 
-    Write-Host "[$($Variant.Name)] Warmup" -ForegroundColor DarkYellow
-    $null = Start-TraceRun -Variant $Variant -ProfileDir $warmupProfile
+    $null = Invoke-TraceRunWithRetry -Variant $Variant -SeedProfileDir $BaseProfileTemplate -ProfileDir $warmupProfile -DisplayName "[$($Variant.Name)] Warmup"
 
     New-CleanDirectory $warmedTemplate
     Copy-DirectoryContents -Source $warmupProfile -Destination $warmedTemplate
@@ -508,11 +593,7 @@ function Measure-Variant {
     $runs = @()
     for ($i = 1; $i -le $script:RunCount; $i++) {
         $runProfile = Join-Path $variantRoot "run-$i"
-        New-CleanDirectory $runProfile
-        Copy-DirectoryContents -Source $warmedTemplate -Destination $runProfile
-
-        Write-Host "[$($Variant.Name)] Run $i/$($script:RunCount)" -ForegroundColor Yellow
-        $runs += Start-TraceRun -Variant $Variant -ProfileDir $runProfile
+        $runs += Invoke-TraceRunWithRetry -Variant $Variant -SeedProfileDir $warmedTemplate -ProfileDir $runProfile -DisplayName "[$($Variant.Name)] Run $i/$($script:RunCount)"
     }
 
     $t3Average = ($runs | Measure-Object -Property T3LoadedEndMs -Average).Average
@@ -520,8 +601,26 @@ function Measure-Variant {
     $t5Average = ($runs | Measure-Object -Property T5ViewModelEndMs -Average).Average
     $contentRenderedAverage = ($runs | Measure-Object -Property ContentRenderedEndMs -Average).Average
     $loadedAsyncAverage = ($runs | Measure-Object -Property LoadedAsyncDurationMs -Average).Average
+    $loadedAsyncTailAverage = ($runs | ForEach-Object {
+        if ($null -ne $_.LoadedAsyncTailMs) { $_.LoadedAsyncTailMs }
+    } | Measure-Object -Average).Average
+    $loadedAsyncResumeGapAverage = ($runs | ForEach-Object {
+        if ($null -ne $_.LoadedAsyncResumeGapMs) { $_.LoadedAsyncResumeGapMs }
+    } | Measure-Object -Average).Average
     $workingSetAverage = ($runs | Measure-Object -Property WorkingSetMB -Average).Average
     $privateAverage = ($runs | Measure-Object -Property PrivateMemoryMB -Average).Average
+    $startupRequestBookmarkAverage = ($runs | ForEach-Object {
+        if ($null -ne $_.StartupRequestBookmarkMs) { $_.StartupRequestBookmarkMs }
+    } | Measure-Object -Average).Average
+    $startupRequestBookshelfAverage = ($runs | ForEach-Object {
+        if ($null -ne $_.StartupRequestBookshelfMs) { $_.StartupRequestBookshelfMs }
+    } | Measure-Object -Average).Average
+    $startupRequestBookmarkQueueAverage = ($runs | ForEach-Object {
+        if ($null -ne $_.StartupRequestBookmarkQueueMs) { $_.StartupRequestBookmarkQueueMs }
+    } | Measure-Object -Average).Average
+    $startupRequestBookshelfQueueAverage = ($runs | ForEach-Object {
+        if ($null -ne $_.StartupRequestBookshelfQueueMs) { $_.StartupRequestBookshelfQueueMs }
+    } | Measure-Object -Average).Average
 
     $susieAverage = ($runs | ForEach-Object {
         $value = Get-TraceMetricValue -TraceEntries $_.Trace -Label "MainWindowModel.LoadedAsync.SusiePluginManager.Initialize" -Key "duration_ms"
@@ -558,6 +657,8 @@ function Measure-Variant {
         T5ViewModelEndMsAverage = [math]::Round($t5Average, 1)
         ContentRenderedEndMsAverage = [math]::Round($contentRenderedAverage, 1)
         LoadedAsyncDurationMsAverage = [math]::Round($loadedAsyncAverage, 1)
+        LoadedAsyncTailMsAverage = if ($null -eq $loadedAsyncTailAverage) { $null } else { [math]::Round($loadedAsyncTailAverage, 1) }
+        LoadedAsyncResumeGapMsAverage = if ($null -eq $loadedAsyncResumeGapAverage) { $null } else { [math]::Round($loadedAsyncResumeGapAverage, 1) }
         WorkingSetMBAverage = [math]::Round($workingSetAverage, 1)
         PrivateMemoryMBAverage = [math]::Round($privateAverage, 1)
         SusieInitializeDurationMsAverage = if ($null -eq $susieAverage) { $null } else { [math]::Round($susieAverage, 1) }
@@ -565,6 +666,10 @@ function Measure-Variant {
         LoadedBookshelfWaitMsAverage = if ($null -eq $bookshelfWaitAverage) { $null } else { [math]::Round($bookshelfWaitAverage, 1) }
         WarmupBookmarkWaitMsAverage = if ($null -eq $warmupBookmarkAverage) { $null } else { [math]::Round($warmupBookmarkAverage, 1) }
         WarmupBookshelfWaitMsAverage = if ($null -eq $warmupBookshelfAverage) { $null } else { [math]::Round($warmupBookshelfAverage, 1) }
+        StartupRequestBookmarkMsAverage = if ($null -eq $startupRequestBookmarkAverage) { $null } else { [math]::Round($startupRequestBookmarkAverage, 1) }
+        StartupRequestBookshelfMsAverage = if ($null -eq $startupRequestBookshelfAverage) { $null } else { [math]::Round($startupRequestBookshelfAverage, 1) }
+        StartupRequestBookmarkQueueMsAverage = if ($null -eq $startupRequestBookmarkQueueAverage) { $null } else { [math]::Round($startupRequestBookmarkQueueAverage, 1) }
+        StartupRequestBookshelfQueueMsAverage = if ($null -eq $startupRequestBookshelfQueueAverage) { $null } else { [math]::Round($startupRequestBookshelfQueueAverage, 1) }
         Runs = $runs
     }
 }
@@ -623,13 +728,19 @@ try {
         T5ViewModelEndMsAverage,
         ContentRenderedEndMsAverage,
         LoadedAsyncDurationMsAverage,
+        LoadedAsyncTailMsAverage,
+        LoadedAsyncResumeGapMsAverage,
         WorkingSetMBAverage,
         PrivateMemoryMBAverage,
         SusieInitializeDurationMsAverage,
         LoadedBookmarkWaitMsAverage,
         LoadedBookshelfWaitMsAverage,
         WarmupBookmarkWaitMsAverage,
-        WarmupBookshelfWaitMsAverage
+        WarmupBookshelfWaitMsAverage,
+        StartupRequestBookmarkMsAverage,
+        StartupRequestBookshelfMsAverage,
+        StartupRequestBookmarkQueueMsAverage,
+        StartupRequestBookshelfQueueMsAverage
 
     $summary | Format-Table -AutoSize
 
@@ -643,6 +754,7 @@ try {
             T5ViewModelEndMsDelta = [math]::Round($optimized.T5ViewModelEndMsAverage - $baseline.T5ViewModelEndMsAverage, 1)
             ContentRenderedEndMsDelta = [math]::Round($optimized.ContentRenderedEndMsAverage - $baseline.ContentRenderedEndMsAverage, 1)
             LoadedAsyncDurationMsDelta = [math]::Round($optimized.LoadedAsyncDurationMsAverage - $baseline.LoadedAsyncDurationMsAverage, 1)
+            LoadedAsyncTailMsDelta = if ($null -eq $baseline.LoadedAsyncTailMsAverage -or $null -eq $optimized.LoadedAsyncTailMsAverage) { $null } else { [math]::Round($optimized.LoadedAsyncTailMsAverage - $baseline.LoadedAsyncTailMsAverage, 1) }
             WorkingSetMBDelta = [math]::Round($optimized.WorkingSetMBAverage - $baseline.WorkingSetMBAverage, 1)
             PrivateMemoryMBDelta = [math]::Round($optimized.PrivateMemoryMBAverage - $baseline.PrivateMemoryMBAverage, 1)
         }

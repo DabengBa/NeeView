@@ -87,17 +87,22 @@ namespace NeeView
 
         private static bool IsVisiblePanel(string key)
         {
-            return CustomLayoutPanelManager.Current.IsPanelSelected(key);
+            var manager = CustomLayoutPanelManager.CurrentOrNull;
+            if (manager is null) return false;
+
+            return manager.IsPanelSelected(key);
         }
 
         private void SetVisiblePanel(string key, bool isVisible, bool isFocus = true)
         {
+            CustomLayoutPanelManager.Initialize();
             CustomLayoutPanelManager.Current.SelectPanel(key, isVisible, isFocus);
             RaisePanelPropertyChanged();
         }
 
         private bool ToggleVisiblePanel(string key, bool byMenu)
         {
+            CustomLayoutPanelManager.Initialize();
             bool isVisible = !CustomLayoutPanelManager.Current.IsPanelSelected(key) || (!byMenu && !CustomLayoutPanelManager.Current.IsPanelVisible(key));
             SetVisiblePanel(key, isVisible);
             return isVisible;

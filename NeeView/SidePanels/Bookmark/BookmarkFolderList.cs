@@ -3,6 +3,7 @@ using NeeView.Collections.Generic;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 
 namespace NeeView
 {
@@ -51,13 +52,13 @@ namespace NeeView
         public override bool SyncBookOnRename => false;
 
 
-        public void UpdateItems()
+        public void UpdateItems(DispatcherPriority priority = DispatcherPriority.Normal)
         {
             if (_disposedValue) return;
 
             if (FolderCollection == null)
             {
-                RequestPlace(new QueryPath(QueryScheme.Bookmark, null), null, FolderSetPlaceOption.None);
+                RequestPlace(new QueryPath(QueryScheme.Bookmark, null), null, FolderSetPlaceOption.None, priority);
             }
         }
 

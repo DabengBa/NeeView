@@ -33,6 +33,7 @@ namespace NeeView
         private bool _canHideMenu;
 
         private volatile EditCommandWindow? _editCommandWindow;
+        private FirstLoader? _startupFirstLoader;
 
         private readonly MainWindowController _windowController;
 
@@ -225,12 +226,6 @@ namespace NeeView
         {
             using var startupScope = App.Current.TraceStartupScope("MainWindowModel.LoadedAsync");
 
-            // サイドパネル復元
-            using (App.Current.TraceStartupScope("MainWindowModel.LoadedAsync.CustomLayoutPanelManager.Restore"))
-            {
-                CustomLayoutPanelManager.Current.Restore();
-            }
-
             // フォルダー設定読み込み
             using (App.Current.TraceStartupScope("MainWindowModel.LoadedAsync.SaveData.LoadFolderConfig"))
             {
@@ -267,16 +262,11 @@ namespace NeeView
                 await ProcessJobEngine.Current.WaitPropertyAsync(nameof(ProcessJobEngine.IsBusy), x => x.IsBusy == false);
             }
 
-            // 最初のブック、フォルダを開く
-            using (App.Current.TraceStartupScope("MainWindowModel.LoadedAsync.FirstLoader.Load"))
+            // 最初のブックを開く。フォルダー復元は初回描画後にキューへ送る
+            using (App.Current.TraceStartupScope("MainWindowModel.LoadedAsync.FirstLoader.LoadBook"))
             {
-                new FirstLoader().Load();
-            }
-
-            // 最初のブックマークを開く
-            using (App.Current.TraceStartupScope("MainWindowModel.LoadedAsync.BookmarkFolderList.UpdateItems"))
-            {
-                BookmarkFolderList.Current.UpdateItems();
+                _startupFirstLoader = new FirstLoader();
+                _startupFirstLoader.LoadBook();
             }
 
             // オプション指定があればフォルダーリスト表示
@@ -290,8 +280,6 @@ namespace NeeView
             {
                 SlideShow.Current.Play();
             }
-
-            _ = WarmupStartupPanelsAsync();
 
             using (App.Current.TraceStartupScope("MainWindowModel.LoadedAsync.UserSettingTools.ApplyDeferredCommandCollection"))
             {
@@ -323,26 +311,46 @@ namespace NeeView
 #endif
         }
 
-        private static async Task WarmupStartupPanelsAsync()
+        public void BeginStartupWarmup()
         {
-            try
+            using (App.Current.TraceStartupScope("MainWindowModel.StartupWarmup.FirstLoader.LoadFolder"))
             {
-                await Task.Yield();
-
-                using (App.Current.TraceStartupScope("MainWindowModel.StartupWarmup.BookmarkFolderList.WaitAsync"))
-                {
-                    await BookmarkFolderList.Current.WaitAsync(CancellationToken.None);
-                }
-
-                using (App.Current.TraceStartupScope("MainWindowModel.StartupWarmup.BookshelfFolderList.WaitAsync"))
-                {
-                    await BookshelfFolderList.Current.WaitAsync(CancellationToken.None);
-                }
+                _startupFirstLoader?.LoadFolder(System.Windows.Threading.DispatcherPriority.Background);
+                _startupFirstLoader = null;
             }
-            catch (Exception ex)
+
+            using (App.Current.TraceStartupScope("MainWindowModel.StartupWarmup.BookmarkFolderList.UpdateItems"))
             {
-                Trace.WriteLine($"StartupWarmupFailed: {ex.Message}");
+                BookmarkFolderList.Current.UpdateItems(System.Windows.Threading.DispatcherPriority.Background);
             }
+
+            App.Current.TraceStartupStamp("MainWindowModel.StartupWarmup.Queued");
+            _ = WarmupStartupPanelsAsync();
+        }
+
+        private static Task WarmupStartupPanelsAsync()
+        {
+            return Task.Run(async () =>
+            {
+                try
+                {
+                    App.Current.TraceStartupStamp("MainWindowModel.StartupWarmup.ThreadPoolStart");
+
+                    using (App.Current.TraceStartupScope("MainWindowModel.StartupWarmup.BookmarkFolderList.WaitAsync"))
+                    {
+                        await BookmarkFolderList.Current.WaitAsync(CancellationToken.None).ConfigureAwait(false);
+                    }
+
+                    using (App.Current.TraceStartupScope("MainWindowModel.StartupWarmup.BookshelfFolderList.WaitAsync"))
+                    {
+                        await BookshelfFolderList.Current.WaitAsync(CancellationToken.None).ConfigureAwait(false);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine($"StartupWarmupFailed: {ex.Message}");
+                }
+            });
         }
 
         public void ContentRendered()
