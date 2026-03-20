@@ -13,6 +13,18 @@ Param(
 	# ログ出力のあるパッケージ作成
 	[switch]$trace,
 
+	# ReadyToRun の切り替え
+	[ValidateSet("Default", "On", "Off")][string]$readyToRun = "Default",
+
+	# ReadyToRun コンパイルの警告を表示する
+	[switch]$readyToRunShowWarnings,
+
+	# Composite ReadyToRun を有効にする
+	[switch]$readyToRunComposite,
+
+	# ReadyToRun シンボルを出力する
+	[switch]$readyToRunEmitSymbols,
+
 	# ビルドバージョンは更新しない
 	[switch]$noVersionUp
 )
@@ -27,6 +39,10 @@ Write-Host "[Properties] ..." -fore Cyan
 Write-Host "Target: $Target"
 Write-Host "Continue: $continue"
 Write-Host "Trace: $trace"
+Write-Host "ReadyToRun: $readyToRun"
+Write-Host "ReadyToRunShowWarnings: $readyToRunShowWarnings"
+Write-Host "ReadyToRunComposite: $readyToRunComposite"
+Write-Host "ReadyToRunEmitSymbols: $readyToRunEmitSymbols"
 Write-Host
 Read-Host "Press Enter to continue"
 
@@ -37,6 +53,11 @@ $issuesUrl = "https://github.com/neelabo/NeeView/issues"
 
 # sync current directory
 [System.IO.Directory]::SetCurrentDirectory((Get-Location -PSProvider FileSystem).Path)
+
+$dotnet = Join-Path $env:USERPROFILE ".dotnet\dotnet.exe"
+if (-not (Test-Path $dotnet)) {
+	$dotnet = "dotnet"
+}
 
 
 # get file version
@@ -229,6 +250,52 @@ function Get-DefaultOptions {
 	return $defaultOptions
 }
 
+function Get-SusieDefaultOptions {
+	$defaultOptions = @(
+		"-c", "Release"
+	)
+
+	switch ($Target) {
+		"Dev" { $defaultOptions += "-p:VersionSuffix=dev.${dateVersion}"; break; }
+		"Alpha" { $defaultOptions += "-p:VersionSuffix=alpha.${packageAlphaVersion}"; break; }
+		"Beta" { $defaultOptions += "-p:VersionSuffix=beta.${packageBetaVersion}"; break; }
+	}
+
+	return $defaultOptions
+}
+
+function Get-ReadyToRunOptions {
+	$options = @()
+
+	switch ($readyToRun) {
+		"On" { $options += "-p:PublishReadyToRun=true" }
+		"Off" { $options += "-p:PublishReadyToRun=false" }
+	}
+
+	if ($readyToRunShowWarnings) {
+		$options += "-p:PublishReadyToRunShowWarnings=true"
+		if ($readyToRun -eq "Default") {
+			$options += "-p:PublishReadyToRun=true"
+		}
+	}
+
+	if ($readyToRunComposite) {
+		$options += "-p:PublishReadyToRunComposite=true"
+		if ($readyToRun -eq "Default") {
+			$options += "-p:PublishReadyToRun=true"
+		}
+	}
+
+	if ($readyToRunEmitSymbols) {
+		$options += "-p:PublishReadyToRunEmitSymbols=true"
+		if ($readyToRun -eq "Default") {
+			$options += "-p:PublishReadyToRun=true"
+		}
+	}
+
+	return $options
+}
+
 function Build-Project {
 	param (
 		[string]$outputDir,
@@ -236,10 +303,11 @@ function Build-Project {
 	)
 
 	$defaultOptions = Get-DefaultOptions
+	$readyToRunOptions = Get-ReadyToRunOptions
 
-	Write-Host "> dotnet publish $project $defaultOptions $options -o $outputDir`n" -fore Cyan
+	Write-Host "> $dotnet publish $project $defaultOptions $readyToRunOptions $options -o $outputDir`n" -fore Cyan
 
-	& dotnet publish $project $defaultOptions $options -o $outputDir
+	& $dotnet publish $project $defaultOptions $readyToRunOptions $options -o $outputDir
 	if ($? -ne $true) {
 		throw "build error"
 	}
@@ -250,9 +318,15 @@ function Build-SusieProject {
 		[string]$outputDir
 	)
 
-	$defaultOptions = Get-DefaultOptions
+	$defaultOptions = Get-SusieDefaultOptions
 
-	& dotnet publish $projectSusie $defaultOptions -o $outputDir\Libraries\Susie
+	$options = @(
+		"-p:Platform=x86"
+		"-p:PlatformTarget=x86"
+		"-p:RuntimeIdentifier=win-x86"
+	)
+
+	& $dotnet publish $projectSusie $defaultOptions $options -o $outputDir\Libraries\Susie
 	if ($? -ne $true) {
 		throw "build error"
 	}

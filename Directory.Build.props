@@ -1,0 +1,5 @@
+<Project>
+  <PropertyGroup Condition="'$(MSBuildProjectName)'=='SevenZip'">
+    <DefineConstants>$(DefineConstants);UNMANAGED;COMPRESS;LZMA_STREAM;DOTNET20</DefineConstants>
+  </PropertyGroup>
+</Project>
