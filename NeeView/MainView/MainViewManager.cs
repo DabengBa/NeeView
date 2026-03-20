@@ -15,7 +15,7 @@ namespace NeeView
         private MainViewWindow? _window;
         private readonly MainViewComponent _viewComponent;
         private readonly MainView _mainView;
-        private readonly MainViewBay _mainViewBay;
+        private MainViewBay? _mainViewBay;
         private IDisposableContent? _alternativeContent;
         private readonly ContentControl _defaultSocket;
         private bool _isStoreEnabled = true;
@@ -37,7 +37,6 @@ namespace NeeView
 
             _mainView = _viewComponent.MainView;
             _defaultSocket = defaultSocket;
-            _mainViewBay = new MainViewBay();
 
             _defaultSocket.Content = _mainView;
 
@@ -56,7 +55,7 @@ namespace NeeView
 
         public MainViewWindow? Window => _window;
         public MainView MainView => _mainView;
-        public MainViewBay MainViewBay => _mainViewBay;
+        public MainViewBay MainViewBay => _mainViewBay ??= new MainViewBay();
 
         public Window? GetWindowContainingMainView() => System.Windows.Window.GetWindow(_mainView);
 
@@ -64,7 +63,7 @@ namespace NeeView
         private void BookOperation_BookChanging(object? sender, BookChangingEventArgs e)
         {
             _mainView.MouseInput?.Cancel();
-            _mainViewBay.MouseInput.Cancel();
+            _mainViewBay?.MouseInput.Cancel();
         }
 
         private void BookOperation_BookChanged(object? sender, BookChangedEventArgs e)
@@ -218,7 +217,7 @@ namespace NeeView
             switch (Config.Current.MainView.AlternativeContent)
             {
                 case AlternativeContent.Blank:
-                    return new NormalAlternativeContent(_mainViewBay);
+                    return new NormalAlternativeContent(MainViewBay);
                 case AlternativeContent.PageList:
                     return new LayoutPanelAlternativeContent(nameof(PageListPanel), storeAlternativePanelSource);
                 default:

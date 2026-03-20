@@ -5,6 +5,7 @@ using NeeLaboratory.IO.Search;
 using NeeView.Properties;
 using NeeView.Setting;
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -222,36 +223,61 @@ namespace NeeView
         // 起動時処理
         public async ValueTask LoadedAsync()
         {
-            // サイドパネル復元
-            CustomLayoutPanelManager.Current.Restore();
+            using var startupScope = App.Current.TraceStartupScope("MainWindowModel.LoadedAsync");
 
-            // Susie起動
-            // TODO: 非同期化できないか？
-            SusiePluginManager.Current.Initialize();
+            // サイドパネル復元
+            using (App.Current.TraceStartupScope("MainWindowModel.LoadedAsync.CustomLayoutPanelManager.Restore"))
+            {
+                CustomLayoutPanelManager.Current.Restore();
+            }
 
             // フォルダー設定読み込み
-            SaveData.Current.LoadFolderConfig();
+            using (App.Current.TraceStartupScope("MainWindowModel.LoadedAsync.SaveData.LoadFolderConfig"))
+            {
+                SaveData.Current.LoadFolderConfig();
+            }
 
             // 履歴読み込み
-            SaveData.Current.LoadHistory();
+            using (App.Current.TraceStartupScope("MainWindowModel.LoadedAsync.SaveData.LoadHistory"))
+            {
+                SaveData.Current.LoadHistory();
+            }
 
             // ブックマーク読み込み
-            SaveData.Current.LoadBookmark();
+            using (App.Current.TraceStartupScope("MainWindowModel.LoadedAsync.SaveData.LoadBookmark"))
+            {
+                SaveData.Current.LoadBookmark();
+            }
 
             // プレイリスト読み込み
-            PlaylistHub.Current.Initialize();
+            using (App.Current.TraceStartupScope("MainWindowModel.LoadedAsync.PlaylistHub.Initialize"))
+            {
+                PlaylistHub.Current.Initialize();
+            }
 
             // SaveDataSync活動開始
-            SaveDataSync.Current.Initialize();
+            using (App.Current.TraceStartupScope("MainWindowModel.LoadedAsync.SaveDataSync.Initialize"))
+            {
+                SaveDataSync.Current.Initialize();
+            }
 
             // 非同期初期化処理を待機
-            await ProcessJobEngine.Current.WaitPropertyAsync(nameof(ProcessJobEngine.IsBusy), x => x.IsBusy == false);
+            using (App.Current.TraceStartupScope("MainWindowModel.LoadedAsync.ProcessJobEngine.WaitPropertyAsync"))
+            {
+                await ProcessJobEngine.Current.WaitPropertyAsync(nameof(ProcessJobEngine.IsBusy), x => x.IsBusy == false);
+            }
 
             // 最初のブック、フォルダを開く
-            new FirstLoader().Load();
+            using (App.Current.TraceStartupScope("MainWindowModel.LoadedAsync.FirstLoader.Load"))
+            {
+                new FirstLoader().Load();
+            }
 
             // 最初のブックマークを開く
-            BookmarkFolderList.Current.UpdateItems();
+            using (App.Current.TraceStartupScope("MainWindowModel.LoadedAsync.BookmarkFolderList.UpdateItems"))
+            {
+                BookmarkFolderList.Current.UpdateItems();
+            }
 
             // オプション指定があればフォルダーリスト表示
             if (App.Current.Option.FolderListQuery is not null)
@@ -265,9 +291,12 @@ namespace NeeView
                 SlideShow.Current.Play();
             }
 
-            // パネル初期化待機
-            await BookmarkFolderList.Current.WaitAsync(CancellationToken.None);
-            await BookshelfFolderList.Current.WaitAsync(CancellationToken.None);
+            _ = WarmupStartupPanelsAsync();
+
+            using (App.Current.TraceStartupScope("MainWindowModel.LoadedAsync.UserSettingTools.ApplyDeferredCommandCollection"))
+            {
+                UserSettingTools.ApplyDeferredCommandCollection();
+            }
 
             // 起動時スクリプトの実行
             if (App.Current.Option.ScriptQuery is not null)
@@ -275,17 +304,45 @@ namespace NeeView
                 var path = App.Current.Option.ScriptQuery.ResolvePath().SimplePath;
                 if (!string.IsNullOrEmpty(path))
                 {
-                    ScriptManager.Current.Execute(this, path, null, null);
+                    using (App.Current.TraceStartupScope("MainWindowModel.LoadedAsync.ScriptManager.Execute"))
+                    {
+                        ScriptManager.Current.Execute(this, path, null, null);
+                    }
                 }
             }
 
             // Script: OnStartup
-            CommandTable.Current.TryExecute(this, ScriptCommand.EventOnStartup, null, CommandOption.None);
+            using (App.Current.TraceStartupScope("MainWindowModel.LoadedAsync.CommandTable.TryExecute.OnStartup"))
+            {
+                CommandTable.Current.TryExecute(this, ScriptCommand.EventOnStartup, null, CommandOption.None);
+            }
 
 #if DEBUG
             // [開発用] デバッグアクションの実行
             DebugCommand.Execute(App.Current.Option.DebugCommand);
 #endif
+        }
+
+        private static async Task WarmupStartupPanelsAsync()
+        {
+            try
+            {
+                await Task.Yield();
+
+                using (App.Current.TraceStartupScope("MainWindowModel.StartupWarmup.BookmarkFolderList.WaitAsync"))
+                {
+                    await BookmarkFolderList.Current.WaitAsync(CancellationToken.None);
+                }
+
+                using (App.Current.TraceStartupScope("MainWindowModel.StartupWarmup.BookshelfFolderList.WaitAsync"))
+                {
+                    await BookshelfFolderList.Current.WaitAsync(CancellationToken.None);
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"StartupWarmupFailed: {ex.Message}");
+            }
         }
 
         public void ContentRendered()

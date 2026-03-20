@@ -62,6 +62,7 @@ namespace NeeView
 
             StartTime = DateTime.Now;
             Stopwatch.Start();
+            TraceStartupStamp("App.Startup.Enter");
 
             // DLL 検索パスから現在の作業ディレクトリ (CWD) を削除
             PInvoke.SetDllDirectory("");
@@ -102,9 +103,15 @@ namespace NeeView
                 }
 
                 // 未処理例外ハンドル
-                InitializeUnhandledException();
+                using (TraceStartupScope("App.InitializeUnhandledException"))
+                {
+                    InitializeUnhandledException();
+                }
 
-                await InitializeAsync(e);
+                using (TraceStartupScope("App.InitializeAsync.Call"))
+                {
+                    await InitializeAsync(e);
+                }
             }
             catch (OperationCanceledException ex)
             {
@@ -133,11 +140,18 @@ namespace NeeView
             this.ShutdownMode = ShutdownMode.OnMainWindowClose;
 
             // メインウィンドウ起動
-            var mainWindow = new MainWindow();
-            WindowParameters.Initialize(mainWindow);
+            MainWindow mainWindow;
+            using (TraceStartupScope("App.MainWindow.Create"))
+            {
+                mainWindow = new MainWindow();
+                WindowParameters.Initialize(mainWindow);
+            }
 
-            NVInterop.NVFpReset();
-            mainWindow.Show();
+            using (TraceStartupScope("App.MainWindow.Show"))
+            {
+                NVInterop.NVFpReset();
+                mainWindow.Show();
+            }
 
             MessageDialog.IsShowInTaskBar = false;
         }
@@ -147,28 +161,45 @@ namespace NeeView
         /// </summary>
         private async ValueTask InitializeAsync(StartupEventArgs e)
         {
+            using var startupScope = TraceStartupScope("App.InitializeAsync");
             Debug.WriteLine($"App.InitializeAsync...: {Stopwatch.ElapsedMilliseconds}ms");
 
             this.ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
             // AnimatedImage ライブラリ初期化
-            AnimatedImageChecker.InitializeLibrary();
+            using (TraceStartupScope("App.InitializeAsync.AnimatedImageChecker.InitializeLibrary"))
+            {
+                AnimatedImageChecker.InitializeLibrary();
+            }
 
             // APPXデータフォルダ移動 (ver.38)
-            Environment.CorrectLocalAppDataFolder();
+            using (TraceStartupScope("App.InitializeAsync.Environment.CorrectLocalAppDataFolder"))
+            {
+                Environment.CorrectLocalAppDataFolder();
+            }
 
             // コマンドライン引数処理
-            _option = ParseCommandLineOption(e.Args);
+            using (TraceStartupScope("App.InitializeAsync.ParseCommandLineOption"))
+            {
+                _option = ParseCommandLineOption(e.Args);
+            }
 
             // カレントディレクトリを実行ファイルの場所に変更。ファイルロック回避のため
-            System.IO.Directory.SetCurrentDirectory(Environment.AssemblyFolder);
+            using (TraceStartupScope("App.InitializeAsync.Directory.SetCurrentDirectory"))
+            {
+                System.IO.Directory.SetCurrentDirectory(Environment.AssemblyFolder);
+            }
 
             // 多重起動サービス起動
-            _multiBootService = new MultiBootService();
+            using (TraceStartupScope("App.InitializeAsync.MultiBootService"))
+            {
+                _multiBootService = new MultiBootService();
+            }
 
             // セカンドプロセス判定
             Environment.IsSecondProcess = _multiBootService.IsServerExists;
 
+            TraceStartupStamp("App.UserSettingLoading");
             DebugStamp("UserSettingLoading...");
 
             // load UserSetting bytes
@@ -176,7 +207,11 @@ namespace NeeView
             var settingResource = new UserSettingResource(_option.SettingFilename);
 
             // create boot setting
-            var boot = settingResource.LoadBootSetting();
+            BootSetting? boot;
+            using (TraceStartupScope("App.InitializeAsync.LoadBootSetting"))
+            {
+                boot = settingResource.LoadBootSetting();
+            }
             if (boot is null)
             {
                 setting = CreateUserSetting(settingResource);
@@ -203,7 +238,10 @@ namespace NeeView
             // ensure UserSetting
             setting ??= CreateUserSetting(settingResource);
             SaveData.Current.SetUserSettingFileStamp(setting.FileStamp);
-            UserSettingTools.Restore(setting, replaceConfig: true);
+            using (TraceStartupScope("App.InitializeAsync.UserSettingTools.Restore"))
+            {
+                UserSettingTools.Restore(setting, replaceConfig: true);
+            }
 
             // fix language
             if (_option.Language is null)
@@ -211,6 +249,7 @@ namespace NeeView
                 Config.Current.System.Language = TextResources.Culture.Name;
             }
 
+            TraceStartupStamp("App.UserSettingLoaded");
             DebugStamp("UserSettingLoaded");
 
             // show version dialog
@@ -251,6 +290,7 @@ namespace NeeView
         /// </summary>
         private UserSetting CreateUserSetting(UserSettingResource settingResource)
         {
+            using var startupScope = TraceStartupScope("App.CreateUserSetting");
             using var span = DebugSpan();
             try
             {
@@ -284,6 +324,7 @@ namespace NeeView
         /// <param name="language"></param>
         private void InitializeTextResource(string language)
         {
+            using var startupScope = TraceStartupScope("App.InitializeTextResource");
             using var span = DebugSpan();
             CultureInfo culture;
             try
@@ -306,6 +347,7 @@ namespace NeeView
         /// </summary>
         private void InitializeHtmlNode()
         {
+            using var startupScope = TraceStartupScope("App.InitializeHtmlNode");
             HtmlNode.DefaultTextEvaluator = e => TextResources.Replace(e, true);
         }
 
@@ -314,6 +356,7 @@ namespace NeeView
         /// </summary>
         private void InitializeCommandTable()
         {
+            using var startupScope = TraceStartupScope("App.InitializeCommandTable");
             using var span = DebugSpan();
             _ = CommandTable.Current;
         }
@@ -323,6 +366,7 @@ namespace NeeView
         /// </summary>
         private void InitializeSupportFileType(Config config)
         {
+            using var startupScope = TraceStartupScope("App.InitializeSupportFileType");
             using var span = DebugSpan();
             if (config.Image.Standard.SupportFileTypes is null)
             {
@@ -335,6 +379,7 @@ namespace NeeView
         /// </summary>
         private void InitializeTemporary(Config config)
         {
+            using var startupScope = TraceStartupScope("App.InitializeTemporary");
             using var span = DebugSpan();
             config.System.TemporaryDirectory = Temporary.Current.SetDirectory(config.System.TemporaryDirectory, true);
         }
@@ -344,6 +389,7 @@ namespace NeeView
         /// </summary>
         private void InitializeImeKey(Config config)
         {
+            using var startupScope = TraceStartupScope("App.InitializeImeKey");
             using var span = DebugSpan();
             if (!config.System.IsInputMethodEnabled)
             {
@@ -357,6 +403,7 @@ namespace NeeView
         /// </summary>
         private void InitializeTheme()
         {
+            using var startupScope = TraceStartupScope("App.InitializeTheme");
             using var span = DebugSpan();
             _ = ThemeManager.Current;
         }
@@ -371,6 +418,7 @@ namespace NeeView
                 if (_isSplashScreenVisible) return;
                 _isSplashScreenVisible = true;
 
+                using var startupScope = TraceStartupScope("App.ShowSplashScreen");
                 using var span = DebugSpan();
                 var resourceName = "Resources/SplashScreen.png";
                 var splashScreen = new SplashScreen(resourceName);
@@ -517,6 +565,41 @@ namespace NeeView
         {
             SaveData.Current.DisableSave();
             Shutdown();
+        }
+
+        public IDisposable TraceStartupScope(string label)
+        {
+            return new StartupTraceScope(Stopwatch, label);
+        }
+
+        public void TraceStartupStamp(string label)
+        {
+            Trace.WriteLine(string.Format(CultureInfo.InvariantCulture, "Startup.Trace|{0}|mark_ms={1}", label, Stopwatch.ElapsedMilliseconds));
+        }
+
+        private sealed class StartupTraceScope : IDisposable
+        {
+            private readonly Stopwatch _stopwatch;
+            private readonly string _label;
+            private readonly long _start;
+            private bool _isDisposed;
+
+            public StartupTraceScope(Stopwatch stopwatch, string label)
+            {
+                _stopwatch = stopwatch;
+                _label = label;
+                _start = stopwatch.ElapsedMilliseconds;
+                Trace.WriteLine(string.Format(CultureInfo.InvariantCulture, "Startup.Trace|{0}|start_ms={1}", _label, _start));
+            }
+
+            public void Dispose()
+            {
+                if (_isDisposed) return;
+                _isDisposed = true;
+
+                var end = _stopwatch.ElapsedMilliseconds;
+                Trace.WriteLine(string.Format(CultureInfo.InvariantCulture, "Startup.Trace|{0}|end_ms={1}|duration_ms={2}", _label, end, end - _start));
+            }
         }
 
 

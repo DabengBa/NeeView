@@ -116,6 +116,12 @@ namespace NeeView
 #endif
         }
 
+        public void EnsureInitialized()
+        {
+            if (_isInitialized) return;
+            Initialize();
+        }
+
 
         private void Plugins_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
@@ -217,7 +223,7 @@ namespace NeeView
         // Susie画像プラグインのサポート拡張子を更新
         public void UpdateImageExtensions()
         {
-            var extensions = INPlugins
+            var extensions = GetPlugins(SusiePluginType.Image)
                 .Where(e => e.IsEnabled)
                 .SelectMany(e => e.Extensions);
 
@@ -229,7 +235,7 @@ namespace NeeView
         // Susie書庫プラグインのサポート拡張子を更新
         public void UpdateArchiveExtensions()
         {
-            var extensions = AMPlugins
+            var extensions = GetPlugins(SusiePluginType.Archive)
                 .Where(e => e.IsEnabled)
                 .SelectMany(e => e.Extensions);
 
@@ -243,6 +249,7 @@ namespace NeeView
         {
             lock (_lock)
             {
+                EnsureInitialized();
                 if (_client is null) throw new InvalidOperationException("Client is null");
 
                 var target = Plugins.FirstOrDefault(e => e.Name == plugin.Name);
@@ -256,6 +263,7 @@ namespace NeeView
         {
             lock (_lock)
             {
+                EnsureInitialized();
                 if (_client is null) throw new InvalidOperationException("Client is null");
 
                 var settings = Plugins
@@ -274,6 +282,7 @@ namespace NeeView
 
             lock (_lock)
             {
+                EnsureInitialized();
                 if (_client is null) throw new InvalidOperationException("Client is null");
 
                 _client.SetPlugin(plugins);
@@ -284,6 +293,7 @@ namespace NeeView
         {
             lock (_lock)
             {
+                EnsureInitialized();
                 if (_client is null) throw new InvalidOperationException("Client is null");
 
                 var plugins = _client.GetPlugin(new List<string>() { name });
@@ -312,6 +322,7 @@ namespace NeeView
         {
             lock (_lock)
             {
+                EnsureInitialized();
                 _client?.SetPluginOrder(Plugins.Select(e => e.Name).ToList());
             }
         }
@@ -320,6 +331,7 @@ namespace NeeView
         {
             lock (_lock)
             {
+                EnsureInitialized();
                 if (_client is null) throw new InvalidOperationException("Client is null");
 
                 return new SusieImagePluginAccessor(_client, null);
@@ -330,6 +342,7 @@ namespace NeeView
         {
             lock (_lock)
             {
+                EnsureInitialized();
                 if (_client is null) throw new InvalidOperationException("Client is null");
 
                 var plugin = _client.GetImagePlugin(fileName, buff, isCheckExtension);
@@ -343,6 +356,7 @@ namespace NeeView
         {
             lock (_lock)
             {
+                EnsureInitialized();
                 if (_client is null) throw new InvalidOperationException("Client is null");
 
                 var plugin = _client.GetArchivePlugin(fileName, buff, isCheckExtension, pluginName);
@@ -356,6 +370,7 @@ namespace NeeView
         {
             lock (_lock)
             {
+                EnsureInitialized();
                 if (_client is null) throw new InvalidOperationException("Client is null");
 
                 var handle = new WindowInteropHelper(owner).Handle;
@@ -366,6 +381,8 @@ namespace NeeView
         public void ClearUnauthorizedPlugins()
         {
             UnauthorizedPlugins = new();
+            UpdateImageExtensions();
+            UpdateArchiveExtensions();
         }
 
         #region Memento
@@ -384,6 +401,8 @@ namespace NeeView
         {
             if (memento == null) return;
             this.UnauthorizedPlugins = memento.Select(e => e.Value.ToSusiePluginInfo(e.Key)).ToList();
+            UpdateImageExtensions();
+            UpdateArchiveExtensions();
 
             if (_isInitialized)
             {
@@ -393,12 +412,17 @@ namespace NeeView
 
         public List<string> GetSupportedPluginList(SusiePluginType pluginType, string ext)
         {
-            return GetPluginCollection(pluginType).Where(e => e.IsEnabled && e.Extensions.Contains(ext)).Select(e => e.Name).ToList();
+            return GetPlugins(pluginType).Where(e => e.IsEnabled && e.Extensions.Contains(ext)).Select(e => e.Name).ToList();
         }
 
         public bool IsSupportedPlugin(SusiePluginType pluginType, string ext, string pluginName)
         {
-            return GetPluginCollection(pluginType).FirstOrDefault(e => e.Name == pluginName)?.Extensions.Contains(ext) ?? false;
+            return GetPlugins(pluginType).FirstOrDefault(e => e.Name == pluginName)?.Extensions.Contains(ext) ?? false;
+        }
+
+        private IEnumerable<SusiePluginInfo> GetPlugins(SusiePluginType pluginType)
+        {
+            return Plugins.Where(e => e.PluginType == pluginType);
         }
 
         private ObservableCollection<SusiePluginInfo> GetPluginCollection(SusiePluginType pluginType)

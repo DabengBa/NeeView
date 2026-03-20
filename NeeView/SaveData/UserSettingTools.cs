@@ -10,6 +10,7 @@ namespace NeeView
     public static class UserSettingTools
     {
         private static JsonSerializerOptions? _serializerOptions;
+        private static CommandCollection? _deferredCommandCollection;
 
         public static FormatVersion? UserSettingFormat { get; private set; }
 
@@ -127,7 +128,8 @@ namespace NeeView
             CustomLayoutPanelManager.RestoreMaybe();
 
             // コマンド設定反映
-            CommandTable.Current.RestoreCommandCollection(setting.Commands, true);
+            _deferredCommandCollection = setting.Commands?.Clone();
+            CommandTable.Current.RestoreCommandCollection(setting.Commands, true, updateScriptCommands: false, ignoreMissingScriptCommands: true);
 
             // ドラッグアクション反映
             DragActionTable.Current.RestoreDragActionCollection(setting.DragActions);
@@ -137,6 +139,15 @@ namespace NeeView
 
             // SusiePlugins反映
             SusiePluginManager.Current.RestoreSusiePluginCollection(setting.SusiePlugins);
+        }
+
+        public static bool ApplyDeferredCommandCollection()
+        {
+            if (_deferredCommandCollection == null) return false;
+
+            CommandTable.Current.RestoreCommandCollection(_deferredCommandCollection, true, updateScriptCommands: true, ignoreMissingScriptCommands: true);
+            _deferredCommandCollection = null;
+            return true;
         }
     }
 

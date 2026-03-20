@@ -210,6 +210,7 @@ namespace NeeView.Setting
         public override void InitializeValue()
         {
             base.InitializeValue();
+            SusiePluginManager.Current.EnsureInitialized();
             SusiePluginManager.Current.ClearUnauthorizedPlugins();
         }
     }

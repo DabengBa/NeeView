@@ -76,6 +76,27 @@
 - 启动到主窗口出现的时间统计
 - 启动后工作集与私有内存统计
 
+## 当前结果（`Runs=5`）
+
+| Variant | PublishReadyToRun | Size | Startup Avg | Working Set Avg | Private Memory Avg |
+|--|--:|--:|--:|--:|--:|
+| `baseline-no-r2r` | false | 51.6 MB | 533.3 ms | 111.1 MB | 48.3 MB |
+| `experiment-r2r` | true | 65.3 MB | 516.2 ms | 126.8 MB | 57.4 MB |
+
+**结果解读**
+
+- ReadyToRun 让主窗口出现时间缩短约 `17.1 ms`，约 `3.2%`
+- 发布目录增大约 `13.7 MB`，约 `26.6%`
+- 工作集增加约 `15.7 MB`
+- 私有内存增加约 `9.1 MB`
+
+**当前结论**
+
+- ReadyToRun 对 NeeView 有小幅收益，但不是启动优化的主收益来源
+- 当前项目已经保留 ReadyToRun 开关，方便发布时显式切换
+- 后续启动优化重点已转向代码级关键路径，而不是继续深挖 ReadyToRun 微调
+- 最新代码级分段测试见 `docs/startup-performance-checklist.md`
+
 ## 前置条件
 
 - 需要安装与项目目标框架匹配的 .NET SDK
@@ -154,3 +175,8 @@ git submodule update --init --recursive
 
 - 保持当前默认值但不继续扩大使用范围
 - 或进一步做 Composite / TieredCompilation / 更细粒度的实验
+
+## 相关文档
+
+- `docs/startup-performance-checklist.md`
+- `MakePackage/Measure-StartupTrace.ps1`

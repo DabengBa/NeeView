@@ -14,6 +14,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.WindowsAndMessaging;
@@ -47,9 +48,17 @@ namespace NeeView
         public MainWindow()
         {
             NVInterop.NVFpReset();
+            using var startupScope = App.Current.TraceStartupScope("MainWindow.Initialize");
 
-            InitializeComponent();
-            WindowChromeTools.SetWindowChromeSource(this);
+            using (App.Current.TraceStartupScope("MainWindow.Initialize.InitializeComponent"))
+            {
+                InitializeComponent();
+            }
+
+            using (App.Current.TraceStartupScope("MainWindow.Initialize.WindowChromeTools.SetWindowChromeSource"))
+            {
+                WindowChromeTools.SetWindowChromeSource(this);
+            }
 
             // TextBox の ContextMenu のスタイルを変更する ... やりすぎ？
             // ThemeProfile.InitializeEditorContextMenuStyle(this);
@@ -59,25 +68,29 @@ namespace NeeView
             if (_current is not null) throw new InvalidOperationException();
             _current = this;
 
-            DragDropHelper.AttachDragOverTerminator(this);
+            using (App.Current.TraceStartupScope("MainWindow.Initialize.WindowInfrastructure"))
+            {
+                DragDropHelper.AttachDragOverTerminator(this);
 
-            // Window状態初期化
-            InitializeWindowShapeSnap();
+                // Window状態初期化
+                InitializeWindowShapeSnap();
 
-            // win proc
-            _windowProcedure = new WindowProcedure(this);
+                // win proc
+                _windowProcedure = new WindowProcedure(this);
 
-            _windowStateManager = new WindowStateManager(this);
-            _windowController = new MainWindowController(this, _windowStateManager);
+                _windowStateManager = new WindowStateManager(this);
+                _windowController = new MainWindowController(this, _windowStateManager);
 
-            ContextMenuWatcher.Initialize();
+                ContextMenuWatcher.Initialize();
 
-            var mouseHorizontalWheel = new MouseHorizontalWheelService(this);
-            mouseHorizontalWheel.MouseHorizontalWheelChanged += (s, e) => MouseHorizontalWheelChanged?.Invoke(s, e);
+                var mouseHorizontalWheel = new MouseHorizontalWheelService(this);
+                mouseHorizontalWheel.MouseHorizontalWheelChanged += (s, e) => MouseHorizontalWheelChanged?.Invoke(s, e);
+            }
 
-            // 固定画像初期化
-            ThumbnailResource.InitializeStaticImages();
-            _ = FileIconCollection.Current.InitializeAsync();
+            using (App.Current.TraceStartupScope("MainWindow.Initialize.StaticResources"))
+            {
+                _ = FileIconCollection.Current.InitializeAsync();
+            }
 
             // FpReset 念のため
             NVInterop.NVFpReset();
@@ -86,47 +99,60 @@ namespace NeeView
             //ContentDropManager.Current.SetDragDropEvent(MainView);
 
             // ViewComponent
-            MainViewComponent.Initialize();
+            using (App.Current.TraceStartupScope("MainWindow.Initialize.MainViewComponent.Initialize"))
+            {
+                MainViewComponent.Initialize();
+            }
             _viewComponent = MainViewComponent.Current;
 
             // ViewComponent Mouse/TouchCommand
-            RoutedCommandTable.Current.AddMouseInput(_viewComponent.MouseInput);
-            RoutedCommandTable.Current.AddTouchInput(_viewComponent.TouchInput);
+            using (App.Current.TraceStartupScope("MainWindow.Initialize.MainViewComponent.InputBinding"))
+            {
+                RoutedCommandTable.Current.AddMouseInput(_viewComponent.MouseInput);
+                RoutedCommandTable.Current.AddTouchInput(_viewComponent.TouchInput);
+            }
 
-            MainViewManager.Initialize(_viewComponent, this.MainViewSocket);
+            using (App.Current.TraceStartupScope("MainWindow.Initialize.MainViewManager.Initialize"))
+            {
+                MainViewManager.Initialize(_viewComponent, this.MainViewSocket);
+            }
 
-            MainWindowModel.Initialize(_windowController);
+            using (App.Current.TraceStartupScope("MainWindow.Initialize.MainWindowModel.Initialize"))
+            {
+                MainWindowModel.Initialize(_windowController);
+            }
 
             // MainWindow : ViewModel
-            _vm = new MainWindowViewModel(MainWindowModel.Current);
-            this.DataContext = _vm;
+            using (App.Current.TraceStartupScope("MainWindow.Initialize.MainWindowViewModel"))
+            {
+                _vm = new MainWindowViewModel(MainWindowModel.Current);
+                this.DataContext = _vm;
+            }
 
             _vm.FocusMainViewCall += (s, e) => _viewComponent.RaiseFocusMainViewRequest();
 
             // コマンド初期化
-            _routedCommandBinding = new RoutedCommandBinding(this, RoutedCommandTable.Current);
-
-            // MainWindow MouseCommand Terminator
-            var mouseContext = new MouseInputContext(this, null, MouseGestureCommandCollection.Current, null, null, null, null, null)
+            using (App.Current.TraceStartupScope("MainWindow.Initialize.RoutedCommandBinding"))
             {
-                IsGestureEnabled = false,
-                IsLeftButtonDownEnabled = false,
-                IsRightButtonDownEnabled = false,
-                IsVerticalWheelEnabled = false,
-                IsMouseEventTerminated = false
-            };
-            RoutedCommandTable.Current.AddMouseInput(new MouseInput(mouseContext));
+                _routedCommandBinding = new RoutedCommandBinding(this, RoutedCommandTable.Current);
+            }
 
             // サイドパネル初期化
-            CustomLayoutPanelManager.Initialize();
+            using (App.Current.TraceStartupScope("MainWindow.Initialize.CustomLayoutPanelManager.Initialize"))
+            {
+                CustomLayoutPanelManager.Initialize();
+            }
 
             // 各コントロールとモデルを関連付け
-            _mediaControl = new MediaControl();
-            this.PageSliderView.Source = PageSlider.Current;
-            this.MediaControlView.Source = _mediaControl;
-            this.ThumbnailListArea.Source = ThumbnailList.Current;
-            this.MenuBar.Source = new MenuBar(_windowStateManager);
-            this.AddressBar.Source = new AddressBar();
+            using (App.Current.TraceStartupScope("MainWindow.Initialize.ViewSources"))
+            {
+                _mediaControl = new MediaControl();
+                this.PageSliderView.Source = PageSlider.Current;
+                this.MediaControlView.Source = _mediaControl;
+                this.ThumbnailListArea.Source = ThumbnailList.Current;
+                this.MenuBar.Source = new MenuBar(_windowStateManager);
+                this.AddressBar.Source = new AddressBar();
+            }
 
             _vm.MenuAutoHideDescription.SetMenuBar(this.MenuBar.Source);
 
@@ -172,52 +198,55 @@ namespace NeeView
 
 
 
-            _windowController.SubscribePropertyChanged(nameof(MainWindowController.AutoHideMode),
-                (s, e) => AutoHideModeChanged());
+            using (App.Current.TraceStartupScope("MainWindow.Initialize.EventHooks"))
+            {
+                _windowController.SubscribePropertyChanged(nameof(MainWindowController.AutoHideMode),
+                    (s, e) => AutoHideModeChanged());
 
-            // initialize routed commands
-            RoutedCommandTable.Current.UpdateInputGestures();
+                // initialize routed commands
+                RoutedCommandTable.Current.UpdateInputGestures();
 
-            // watch menu bar visibility
-            this.MenuArea.IsVisibleChanged += (s, e) => Config.Current.MenuBar.IsVisible = this.MenuArea.IsVisible;
+                // watch menu bar visibility
+                this.MenuArea.IsVisibleChanged += (s, e) => Config.Current.MenuBar.IsVisible = this.MenuArea.IsVisible;
 
-            // watch slider visibility
-            this.SliderArea.IsVisibleChanged += (s, e) => Config.Current.Slider.IsVisible = this.SliderArea.IsVisible;
+                // watch slider visibility
+                this.SliderArea.IsVisibleChanged += (s, e) => Config.Current.Slider.IsVisible = this.SliderArea.IsVisible;
 
-            // moue event for window
-            this.PreviewMouseMove += MainWindow_PreviewMouseMove;
-            this.PreviewMouseUp += MainWindow_PreviewMouseUp;
-            this.PreviewMouseDown += MainWindow_PreviewMouseDown;
-            this.PreviewMouseWheel += MainWindow_PreviewMouseWheel;
-            this.PreviewStylusDown += MainWindow_PreviewStylusDown;
+                // moue event for window
+                this.PreviewMouseMove += MainWindow_PreviewMouseMove;
+                this.PreviewMouseUp += MainWindow_PreviewMouseUp;
+                this.PreviewMouseDown += MainWindow_PreviewMouseDown;
+                this.PreviewMouseWheel += MainWindow_PreviewMouseWheel;
+                this.PreviewStylusDown += MainWindow_PreviewStylusDown;
 
-            // mouse activate
-            _mouseActivate = new MouseActivate(this);
+                // mouse activate
+                _mouseActivate = new MouseActivate(this);
 
-            // key event for window
-            this.PreviewKeyDown += MainWindow_PreviewKeyDown;
-            this.PreviewKeyUp += MainWindow_PreviewKeyUp;
-            this.KeyDown += MainWindow_KeyDown;
+                // key event for window
+                this.PreviewKeyDown += MainWindow_PreviewKeyDown;
+                this.PreviewKeyUp += MainWindow_PreviewKeyUp;
+                this.KeyDown += MainWindow_KeyDown;
 
-            // cancel rename triggers
-            this.MouseLeftButtonDown += (s, e) => this.RenameManager.CloseAll();
-            this.MouseRightButtonDown += (s, e) => this.RenameManager.CloseAll();
+                // cancel rename triggers
+                this.MouseLeftButtonDown += (s, e) => this.RenameManager.CloseAll();
+                this.MouseRightButtonDown += (s, e) => this.RenameManager.CloseAll();
 
-            // frame event
-            CompositionTarget.Rendering += OnRendering;
+                // frame event
+                CompositionTarget.Rendering += OnRendering;
 
-            // message layer space
-            InitializeMessageLayerSpace();
+                // message layer space
+                InitializeMessageLayerSpace();
 
-            // page caption
-            InitializePageCaption();
+                // page caption
+                InitializePageCaption();
 
-            // side panel quick hide
-            this.MainViewPanelRect.PreviewMouseDown += (s, e) => _vm.AllPanelHideAtOnce();
-            this.MainViewPanelRect.PreviewMouseWheel += (s, e) => _vm.AllPanelHideAtOnce();
+                // side panel quick hide
+                this.MainViewPanelRect.PreviewMouseDown += (s, e) => _vm.AllPanelHideAtOnce();
+                this.MainViewPanelRect.PreviewMouseWheel += (s, e) => _vm.AllPanelHideAtOnce();
 
-            // 開発用初期化
-            Debug_Initialize();
+                // 開発用初期化
+                Debug_Initialize();
+            }
 
             Debug.WriteLine($"App.MainWindow.Initialize.Done: {App.Current.Stopwatch.ElapsedMilliseconds}ms");
         }
@@ -397,6 +426,7 @@ namespace NeeView
         protected override void OnSourceInitialized(EventArgs e)
         {
             base.OnSourceInitialized(e);
+            using var startupScope = App.Current.TraceStartupScope("MainWindow.SourceInitialized");
 
             Debug.WriteLine($"App.MainWindow.SourceInitialized: {App.Current.Stopwatch.ElapsedMilliseconds}ms");
 
@@ -427,6 +457,7 @@ namespace NeeView
         // ウィンドウ表示開始
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            using var startupScope = App.Current.TraceStartupScope("MainWindow.Loaded");
             Debug.WriteLine($"App.MainWindow.Loaded: {App.Current.Stopwatch.ElapsedMilliseconds}ms");
 
             MessageDialog.OwnerWindow = this;
@@ -464,15 +495,21 @@ namespace NeeView
         // ウィンドウコンテンツ表示開始
         private async void MainWindow_ContentRendered(object sender, EventArgs e)
         {
+            using var startupScope = App.Current.TraceStartupScope("MainWindow.ContentRendered");
             Debug.WriteLine($"App.MainWindow.ContentRendered: {App.Current.Stopwatch.ElapsedMilliseconds}ms");
 
-            await _vm.ContentRenderedAsync();
+            using (App.Current.TraceStartupScope("MainWindow.ContentRendered.ViewModel"))
+            {
+                await _vm.ContentRenderedAsync();
+            }
 
             // focus
             if (this.WindowState != WindowState.Minimized)
             {
                 this.Focus();
             }
+
+            BeginDeferredStartupWarmup();
 
             Debug.WriteLine($"App.MainWindow.ContentRendered.Done: {App.Current.Stopwatch.ElapsedMilliseconds}ms");
 
@@ -481,6 +518,32 @@ namespace NeeView
             {
                 WelcomeDialog.ShowDialog(this);
             }
+        }
+
+        private void BeginDeferredStartupWarmup()
+        {
+            Dispatcher.BeginInvoke(() =>
+            {
+                using var startupScope = App.Current.TraceStartupScope("MainWindow.DeferredWarmup");
+
+                using (App.Current.TraceStartupScope("MainWindow.DeferredWarmup.MouseTerminator"))
+                {
+                    var mouseContext = new MouseInputContext(this, null, MouseGestureCommandCollection.Current, null, null, null, null, null)
+                    {
+                        IsGestureEnabled = false,
+                        IsLeftButtonDownEnabled = false,
+                        IsRightButtonDownEnabled = false,
+                        IsVerticalWheelEnabled = false,
+                        IsMouseEventTerminated = false
+                    };
+                    RoutedCommandTable.Current.AddMouseInput(new MouseInput(mouseContext));
+                }
+
+                using (App.Current.TraceStartupScope("MainWindow.DeferredWarmup.ThumbnailResource.InitializeStaticImages"))
+                {
+                    ThumbnailResource.InitializeStaticImages();
+                }
+            }, DispatcherPriority.Background);
         }
 
         // ウィンドウアクティブ

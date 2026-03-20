@@ -734,11 +734,14 @@ namespace NeeView
             return collection;
         }
 
-        public void RestoreCommandCollection(CommandCollection? collection, bool cleanup)
+        public void RestoreCommandCollection(CommandCollection? collection, bool cleanup, bool updateScriptCommands = true, bool ignoreMissingScriptCommands = false)
         {
             if (collection == null) return;
 
-            ScriptManager.Current.UpdateScriptCommands(isForce: false, isReplace: false);
+            if (updateScriptCommands)
+            {
+                ScriptManager.Current.UpdateScriptCommands(isForce: false, isReplace: false);
+            }
 
             // collection は差分の可能性がるので、不足分をデフォルトから補完する
             var reconstruct = collection.UnionBy(DefaultMemento, e => e.Key);
@@ -760,10 +763,18 @@ namespace NeeView
                             Debug.Assert(command.Name == pair.Key);
                             command.Restore(pair.Value);
                         }
+                        else if (ignoreMissingScriptCommands && ScriptCommand.IsScriptCommandName(cloneName.Name))
+                        {
+                            continue;
+                        }
                         else
                         {
                             Debug.WriteLine($"Warning: No such clone source command '{cloneName.Name}'");
                         }
+                    }
+                    else if (ignoreMissingScriptCommands && ScriptCommand.IsScriptCommandName(pair.Key))
+                    {
+                        continue;
                     }
                     else
                     {
