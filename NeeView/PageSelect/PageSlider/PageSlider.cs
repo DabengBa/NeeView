@@ -14,13 +14,12 @@ namespace NeeView
         public static PageSlider Current { get; }
 
 
+        private PageMarkers? _pageMarkers;
         private bool _isSliderDirectionReversed;
 
 
         private PageSlider()
         {
-            this.PageMarkers = new PageMarkers(BookOperation.Current);
-
             Config.Current.BookSetting.SubscribePropertyChanged(nameof(BookSettingConfig.BookReadOrder), (s, e) => UpdateIsSliderDirectionReversed());
 
             ThumbnailList.Current.IsSliderDirectionReversed = this.IsSliderDirectionReversed;
@@ -43,7 +42,7 @@ namespace NeeView
         /// <summary>
         /// ページマーカー表示のモデル
         /// </summary>
-        public PageMarkers PageMarkers { get; private set; }
+        public PageMarkers PageMarkers => _pageMarkers ??= CreatePageMarkers();
 
         /// <summary>
         /// 実際のスライダー方向
@@ -58,7 +57,10 @@ namespace NeeView
                     _isSliderDirectionReversed = value;
                     RaisePropertyChanged();
                     ThumbnailList.Current.IsSliderDirectionReversed = _isSliderDirectionReversed;
-                    this.PageMarkers.IsSliderDirectionReversed = _isSliderDirectionReversed;
+                    if (_pageMarkers is not null)
+                    {
+                        _pageMarkers.IsSliderDirectionReversed = _isSliderDirectionReversed;
+                    }
                     SliderDirectionChanged?.Invoke(this, new ValueChangedEventArgs<bool>() { NewValue = _isSliderDirectionReversed });
                 }
             }
@@ -201,6 +203,14 @@ namespace NeeView
             {
                 PageSelector.Jump(this);
             }
+        }
+
+        private PageMarkers CreatePageMarkers()
+        {
+            return new PageMarkers(BookOperation.Current)
+            {
+                IsSliderDirectionReversed = _isSliderDirectionReversed
+            };
         }
 
     }

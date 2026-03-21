@@ -23,10 +23,16 @@ namespace NeeView
             LoadBookCore();
         }
 
-        public void LoadFolder(DispatcherPriority priority = DispatcherPriority.Normal)
+        public bool HasFolderToLoad()
         {
             EnsureInitialized();
-            LoadFolderCore(priority);
+            return _folder is not null;
+        }
+
+        public bool LoadFolder(DispatcherPriority priority = DispatcherPriority.Normal)
+        {
+            EnsureInitialized();
+            return LoadFolderCore(priority);
         }
 
         private void EnsureInitialized()
@@ -132,15 +138,16 @@ namespace NeeView
             BookHubTools.RequestLoad(this, _book.Paths, options, _folder == null, _book.BookMemento);
         }
 
-        private void LoadFolderCore(DispatcherPriority priority)
+        private bool LoadFolderCore(DispatcherPriority priority)
         {
-            if (_folder is null) return;
+            if (_folder is null) return false;
 
             var path = _book?.Path ?? _folder.FolderMemento?.Select;
             var select = path is not null ? new FolderItemPosition(new QueryPath(path)) : null;
 
             _folder.FolderMemento?.Register();
             BookshelfFolderList.Current.RequestPlace(new QueryPath(_folder.Path), select, FolderSetPlaceOption.UpdateHistory, priority);
+            return true;
         }
 
 

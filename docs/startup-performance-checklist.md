@@ -17,6 +17,20 @@
 - **T5**：首屏可交互
 - **T6**：后台预热完成
 
+> 当前 `Startup.Trace` 中的 `T3/T4/T5` 是 **从进程启动 `T0` 开始累计的绝对时间戳**，不是分段耗时。  
+> 实际分析时应同时关注：
+>
+> - `T0 -> T3`
+> - `T3 -> T4`
+> - `T4 -> T5`
+
+> 从本轮开始，正式验收口径调整为：
+>
+> - 默认 `Runs >= 20`
+> - 同时输出 `Median / TrimmedMean / P90 / Max`
+> - 同时统计 `TimeoutRunRate / TimeoutAttemptRate`
+> - `Average` 只保留为辅助参考，不再作为主决策指标
+
 > 建议先补齐日志埋点，再做结构改造；每一批改造都要保留 A/B 对比数据。
 
 ---
@@ -39,6 +53,22 @@
 - [x] `MainWindow.ContentRendered.ViewModel` / `LoadedAsync.Returned` 细分 trace 已接入
 - [x] `FirstLoader.LoadFolder` / `BookmarkFolderList.UpdateItems` 已后移到 `T5` 之后
 - [x] `Measure-StartupTrace.ps1` 已支持 `LoadedAsyncTail` 指标与超时重试
+- [x] `Measure-StartupTrace.ps1` 默认输出 `T0 -> T3` / `T3 -> T4` / `T4 -> T5`
+- [x] `Measure-StartupTrace.ps1` 默认 `Runs=20`，并输出 `Median / TrimmedMean / P90 / Max / TimeoutRate`
+- [x] `InitializeComponent` / `ViewSources` / `MainViewComponent.Initialize.ViewModel` 深拆 trace 已接入
+- [x] `SidePanelFrame.EnsureInitialized` / `CustomLayoutPanelManager.Restore` 深拆评估已完成
+- [x] FolderList “加载中”状态与 `LoadCompleted` 回调已接入
+- [x] `ProcessJobEngine.WaitPropertyAsync` 超时诊断与 10s fallback 已接入
+- [x] `AddressBarView` 非首屏 popup 改为按需创建已进入实验态
+- [x] `MenuBarView.WindowCaptionButtons` 已后移到 `DeferredWarmup`
+- [x] MainMenu group 子菜单按首次展开创建已进入实验态
+- [x] 新口径 `Runs=20` 正式复测已执行
+- [x] `T3/T4/T5` 绝对时间戳口径已在文档中澄清
+- [x] `PageSlider.PageMarkers` 改为 lazy 创建已进入实验态
+- [x] `PageSliderView.Initialize` 细分 trace 已接入
+- [x] `PageSliderView.PageMarkers.Source` 已后移到 `DeferredWarmup`
+- [x] `PageSliderViewModel` 启动期字体参数依赖已移除
+- [x] `PageSliderView.Source / Initialize` 新口径 `Runs=20` 正式复测已执行
 
 **ReadyToRun 实测结果**
 
@@ -123,14 +153,31 @@
 
 ---
 
-**当前实验波次（未提交工作树 vs `HEAD`, ReadyToRun=On, `Runs=5`）**
+**本轮 T5 收敛验证（2026-03-21，Baseline=`79ed2534f`，Optimized=`3f6381441`，ReadyToRun=On，`Runs=5`）**
 
-> 口径同上；`trace-baseline = HEAD`，`current-optimized = 当前工作树`
+> 口径同上；`trace-baseline = 修正前基线`，`current-optimized = 本轮修正后代码`
 
 | Variant | T3 | T4 | T5 | `LoadedAsync()` | `LoadedAsync tail` |
 |--|--:|--:|--:|--:|--:|
 | `trace-baseline` | 1754.6 ms | 2047.6 ms | 2086.0 ms | 37.6 ms | 0.2 ms |
 | `current-optimized` | 1705.8 ms | 1996.2 ms | 2019.4 ms | 19.4 ms | 2.8 ms |
+
+**阶段差值口径（更适合判断真实收益）**
+
+| Variant | `T0 -> T3` | `T3 -> T4` | `T4 -> T5` |
+|--|--:|--:|--:|
+| `trace-baseline` | 1754.6 ms | 293.0 ms | 38.4 ms |
+| `current-optimized` | 1705.8 ms | 290.4 ms | 23.2 ms |
+
+**阶段差值解读**
+
+- `T3/T4/T5` 本身都大于 `1700 ms`，是因为它们是从 `T0` 开始累计的绝对时间戳
+- 真正表示首屏后尾段是否健康的，是 `T4 -> T5`
+- 本轮修正后：
+  - `T0 -> T3` 改善 `48.8 ms`
+  - `T3 -> T4` 再改善 `2.6 ms`
+  - `T4 -> T5` 再改善 `15.2 ms`
+- 因此当前问题已经不再是 `LoadedAsync()` 尾段，而是 `T0 -> T3/T4` 主链路仍然偏大
 
 **这波改造的量化结果**
 
@@ -173,6 +220,295 @@
 - 这波改造已经恢复为可提交状态
 - `T3/T4/T5` 都重新回到正向收益，且 `LoadedAsync tail` 已基本压平
 - 下一轮不再优先盯 `ContentRendered.ViewModel` 空档，而应回到 `T0 -> T4` 主链路瘦身
+- 后续汇报和验收应优先使用 `T0 -> T3 / T3 -> T4 / T4 -> T5` 三段差值，避免误读绝对时间戳
+
+---
+
+**本轮观测 / 稳定性改造结果（2026-03-21，Baseline=`HEAD`，Optimized=`current working tree`，ReadyToRun=On，`Runs=5`）**
+
+> 命令：`Measure-StartupTrace.ps1 -RunCount 5 -TraceTimeoutSeconds 120 -TraceRetryCount 4 -SkipPublish`
+>
+> 说明：
+>
+> - 本轮目标主要是 **默认输出 phase delta、细化热点归因、补齐启动稳定性保护**
+> - `HEAD` 基线仍偶发卡在 `MainWindowModel.LoadedAsync.ProcessJobEngine.WaitPropertyAsync`
+> - 因此这组数据更适合解读为“观测能力提升 + 启动保护生效”，而不是一次大幅提速
+
+| Variant | `T0 -> T3` | `T3 -> T4` | `T4 -> T5` | `LoadedAsync()` | `LoadedAsync tail` |
+|--|--:|--:|--:|--:|--:|
+| `trace-baseline` | 1881.2 ms | 274.2 ms | 14.0 ms | 11.8 ms | 1.2 ms |
+| `current-optimized` | 1875.0 ms | 284.8 ms | 11.2 ms | 10.0 ms | 0.2 ms |
+
+**本轮差值**
+
+- `T0 -> T3`：`-6.2 ms`
+- `T3 -> T4`：`+10.6 ms`
+- `T4 -> T5`：`-2.8 ms`
+- `LoadedAsync()`：`-1.8 ms`
+- `LoadedAsync tail`：`-1.0 ms`
+- 工作集 / 私有内存：基本持平（`-0.1 MB / -0.1 MB`）
+
+**这波改造的实际价值**
+
+- `Measure-StartupTrace.ps1` 已默认输出三段 phase delta，后续验收不再需要手工换算
+- `InitializeComponent` / `ViewSources` / `MainViewComponent.Initialize.ViewModel` 热点已经可直接归因
+- `FolderList` 启动恢复链已具备“加载中”反馈与完成事件，后续可以继续做选中/聚焦收敛
+- `ProcessJobEngine.WaitPropertyAsync` 即使再出现偶发超时，当前工作树也不会无限卡住启动
+
+**最新热点拆解（`current-optimized`，run-1 代表样本）**
+
+| 区段 | Trace | Duration |
+|--|--|--:|
+| 主路径 | `MainWindow.Initialize.InitializeComponent` | 448 ms |
+| ctor 热点 | `MainWindow.InitializeComponent.AddressBarView` | 99 ms |
+| ctor 热点 | `MainWindow.InitializeComponent.MenuBarView` | 84 ms |
+| ViewSources | `MainWindow.Initialize.ViewSources` | 65 ms |
+| ViewSources 热点 | `MainWindow.Initialize.ViewSources.MenuBar.Source` | 56 ms |
+| ViewModel | `MainWindow.Initialize.MainViewComponent.Initialize` | 30 ms |
+| ViewModel 热点 | `MainViewComponent.Initialize.ViewModel.New` | 8 ms |
+| ViewModel 热点 | `MainViewViewModel.Initialize.ContextMenuHooks` | 7 ms |
+| 首帧后预热 | `MainWindow.DeferredWarmup.SidePanelFrame.EnsureInitialized` | 32 ms |
+| 首帧后预热 | `...CustomLayoutPanelManager.Initialize` | 16 ms |
+| 首帧后预热 | `...SidePanelFrameViewModel` | 13 ms |
+| 首帧后预热 | `MainWindow.DeferredWarmup.CustomLayoutPanelManager.Restore` | 6 ms |
+
+**当前判断（更新）**
+
+- 现在最值得继续压缩的已经不是 `LoadedAsync()`，而是：
+  1. `PageSliderView.Source / Initialize`
+  2. `AddressBarView` / `MenuBarView` 构造剩余成本
+  3. `InitializeComponent` 内部 XAML / 绑定初始化成本
+- `MenuBar.Source` 已被压到 `3~4 ms` 量级，不再是当前主攻对象
+- `SidePanelFrame.EnsureInitialized` 总量约 `28~30 ms`，仍值得观察，但优先级已经低于 `PageSliderView.Source`
+- `FolderList.StartupRequestPlace.*` 自身耗时依旧不小（约 `173~327 ms`），但已落到 `T5` 之后；下一步重点是体验收敛、虚拟化与分批提交，而不是重新搬回关键路径
+- `ProcessJobEngine` 在本轮 `Runs=20` 中未复现 timeout，但护栏不等于修复；后续仍要继续做根因定位
+
+---
+
+**AddressBar / MenuBar 主路径减量快测（2026-03-21，Baseline=`HEAD`，Optimized=`current working tree`，ReadyToRun=On，`Runs=1`）**
+
+> 命令：`Measure-StartupTrace.ps1 -RunCount 1 -TraceTimeoutSeconds 120 -TraceRetryCount 4`
+>
+> 说明：
+>
+> - 这一轮是 **方向性快测**，用于确认 `AddressBarView` / `MenuBarView` / `MenuBar.Source` 的首轮减量是否生效
+> - `Runs=1` 不能作为最终验收；正式结论仍需补一轮 `Runs=5`
+
+| Variant | `T0 -> T3` | `T3 -> T4` | `T4 -> T5` | `LoadedAsync()` | Working Set | Private Memory |
+|--|--:|--:|--:|--:|--:|--:|
+| `trace-baseline` | 1749.0 ms | 288.0 ms | 10.0 ms | 9.0 ms | 164.3 MB | 102.3 MB |
+| `current-optimized` | 1653.0 ms | 271.0 ms | 20.0 ms | 19.0 ms | 161.6 MB | 98.5 MB |
+
+**本轮快测差值**
+
+- `T0 -> T3`：`-96.0 ms`
+- `T3 -> T4`：`-17.0 ms`
+- `T4 -> T5`：`+10.0 ms`
+- `T5` 绝对时间戳：`2047.0 -> 1944.0 ms`，改善 `103.0 ms`
+- 工作集 / 私有内存：`-2.7 MB / -3.8 MB`
+
+**当前样本热点（run-1）**
+
+| 区段 | Trace | Duration |
+|--|--|--:|
+| 主路径 | `MainWindow.Initialize.InitializeComponent` | 374 ms |
+| ctor 热点 | `MainWindow.InitializeComponent.AddressBarView` | 78 ms |
+| ctor 热点 | `MainWindow.InitializeComponent.MenuBarView` | 56 ms |
+| ViewSources | `MainWindow.Initialize.ViewSources` | 32 ms |
+| ViewSources 热点 | `MainWindow.Initialize.ViewSources.PageSliderView.Source` | 27 ms |
+| ViewSources 热点 | `MainWindow.Initialize.ViewSources.MenuBar.Source` | 3 ms |
+| 首帧后预热 | `MainWindow.DeferredWarmup.MenuBarView.WindowCaptionButtons` | 4 ms |
+| 可交互尾段 | `MainWindow.ContentRendered.ViewModel` | 19 ms |
+
+**快测结论**
+
+- `AddressBarView` 的关闭态 popup 已不再在启动时实例化；`BookPopupContent` / `PageSortModePalette` 已移出 `InitializeComponent` 主路径
+- `MenuBarView.WindowCaptionButtons` 已后移到 `DeferredWarmup`，当前样本里不再占用 `T0 -> T4`
+- `MenuBar.Source` 当前样本仅 `3 ms`，说明主菜单 group 按首次展开构造已经明显压平这段成本
+- 当前新的 `ViewSources` 首要热点已经转到 `PageSliderView.Source`（`27 ms`）
+- 这组数据对 `T0 -> T3 / T3 -> T4` 是明确正向，但 `T4 -> T5` 与 `LoadedAsync()` 单样本有回升，下一步必须先做 `Runs=5` 复测，避免把噪声误判成回退
+
+**本轮已落地实现**
+
+- `AddressBarView`
+  - `PageSortModePalette` 改为 `PageSortModePopup` 打开时创建
+  - `BookPopupContent` 改为 `BookPopup` 打开时创建
+- `MenuBarView`
+  - `WindowCaptionButtons` 改为 `Loaded + DispatcherPriority.Background` 后创建
+  - watermark 使用静态冻结 brush，减少构造期临时对象
+- `MainMenu`
+  - group 子菜单改为首次展开时再创建，避免启动时一次性构造整棵菜单树
+- `MainWindow`
+  - DPI 更新改为通过 `MenuBar.UpdateWindowCaptionButtonsStrokeThickness()` 兼容延后创建后的标题栏按钮
+
+**本轮已完成验证**
+
+- 已使用用户级 `.NET 10 SDK` 执行 `dotnet build NeeView.sln -c Release -p:Platform=x64`
+- 当前结果：`0 warning / 0 error`
+- 已执行 1 轮 `Startup.Trace` 快测，结果已记录在本节
+
+---
+
+**度量口径升级进展（2026-03-21）**
+
+- `Measure-StartupTrace.ps1` 默认 `RunCount` 已从 `5` 提升到 `20`
+- 新增统计：
+  - `Median`
+  - `TrimmedMean`（按 `TrimRatio=0.1` 去头去尾）
+  - `P90`
+  - `Max`
+  - `TimeoutRunRate / TimeoutAttemptRate`
+- 控制台默认输出已切换为：
+  - `T0 -> T3`
+  - `T3 -> T4`
+  - `T4 -> T5`
+  - `LoadedAsync()`
+  的 `TrimmedMean / P90 / Max`
+- `Average` 仍保留在结果 JSON 中，但降级为辅助指标
+- 已用 `Measure-StartupTrace.ps1 -RunCount 1 -TraceRetryCount 1 -SkipPublish` 验证新统计输出与 JSON 字段
+- 已完成基于新口径的正式 `Runs=20` 对比，结果见下节
+
+---
+
+**AddressBar / MenuBar 正式复测（2026-03-21，Baseline=`HEAD`，Optimized=`current working tree`，ReadyToRun=On，`Runs=20`）**
+
+> 命令：`Measure-StartupTrace.ps1 -RunCount 20 -TraceTimeoutSeconds 120 -TraceRetryCount 4`
+>
+> 口径：
+>
+> - 以 `TrimmedMean / P90 / Max` 为主
+> - 同时观察 `TimeoutRunRate / TimeoutAttemptRate`
+> - `Average` 仅作辅助，不作为主决策依据
+
+| Variant | Timeout Run | `T0 -> T3` TM / P90 / Max | `T3 -> T4` TM / P90 / Max | `T4 -> T5` TM / P90 / Max |
+|--|--:|--:|--:|--:|
+| `trace-baseline` | `0%` | `1881.8 / 2000.4 / 2193.0 ms` | `277.8 / 301.1 / 312.0 ms` | `14.8 / 20.3 / 23.0 ms` |
+| `current-optimized` | `0%` | `1708.2 / 1783.0 / 1824.0 ms` | `264.8 / 280.3 / 289.0 ms` | `16.8 / 18.1 / 20.0 ms` |
+
+**正式结果解读**
+
+- `T0 -> T3`
+  - `TrimmedMean`: `-173.6 ms`
+  - `P90`: `-217.4 ms`
+  - `Max`: `-369.0 ms`
+- `T3 -> T4`
+  - `TrimmedMean`: `-13.0 ms`
+  - `P90`: `-20.8 ms`
+  - `Max`: `-23.0 ms`
+- `T4 -> T5`
+  - `TrimmedMean`: `+2.0 ms`
+  - `P90`: `-2.2 ms`
+  - `Max`: `-3.0 ms`
+- `LoadedAsync()`
+  - `TrimmedMean`: `12.4 -> 15.8 ms`，回升 `3.4 ms`
+  - `P90`: `16.2 -> 17.1 ms`，回升 `0.9 ms`
+  - `Max`: `18.0 -> 19.0 ms`，回升 `1.0 ms`
+- `LoadedAsync tail`
+  - `P90`: `4.0 -> 0.1 ms`
+  - 尾段恢复明显更平
+- 内存
+  - `WorkingSet Median`: `163.0 -> 159.8 MB`
+  - `PrivateMemory Median`: `102.8 -> 100.6 MB`
+- 稳定性
+  - `TimeoutRunRate = 0%`
+  - `TimeoutAttemptRate = 0%`
+  - 本轮 20 次内未复现 `ProcessJobEngine` timeout
+
+**正式结论**
+
+- 这轮 `AddressBar / MenuBar` 改造对主路径是稳定正收益，不是快测噪声：
+  - `T0 -> T3` 明确大幅下降
+  - `T3 -> T4` 明确小幅下降
+- `T4 -> T5` 的 `TrimmedMean` 有轻微回升，但 `P90 / Max` 反而更好，说明尾部体验没有变差，快测中的“首屏后回退”没有被 20 次正式复测放大
+- `LoadedAsync()` 主体略有回升，但 `LoadedAsync tail` 的 `P90` 被显著压平，说明当前问题不再是 continuation 尾段抖动
+- `MenuBar.Source` 已经压平；下一个真正值得继续打的热点是 `PageSliderView.Source / Initialize`
+
+**当前工作树热点（`current-optimized`, `Runs=20`）**
+
+| 区段 | Trace | Median | P90 | Max |
+|--|--|--:|--:|--:|
+| 主路径 | `MainWindow.Initialize.InitializeComponent` | 380 ms | 418 ms | 443 ms |
+| ctor 热点 | `MainWindow.InitializeComponent.AddressBarView` | 73.5 ms | 83 ms | 88 ms |
+| ctor 热点 | `MainWindow.InitializeComponent.MenuBarView` | 58 ms | 65 ms | 70 ms |
+| ViewSources | `MainWindow.Initialize.ViewSources` | 30.5 ms | 33 ms | 39 ms |
+| ViewSources 热点 | `MainWindow.Initialize.ViewSources.PageSliderView.Source` | 26 ms | 29 ms | 34 ms |
+| ViewSources 热点 | `MainWindow.Initialize.ViewSources.MenuBar.Source` | 3 ms | 4 ms | 25 ms |
+| 首帧后预热 | `MainWindow.DeferredWarmup.MenuBarView.WindowCaptionButtons` | 4 ms | 5 ms | 6 ms |
+| 可交互尾段 | `MainWindow.ContentRendered.ViewModel` | 17 ms | 18 ms | 20 ms |
+
+---
+
+**PageSlider 正式复测（2026-03-21，Baseline=`HEAD`，Optimized=`current working tree`，ReadyToRun=On，`Runs=20`）**
+
+> 命令：`Measure-StartupTrace.ps1 -RunCount 20 -TraceTimeoutSeconds 120 -TraceRetryCount 4`
+>
+> 说明：
+>
+> - 这轮是 `PageSliderView.Source / Initialize` 改造后的正式复测
+> - `HEAD` 基线在本轮出现 `3/20` 次 timeout retry，因此这组对比同时反映了 **主路径减量** 和 **当前工作树启动稳定性更好**
+> - 是否“PageSlider 已经打穿”不能只看总链路 delta，还要直接看 `PageSlider` 自身 trace 指标
+
+**本轮已落地实现**
+
+- `PageSlider.PageMarkers` 改为 lazy 创建，避免 `PageSlider` 构造阶段提前拉起 marker 模型
+- `PageSliderView.Initialize` 已拆分 `ViewModel.New / AssignDataContext / PageMarkers.Queue` trace
+- `PageMarkersView.Source` 改为 `Loaded + DispatcherPriority.Background` 后赋值，只在 playlist mark 可见时才真正初始化
+- `PageMarkersView.Initialize` 增加单次初始化保护与 trace，避免重复构造
+- `PageSliderViewModel` 不再在启动期触发 `FontParameters.Current` 与 `SliderConfig.Thickness` 链路
+- `SliderTextBox.FontSize` 改为直接使用 `DynamicResource DefaultFontSize`
+
+| Variant | Timeout Run | `T0 -> T3` TM / P90 / Max | `T3 -> T4` TM / P90 / Max | `T4 -> T5` TM / P90 / Max |
+|--|--:|--:|--:|--:|
+| `trace-baseline` | `15%` | `2529.6 / 3261.1 / 4209 ms` | `373.6 / 480.2 / 1749 ms` | `16.2 / 25.7 / 98 ms` |
+| `current-optimized` | `0%` | `1809.2 / 2141.8 / 3824 ms` | `307.3 / 360.9 / 478 ms` | `20.4 / 24.3 / 29 ms` |
+
+**正式结果解读**
+
+- `T0 -> T3`
+  - `TrimmedMean`: `-720.4 ms`
+  - `P90`: `-1119.3 ms`
+  - `Max`: `-385 ms`
+- `T3 -> T4`
+  - `TrimmedMean`: `-66.3 ms`
+  - `P90`: `-119.3 ms`
+- `T4 -> T5`
+  - `TrimmedMean`: `+4.2 ms`
+  - `P90`: `-1.4 ms`
+  - `Max`: `29 ms`，明显低于基线的 `98 ms`
+- `LoadedAsync()`
+  - `TrimmedMean`: `14.2 -> 19.0 ms`
+  - `P90`: `20.9 -> 22.4 ms`
+- `LoadedAsync tail`
+  - `P90`: `2.3 -> 0.1 ms`
+- 稳定性
+  - `TimeoutRunRate`: `15% -> 0%`
+  - `TimeoutAttemptRate`: `13% -> 0%`
+
+**PageSlider 自身指标（`current-optimized`, `Runs=20`）**
+
+| Trace | Median | TM | P90 | Max |
+|--|--:|--:|--:|--:|
+| `MainWindow.Initialize.ViewSources.PageSliderView.Source` | `0 ms` | `0.2 ms` | `1 ms` | `1 ms` |
+| `MainWindow.Initialize.ViewSources.PageSliderView.Initialize` | `0 ms` | `0.2 ms` | `1 ms` | `1 ms` |
+| `MainWindow.Initialize.ViewSources.PageSliderView.Initialize.ViewModel.New` | `0 ms` | `0 ms` | `0 ms` | `0 ms` |
+| `MainWindow.DeferredWarmup.PageSliderView.PageMarkers.Source` | `0 ms` | `0.2 ms` | `1 ms` | `1 ms` |
+
+**当前工作树热点（`current-optimized`, `Runs=20`）**
+
+- `MainWindow.Initialize.InitializeComponent`: `TM 414.2 ms / P90 508 ms / Max 681 ms`
+- `MainWindow.InitializeComponent.AddressBarView`: `TM 81.9 ms / P90 101 ms / Max 139 ms`
+- `MainWindow.InitializeComponent.MenuBarView`: `TM 62.5 ms / P90 77 ms / Max 97 ms`
+- `MainWindow.Initialize.ViewSources.MenuBar.Source`: `TM 12.4 ms / P90 28 ms / Max 41 ms`
+- `MainWindow.DeferredWarmup.SidePanelFrame.EnsureInitialized`: `TM 41.0 ms / P90 49 ms / Max 74 ms`
+- `MainWindow.DeferredWarmup.CustomLayoutPanelManager.Restore`: `TM 5.2 ms / P90 7 ms / Max 10 ms`
+
+**正式结论**
+
+- `PageSliderView.Source / Initialize` 已经不再是主路径热点。即使在 `Runs=20` 下，其自身 trace 也稳定落在 `0~1 ms`
+- `PageSlider` 这轮改造可以视为**已经验收通过**
+- 当前真正还值得继续打的，是 `InitializeComponent` 主链路里的 `AddressBarView` / `MenuBarView`
+- `HEAD` 基线这轮暴露出明显启动不稳定性；当前工作树 `TimeoutRunRate / TimeoutAttemptRate = 0%`，说明当前护栏和路径收敛已经带来了稳定性收益
+- 后续汇报不应再把 `PageSlider` 作为主要悬而未决项，而应把焦点转回 `InitializeComponent`、`ProcessJobEngine` 根因、FolderList 收敛与命令系统瘦身
 
 ---
 
@@ -303,7 +639,8 @@
   - [x] `BookshelfFolderList.Current.WaitAsync(...)`
 - [x] 改为“先显示 UI，后异步填充列表”
 - [ ] 列表完成后再更新选中项/聚焦/可见状态
-- [ ] 增加“列表加载中”状态，避免用户误判卡死
+- [x] 增加“列表加载中”状态，避免用户误判卡死
+- [x] 增加 `LoadCompleted` 回调，供启动预热与后续 UI 收敛使用
 
 **涉及文件**
 
@@ -386,11 +723,47 @@
 
 - 这是结构性改造，容易影响停靠/拖拽/自动隐藏行为
 
+### P1-补充：XAML 冻结与空壳化审计
+
+- [ ] 全量审计首屏相关 `Brush / Geometry / DrawingImage / Path`，可冻结的统一冻结
+- [ ] 对非首屏必需的视觉树使用空壳 `ContentControl` / 延后赋值，而不是首屏直接进视觉树
+- [ ] 优先检查以下区域
+  - [ ] `PageSliderView`
+  - [ ] `SidePanel`
+  - [ ] `AddressBarView`
+  - [ ] `MenuBarView`
+- [ ] 记录“延后创建”和“只是后移到首帧后”的差异，避免把 UI 卡顿从 `T0 -> T4` 转移到用户第一次交互
+
+**备注**
+
+- WPF 这里不使用 `x:Load` 口径；应以“空壳容器 + 按需赋 Content / View”实现真正的首屏剥离
+
+### P1-补充：FolderList 虚拟化与分批提交
+
+- [ ] 确认列表控件虚拟化真实生效
+  - [ ] `VirtualizingStackPanel.IsVirtualizing`
+  - [ ] `VirtualizingPanel.VirtualizationMode=Recycling`
+  - [ ] 检查是否被自定义面板 / 分组 / ScrollViewer 破坏
+- [ ] 评估后台加载完成后是否需要分批提交（chunking）
+- [ ] 避免 `LoadCompleted` 后一次性把大量项目塞入 UI，导致首屏后立刻布局抖动
+
+### P1-补充：`ProcessJobEngine` 偶发超时根因定位
+
+- [x] 为启动期 job 增加 `queue / start / end` trace
+- [x] 为启动等待前后增加 engine 状态输出
+- [x] 为 `WaitPropertyAsync` 增加 10 秒 timeout fallback，避免启动永久卡死
+- [ ] 归类 timeout 时对应的 job 类型、输入场景与复现路径
+- [ ] 评估是否只等待“启动关键 job”，把非关键 job 明确后移到后台
+
+**涉及文件**
+
+- `NeeView/System/ProcessJobEngine.cs`
+- `NeeView/MainWindow/MainWindowModel.cs`
+- `MakePackage/Measure-StartupTrace.ps1`
+
 ---
 
-## P2：结构型优化
-
-### 10. 命令系统瘦身
+### P1-补充：命令系统瘦身（优先级上调）
 
 - [ ] 评估将“命令元数据”和“命令实例”分离
 - [ ] 降低启动期 200+ 命令对象一次性构造成本
@@ -403,6 +776,8 @@
 - `NeeView/Command/RoutedCommandTable.cs`
 
 ---
+
+## P2：结构型优化
 
 ### 11. BootSetting 独立轻量缓存
 
@@ -443,28 +818,36 @@
 
 ### Next Iteration
 
-1. 继续深拆 `MainWindow.Initialize.InitializeComponent` / `ViewSources` / `MainViewComponent.Initialize.ViewModel`，把下一轮优化重点放回 `T0 -> T4`
-2. 评估 `SidePanelFrame.EnsureInitialized` / `CustomLayoutPanelManager.Restore` 是否还能继续后移或减量，避免首帧后立刻出现新的 UI 热点
-3. 为 FolderList 增加“加载中”状态与完成回调，补齐 UI 反馈和选中/聚焦收敛
-4. 单独跟踪 `ProcessJobEngine.WaitPropertyAsync` 的偶发超时，确认这是测量噪声还是仍有真实启动不稳定点
+1. 回到 `InitializeComponent` 主路径，继续拆 `AddressBarView` / `MenuBarView` 内部剩余成本，重点看 `BreadcrumbBar`、history menu、样式/资源合并与首屏空壳化
+2. 继续对 `ProcessJobEngine.WaitPropertyAsync.Timeout` 做根因定位，不把 10s fallback 当作修复结论；下一步要补 dump / 调度链证据
+3. 用 `FolderList.LoadCompleted` 把选中项 / 聚焦 / 可见状态收敛补齐，并核对列表虚拟化 / 分批提交是否需要补强
+4. 提前推进“命令元数据 / 命令实例分离”，避免后续菜单与手势系统重新把启动路径拉重
+5. 把 `SidePanelFrame.EnsureInitialized` / `CustomLayoutPanelManager.Restore` 保持为次优先级观察项；若前述热点继续下降后它们重新升位，再回头处理
+6. 继续做首屏 XAML 冻结与空壳化审计，避免只是把卡顿从 `T0 -> T4` 转移到第一次交互后
 
 ### Next Success Criteria
 
-- 在保持当前 `T5` 不回退的前提下，继续压低 `T3/T4`
-- 新一轮优化不能重新引入 `LoadedAsync tail` 的明显回升
-- 大目录/网络目录恢复时首屏不再被列表稳定等待阻塞
-- 功能行为与现有多开、脚本、Susie 使用路径保持一致
+- `T0 -> T3` 与 `T3 -> T4` 的正式优势保持不回退
+- `T4 -> T5` 与 `LoadedAsync()` 不出现新的尾部恶化；继续以 `P90 / Max` 为主验收
+- `TimeoutRunRate / TimeoutAttemptRate` 继续保持为 `0%`，或在复现时能直接定位到具体 job / 调度链
+- `PageSliderView.Source / Initialize` 继续保持在 `0~1 ms` 量级，不重新升回主热点
+- `InitializeComponent` 主路径的下一批热点能被明确收敛到更小集合，而不是继续在 `ViewSources` 上分散
+- 不重新引入 `LoadedAsync tail` 明显回升，也不把 FolderList 阻塞重新搬回关键路径
+- `FolderList` 在大目录 / 网络目录恢复时，UI 有明确加载中状态且最终能正确收敛选中 / 聚焦
+- `ProcessJobEngine` timeout 如再次出现，日志中能直接定位到具体 job
 
 ---
 
 ## 推荐实施顺序
 
 1. 启动埋点补齐
-2. `T0 -> T4` 主链路瘦身
-3. FolderList 完成回调 / 加载中反馈
-4. `InitializeComponent` / `ViewSources` 深拆
-5. `ProcessJobEngine` 波动排查
-6. 侧边栏深度 lazy / 命令系统瘦身
+2. 统一 `T0 -> T3 / T3 -> T4 / T4 -> T5` 验收口径
+3. `PageSlider` 改造正式复测通过后维持低位，不再作为首要热点
+4. `AddressBarView` / `MenuBarView` / `InitializeComponent` 内部剩余成本继续下钻
+5. `ProcessJobEngine` 波动排查 / dump / 调度链核对
+6. FolderList 完成回调后的选中 / 聚焦收敛 + 虚拟化确认
+7. 命令元数据 / 命令实例分离
+8. 侧边栏深度 lazy / XAML 空壳化
 
 **已完成但不再作为当前重点**
 

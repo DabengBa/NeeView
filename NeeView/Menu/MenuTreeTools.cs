@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace NeeView
@@ -33,10 +34,10 @@ namespace NeeView
             return children;
         }
 
-        public static Menu? CreateMenu(TreeListNode<MenuElement> node, bool isDefault)
+        public static Menu? CreateMenu(TreeListNode<MenuElement> node, bool isDefault, bool useLazyGroupItems = false)
         {
             var menu = new Menu();
-            foreach (var element in CreateMenuItems(node, isDefault))
+            foreach (var element in CreateMenuItems(node, isDefault, useLazyGroupItems))
             {
                 menu.Items.Add(element);
             }
@@ -44,20 +45,20 @@ namespace NeeView
             return menu.Items.Count > 0 ? menu : null;
         }
 
-        public static List<object> CreateMenuItems(TreeListNode<MenuElement> node, bool isDefault)
+        public static List<object> CreateMenuItems(TreeListNode<MenuElement> node, bool isDefault, bool useLazyGroupItems = false)
         {
             var collection = new List<object>();
 
             foreach (var element in node)
             {
-                var control = CreateMenuControl(element, isDefault);
+                var control = CreateMenuControl(element, isDefault, useLazyGroupItems);
                 if (control != null) collection.Add(control);
             }
 
             return collection;
         }
 
-        public static object? CreateMenuControl(TreeListNode<MenuElement> node, bool isDefault)
+        public static object? CreateMenuControl(TreeListNode<MenuElement> node, bool isDefault, bool useLazyGroupItems = false)
         {
             switch (node.Value.MenuElementType)
             {
@@ -79,12 +80,33 @@ namespace NeeView
                     {
                         var item = new MenuItem();
                         item.Header = node.Value.Label;
-                        foreach (var child in node)
+
+                        if (useLazyGroupItems)
                         {
-                            var control = CreateMenuControl(child, isDefault);
-                            if (control != null) item.Items.Add(control);
+                            void SubmenuOpened(object? sender, RoutedEventArgs e)
+                            {
+                                item.SubmenuOpened -= SubmenuOpened;
+
+                                foreach (var child in node)
+                                {
+                                    var control = CreateMenuControl(child, isDefault, useLazyGroupItems);
+                                    if (control != null) item.Items.Add(control);
+                                }
+                                item.IsEnabled = item.Items.Count > 0;
+                                item.UpdateInputGestureText();
+                            }
+
+                            item.SubmenuOpened += SubmenuOpened;
                         }
-                        item.IsEnabled = item.Items.Count > 0;
+                        else
+                        {
+                            foreach (var child in node)
+                            {
+                                var control = CreateMenuControl(child, isDefault, useLazyGroupItems);
+                                if (control != null) item.Items.Add(control);
+                            }
+                            item.IsEnabled = item.Items.Count > 0;
+                        }
                         return item;
                     }
 

@@ -140,15 +140,41 @@ namespace NeeView
             // 各コントロールとモデルを関連付け
             using (App.Current.TraceStartupScope("MainWindow.Initialize.ViewSources"))
             {
-                _mediaControl = new MediaControl();
-                this.PageSliderView.Source = PageSlider.Current;
-                this.MediaControlView.Source = _mediaControl;
-                this.ThumbnailListArea.Source = ThumbnailList.Current;
-                this.MenuBar.Source = new MenuBar(_windowStateManager);
-                this.AddressBar.Source = new AddressBar();
+                using (App.Current.TraceStartupScope("MainWindow.Initialize.ViewSources.MediaControl"))
+                {
+                    _mediaControl = new MediaControl();
+                }
+
+                using (App.Current.TraceStartupScope("MainWindow.Initialize.ViewSources.PageSliderView.Source"))
+                {
+                    this.PageSliderView.Source = PageSlider.Current;
+                }
+
+                using (App.Current.TraceStartupScope("MainWindow.Initialize.ViewSources.MediaControlView.Source"))
+                {
+                    this.MediaControlView.Source = _mediaControl;
+                }
+
+                using (App.Current.TraceStartupScope("MainWindow.Initialize.ViewSources.ThumbnailListView.Source"))
+                {
+                    this.ThumbnailListArea.Source = ThumbnailList.Current;
+                }
+
+                using (App.Current.TraceStartupScope("MainWindow.Initialize.ViewSources.MenuBar.Source"))
+                {
+                    this.MenuBar.Source = new MenuBar(_windowStateManager);
+                }
+
+                using (App.Current.TraceStartupScope("MainWindow.Initialize.ViewSources.AddressBar.Source"))
+                {
+                    this.AddressBar.Source = new AddressBar();
+                }
             }
 
-            _vm.MenuAutoHideDescription.SetMenuBar(this.MenuBar.Source);
+            using (App.Current.TraceStartupScope("MainWindow.Initialize.ViewSources.MenuAutoHideDescription.SetMenuBar"))
+            {
+                _vm.MenuAutoHideDescription.SetMenuBar(this.MenuBar.Source);
+            }
 
             Config.Current.MenuBar.AddPropertyChanged(nameof(MenuBarConfig.IsHideMenu),
                 (s, e) => DirtyMenuAreaLayout());
@@ -649,7 +675,7 @@ namespace NeeView
             var isChanged = _dpiProvider.SetDipScale(e.NewDpi);
             if (!isChanged) return;
 
-            this.MenuBar.WindowCaptionButtons.UpdateStrokeThickness(e.NewDpi);
+            this.MenuBar.UpdateWindowCaptionButtonsStrokeThickness(e.NewDpi);
         }
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)

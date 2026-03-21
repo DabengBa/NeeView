@@ -88,6 +88,7 @@ namespace NeeView
 
         public ThumbnailListView()
         {
+            using var startupScope = App.TryTraceStartupScope("MainWindow.InitializeComponent.ThumbnailListView");
             InitializeComponent();
 
             _commandResource = new ThumbnailListItemCommandResource(ThumbnailListItemDetailToolTip.Current);
@@ -152,6 +153,7 @@ namespace NeeView
 
         private void Initialize()
         {
+            using var startupScope = App.TryTraceStartupScope("MainWindow.Initialize.ViewSources.ThumbnailListView.Initialize");
             this.Source.VisibleElement = this;
 
             _vm = new ThumbnailListViewModel(this.Source, ThumbnailListItemDetailToolTip.Current);

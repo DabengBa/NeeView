@@ -61,11 +61,25 @@ namespace NeeView
 
             using (App.Current.TraceStartupScope("MainViewComponent.Initialize.InputContext"))
             {
-                DragTransformControl = new DragTransformControlProxy(PageFrameBoxPresenter, new DummyDragTransformContextFactory(_mainView, Config.Current.View, Config.Current.Mouse));
-                LoupeContext = new LoupeContext(this, Config.Current.Loupe);
+                using (App.Current.TraceStartupScope("MainViewComponent.Initialize.InputContext.DragTransformControl"))
+                {
+                    DragTransformControl = new DragTransformControlProxy(PageFrameBoxPresenter, new DummyDragTransformContextFactory(_mainView, Config.Current.View, Config.Current.Mouse));
+                }
 
-                TouchInput = new TouchInput(new TouchInputContext(_mainView.View, _mainView, mouseGestureCommandCollection, PageFrameBoxPresenter, PageFrameBoxPresenter, DragTransformControl, LoupeContext, ViewScrollContext));
-                MouseInput = new MouseInput(new MouseInputContext(_mainView.View, _mainView, mouseGestureCommandCollection, PageFrameBoxPresenter, PageFrameBoxPresenter, DragTransformControl, LoupeContext, ViewScrollContext));
+                using (App.Current.TraceStartupScope("MainViewComponent.Initialize.InputContext.LoupeContext"))
+                {
+                    LoupeContext = new LoupeContext(this, Config.Current.Loupe);
+                }
+
+                using (App.Current.TraceStartupScope("MainViewComponent.Initialize.InputContext.TouchInput"))
+                {
+                    TouchInput = new TouchInput(new TouchInputContext(_mainView.View, _mainView, mouseGestureCommandCollection, PageFrameBoxPresenter, PageFrameBoxPresenter, DragTransformControl, LoupeContext, ViewScrollContext));
+                }
+
+                using (App.Current.TraceStartupScope("MainViewComponent.Initialize.InputContext.MouseInput"))
+                {
+                    MouseInput = new MouseInput(new MouseInputContext(_mainView.View, _mainView, mouseGestureCommandCollection, PageFrameBoxPresenter, PageFrameBoxPresenter, DragTransformControl, LoupeContext, ViewScrollContext));
+                }
             }
 
             PageFrameBoxPresenter.SelectedRangeChanged += PageFrameBoxPresenter_SelectedRangeChanged;
@@ -75,7 +89,16 @@ namespace NeeView
 
             using (App.Current.TraceStartupScope("MainViewComponent.Initialize.ViewModel"))
             {
-                _mainView.DataContext = new MainViewViewModel(this);
+                MainViewViewModel viewModel;
+                using (App.Current.TraceStartupScope("MainViewComponent.Initialize.ViewModel.New"))
+                {
+                    viewModel = new MainViewViewModel(this);
+                }
+
+                using (App.Current.TraceStartupScope("MainViewComponent.Initialize.ViewModel.AssignDataContext"))
+                {
+                    _mainView.DataContext = viewModel;
+                }
             }
 
             _activeLocker.LockCountChanged += ActiveLocker_LockCountChanged;

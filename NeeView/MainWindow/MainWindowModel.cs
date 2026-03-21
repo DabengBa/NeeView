@@ -259,7 +259,7 @@ namespace NeeView
             // 非同期初期化処理を待機
             using (App.Current.TraceStartupScope("MainWindowModel.LoadedAsync.ProcessJobEngine.WaitPropertyAsync"))
             {
-                await ProcessJobEngine.Current.WaitPropertyAsync(nameof(ProcessJobEngine.IsBusy), x => x.IsBusy == false);
+                await WaitForProcessJobEngineStartupAsync();
             }
 
             // 最初のブックを開く。フォルダー復元は初回描画後にキューへ送る
@@ -313,12 +313,20 @@ namespace NeeView
 
         public void BeginStartupWarmup()
         {
+            if (_startupFirstLoader?.HasFolderToLoad() == true)
+            {
+                SubscribeNextFolderListLoadCompleted(BookshelfFolderList.Current, "MainWindowModel.StartupWarmup.BookshelfFolderList.LoadCompleted");
+            }
             using (App.Current.TraceStartupScope("MainWindowModel.StartupWarmup.FirstLoader.LoadFolder"))
             {
                 _startupFirstLoader?.LoadFolder(System.Windows.Threading.DispatcherPriority.Background);
                 _startupFirstLoader = null;
             }
 
+            if (BookmarkFolderList.Current.FolderCollection is null)
+            {
+                SubscribeNextFolderListLoadCompleted(BookmarkFolderList.Current, "MainWindowModel.StartupWarmup.BookmarkFolderList.LoadCompleted");
+            }
             using (App.Current.TraceStartupScope("MainWindowModel.StartupWarmup.BookmarkFolderList.UpdateItems"))
             {
                 BookmarkFolderList.Current.UpdateItems(System.Windows.Threading.DispatcherPriority.Background);
@@ -351,6 +359,36 @@ namespace NeeView
                     Trace.WriteLine($"StartupWarmupFailed: {ex.Message}");
                 }
             });
+        }
+
+        private static async ValueTask WaitForProcessJobEngineStartupAsync()
+        {
+            var engine = ProcessJobEngine.Current;
+            Trace.WriteLine($"Startup.ProcessJobEngine|phase=before_wait|pending={engine.PendingJobsCount}|processing={(engine.IsProcessing ? 1 : 0)}|busy={(engine.IsBusy ? 1 : 0)}|queued={engine.QueuedJobsCount}|completed={engine.CompletedJobsCount}|current={engine.CurrentJobName}");
+
+            using var timeoutTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+
+            try
+            {
+                await engine.WaitPropertyAsync(nameof(ProcessJobEngine.IsBusy), x => x.IsBusy == false, timeoutTokenSource.Token);
+                Trace.WriteLine($"Startup.ProcessJobEngine|phase=after_wait|pending={engine.PendingJobsCount}|processing={(engine.IsProcessing ? 1 : 0)}|busy={(engine.IsBusy ? 1 : 0)}|queued={engine.QueuedJobsCount}|completed={engine.CompletedJobsCount}|current={engine.CurrentJobName}");
+            }
+            catch (OperationCanceledException) when (timeoutTokenSource.IsCancellationRequested)
+            {
+                App.Current.TraceStartupStamp("MainWindowModel.LoadedAsync.ProcessJobEngine.WaitPropertyAsync.Timeout");
+                Trace.WriteLine($"Startup.ProcessJobEngine|phase=timeout|pending={engine.PendingJobsCount}|processing={(engine.IsProcessing ? 1 : 0)}|busy={(engine.IsBusy ? 1 : 0)}|queued={engine.QueuedJobsCount}|completed={engine.CompletedJobsCount}|current={engine.CurrentJobName}");
+            }
+        }
+
+        private static void SubscribeNextFolderListLoadCompleted(FolderList folderList, string label)
+        {
+            void Handler(object? sender, FolderListLoadCompletedEventArgs e)
+            {
+                folderList.LoadCompleted -= Handler;
+                App.Current.TraceStartupStamp(label);
+            }
+
+            folderList.LoadCompleted += Handler;
         }
 
         public void ContentRendered()

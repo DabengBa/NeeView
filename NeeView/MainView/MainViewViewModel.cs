@@ -23,41 +23,48 @@ namespace NeeView
 
         public MainViewViewModel(MainViewComponent viewComponent)
         {
+            using var startupScope = App.TryTraceStartupScope("MainViewViewModel.Initialize", 10000);
             _viewComponent = viewComponent;
             _presenter = PageFrameBoxPresenter.Current;
 
-            Config.Current.View.AddPropertyChanged(nameof(ViewConfig.MainViewMargin),
-                (s, e) => RaisePropertyChanged(nameof(MainViewMargin)));
+            using (App.TryTraceStartupScope("MainViewViewModel.Initialize.MainViewMargin", 10000))
+            {
+                Config.Current.View.AddPropertyChanged(nameof(ViewConfig.MainViewMargin),
+                    (s, e) => RaisePropertyChanged(nameof(MainViewMargin)));
+            }
 
-            // context menu
-            ContextMenuSource.Current.ContextMenuChanged +=
-                (s, e) => SetContextMenuDirty();
+            using (App.TryTraceStartupScope("MainViewViewModel.Initialize.ContextMenuHooks", 10000))
+            {
+                ContextMenuSource.Current.ContextMenuChanged +=
+                    (s, e) => SetContextMenuDirty();
 
-            RoutedCommandTable.Current.Changed +=
-                (s, e) => SetContextMenuDirty();
+                RoutedCommandTable.Current.Changed +=
+                    (s, e) => SetContextMenuDirty();
 
-            PageSlider.Current.SliderDirectionChanged +=
-                (s, e) => SetContextMenuDirty();
+                PageSlider.Current.SliderDirectionChanged +=
+                    (s, e) => SetContextMenuDirty();
 
-            Config.Current.Command.SubscribePropertyChanged(nameof(CommandConfig.IsReversePageMove),
-                (s, e) => SetContextMenuDirty());
+                Config.Current.Command.SubscribePropertyChanged(nameof(CommandConfig.IsReversePageMove),
+                    (s, e) => SetContextMenuDirty());
+            }
 
-            // busy visibility
-            //_viewComponent.ContentRebuild.AddPropertyChanged(nameof(ContentRebuild.IsBusy),
-            //    (s, e) => UpdateBusyVisibility());
+            using (App.TryTraceStartupScope("MainViewViewModel.Initialize.BusyHooks", 10000))
+            {
+                _viewComponent.SubscribePropertyChanged(nameof(MainViewComponent.IsProcessing),
+                    (s, e) => RaisePropertyChanged(nameof(IsProcessing)));
 
-            _viewComponent.SubscribePropertyChanged(nameof(MainViewComponent.IsProcessing),
-                (s, e) => RaisePropertyChanged(nameof(IsProcessing)));
+                BookOperation.Current.BookControl.AddPropertyChanged(nameof(IBookControl.IsBusy),
+                    (s, e) => UpdateBusyVisibility());
 
-            BookOperation.Current.BookControl.AddPropertyChanged(nameof(IBookControl.IsBusy),
-                (s, e) => UpdateBusyVisibility());
+                _presenter.SubscribePropertyChanged(nameof(PageFrameBoxPresenter.IsLoading),
+                    (s, e) => UpdateBusyVisibility());
+            }
 
-            _presenter.SubscribePropertyChanged(nameof(PageFrameBoxPresenter.IsLoading),
-                (s, e) => UpdateBusyVisibility());
-
-            _presenter.SubscribePropertyChanged(nameof(PageFrameBoxPresenter.View), Presenter_ViewChanged);
-
-            _presenter.SubscribeViewContentChanged(Presenter_ViewContentChanged);
+            using (App.TryTraceStartupScope("MainViewViewModel.Initialize.PresenterHooks", 10000))
+            {
+                _presenter.SubscribePropertyChanged(nameof(PageFrameBoxPresenter.View), Presenter_ViewChanged);
+                _presenter.SubscribeViewContentChanged(Presenter_ViewContentChanged);
+            }
         }
 
         public MainViewComponent ViewComponent => _viewComponent;

@@ -13,6 +13,7 @@ namespace NeeView
     {
         public ProgressBox()
         {
+            using var startupScope = App.TryTraceStartupScope("MainWindow.InitializeComponent.ProgressBox");
             InitializeComponent();
 
             this.DataContext = new ProgressBoxViewModel();

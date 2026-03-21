@@ -140,12 +140,12 @@
                        Placement="Left"
                        HorizontalOffset="{Binding ElementName=PageSortModeButton, Path=ActualWidth}"
                        VerticalOffset="{Binding ElementName=PageSortModeButton, Path=ActualHeight}"
-                       StaysOpen="False" AllowsTransparency="True" Opened="Popup_Opened" Closed="Popup_Closed" PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}">
+                       StaysOpen="False" AllowsTransparency="True" Opened="PageSortModePopup_Opened" Closed="PageSortModePopup_Closed" PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}">
                     <Grid Margin="5">
                         <Grid.Effect>
                             <DropShadowEffect Opacity="0.5" ShadowDepth="2"/>
                         </Grid.Effect>
-                        <local:PageSortModePalette ParentPopup="{Binding ElementName=PageSortModePopup}" SelfClosed="PageSortModePopup_SelfClosed"/>
+                        <ContentControl x:Name="PageSortModePopupSocket" Focusable="False" IsTabStop="False" />
                     </Grid>
                 </Popup>
 
@@ -292,12 +292,12 @@
 
         </DockPanel>
 
-        <Popup x:Name="BookPopup" PlacementTarget="{Binding ElementName=BookButton}" StaysOpen="False" AllowsTransparency="True" Opened="Popup_Opened" Closed="Popup_Closed" PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}">
+        <Popup x:Name="BookPopup" PlacementTarget="{Binding ElementName=BookButton}" StaysOpen="False" AllowsTransparency="True" Opened="BookPopup_Opened" Closed="BookPopup_Closed" PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}">
             <Border Margin="5" Background="{DynamicResource Menu.Background}" BorderBrush="{DynamicResource Menu.Border}" BorderThickness="1">
                 <Border.Effect>
                     <DropShadowEffect Opacity="0.5" ShadowDepth="2" />
                 </Border.Effect>
-                <local:BookPopupContent DataContext="{Binding Model}" ParentPopup="{Binding ElementName=BookPopup}" SelfClosed="BookPopup_SelfClosed"
+                <ContentControl x:Name="BookPopupSocket" Focusable="False" IsTabStop="False"
                         RenderOptions.ClearTypeHint="{DynamicResource Window.ClearTypeHint}" />
             </Border>
         </Popup>

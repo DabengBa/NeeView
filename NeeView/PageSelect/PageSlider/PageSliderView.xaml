@@ -37,7 +37,7 @@
                                        Visibility="{Binding IsSliderWithIndex, Converter={StaticResource BooleanToVisibilityConverter}}"
                                        Maximum="{Binding Model.PageSelector.MaxIndex}" Value="{Binding Model.SelectedIndexRaw}"
                                        ValueChanged="PageSliderTextBox_ValueChanged" KeyDown="PageSliderTextBox_KeyDown"
-                                       FontSize="{Binding FontSize}">
+                                       FontSize="{DynamicResource DefaultFontSize}">
             </local:SliderTextBox>
 
             <Grid>

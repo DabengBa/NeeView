@@ -85,6 +85,8 @@ namespace NeeView
         private double _areaWidth = double.PositiveInfinity;
         private double _areaHeight = double.PositiveInfinity;
         private bool _isFocusAtOnce;
+        private bool _isLoading;
+        private bool _hasLoadedOnce;
 
         private readonly DisposableCollection _disposables = new();
 
@@ -100,6 +102,7 @@ namespace NeeView
             _folderCollectionFactory = new FolderCollectionFactory(_searchEngine, isOverlayEnabled);
 
             _disposables.Add(_busyLockEvent);
+            _busyCount.Changed += BusyCount_Changed;
 
             if (isSyncBookHub)
             {
@@ -187,6 +190,10 @@ namespace NeeView
             remove => _busyCount.Changed -= value;
         }
 
+        // リスト読み込み完了
+        [Subscribable]
+        public event EventHandler<FolderListLoadCompletedEventArgs>? LoadCompleted;
+
         // 選択変更開始
         [Subscribable]
         public event EventHandler<FolderListSelectedChangedEventArgs>? SelectedChanging;
@@ -217,6 +224,18 @@ namespace NeeView
         {
             get { return _isFocusAtOnce; }
             set { SetProperty(ref _isFocusAtOnce, value); }
+        }
+
+        public bool IsLoading
+        {
+            get { return _isLoading; }
+            private set { SetProperty(ref _isLoading, value); }
+        }
+
+        public bool HasLoadedOnce
+        {
+            get { return _hasLoadedOnce; }
+            private set { SetProperty(ref _hasLoadedOnce, value); }
         }
 
         /// <summary>
@@ -471,6 +490,21 @@ namespace NeeView
             RaisePropertyChanged(nameof(IsFolderSearchEnabled));
         }
 
+        private void BusyCount_Changed(object? sender, ReferenceCounterChangedEventArgs e)
+        {
+            if (_disposedValue) return;
+
+            IsLoading = e.IsActive;
+        }
+
+        private void RaiseLoadCompleted(QueryPath path, FolderSetPlaceOption options, bool isCollectionUpdated)
+        {
+            if (_disposedValue) return;
+
+            HasLoadedOnce = true;
+            LoadCompleted?.Invoke(this, new FolderListLoadCompletedEventArgs(path, options, isCollectionUpdated));
+        }
+
         public virtual void IsVisibleChanged(bool isVisible)
         {
         }
@@ -657,7 +691,9 @@ namespace NeeView
             var token = _updateFolderCancellationTokenSource.Token;
 
             // 更新が必要であれば、新しいFolderListBoxを作成する
-            if (CheckFolderListUpdateIfNecessary(path, options))
+            var isCollectionUpdated = CheckFolderListUpdateIfNecessary(path, options);
+
+            if (isCollectionUpdated)
             {
                 try
                 {
@@ -682,6 +718,7 @@ namespace NeeView
 
                         OnPlaceChanged(this, options);
                         PlaceChanged?.Invoke(this, EventArgs.Empty);
+                        RaiseLoadCompleted(Place, options, isCollectionUpdated: true);
                     }
                 }
                 finally
@@ -694,6 +731,7 @@ namespace NeeView
                 // 選択項目のみ変更
                 SetSelectedItem(FixedItem(select), false);
                 PlaceChanged?.Invoke(this, EventArgs.Empty);
+                RaiseLoadCompleted(path, options, isCollectionUpdated: false);
             }
         }
 
@@ -1888,6 +1926,21 @@ namespace NeeView
         }
         #endregion
 
+    }
+
+
+    public class FolderListLoadCompletedEventArgs : EventArgs
+    {
+        public FolderListLoadCompletedEventArgs(QueryPath path, FolderSetPlaceOption options, bool isCollectionUpdated)
+        {
+            Path = path;
+            Options = options;
+            IsCollectionUpdated = isCollectionUpdated;
+        }
+
+        public QueryPath Path { get; }
+        public FolderSetPlaceOption Options { get; }
+        public bool IsCollectionUpdated { get; }
     }
 
 

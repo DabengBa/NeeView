@@ -1,12 +1,13 @@
 Param(
     [ValidateSet("Release")][string]$Configuration = "Release",
     [string]$RuntimeIdentifier = "win-x64",
-    [Alias("Runs")][int]$RunCount = 5,
+    [Alias("Runs")][int]$RunCount = 20,
     [string]$BaselineRef = "HEAD",
     [string]$OutputRoot = "",
     [string]$SeedProfilePath = "",
     [int]$TraceTimeoutSeconds = 90,
     [int]$TraceRetryCount = 1,
+    [double]$TrimRatio = 0.1,
     [switch]$SkipPublish
 )
 
@@ -446,6 +447,139 @@ function Convert-ToRoundedNullable {
     return [math]::Round([double]$Value, $Digits)
 }
 
+function Test-IsTraceTimeoutException {
+    param([System.Exception]$Exception)
+
+    if ($null -eq $Exception) {
+        return $false
+    }
+
+    return $Exception.Message -like "Timed out waiting for startup trace metrics*"
+}
+
+function Get-PercentileValue {
+    param(
+        [double[]]$SortedValues,
+        [double]$Percentile
+    )
+
+    if ($null -eq $SortedValues -or $SortedValues.Count -eq 0) {
+        return $null
+    }
+
+    if ($SortedValues.Count -eq 1) {
+        return $SortedValues[0]
+    }
+
+    $clampedPercentile = [Math]::Min([Math]::Max($Percentile, 0.0), 100.0)
+    $rank = ($clampedPercentile / 100.0) * ($SortedValues.Count - 1)
+    $lowerIndex = [int][Math]::Floor($rank)
+    $upperIndex = [int][Math]::Ceiling($rank)
+
+    if ($lowerIndex -eq $upperIndex) {
+        return $SortedValues[$lowerIndex]
+    }
+
+    $weight = $rank - $lowerIndex
+    return $SortedValues[$lowerIndex] + (($SortedValues[$upperIndex] - $SortedValues[$lowerIndex]) * $weight)
+}
+
+function Get-NumericStats {
+    param(
+        [object[]]$Values,
+        [double]$TrimRatio = 0.1
+    )
+
+    $sortedValues = @(
+        $Values |
+            Where-Object { $null -ne $_ } |
+            ForEach-Object { [double]$_ } |
+            Sort-Object
+    )
+
+    if ($sortedValues.Count -eq 0) {
+        return [pscustomobject]@{
+            Count = 0
+            Average = $null
+            Median = $null
+            TrimmedMean = $null
+            P90 = $null
+            Max = $null
+        }
+    }
+
+    $trimCount = [int][Math]::Floor($sortedValues.Count * $TrimRatio)
+    $trimmedValues =
+        if (($trimCount * 2) -lt $sortedValues.Count) {
+            @($sortedValues[$trimCount..($sortedValues.Count - $trimCount - 1)])
+        }
+        else {
+            $sortedValues
+        }
+
+    $average = ($sortedValues | Measure-Object -Average).Average
+    $trimmedMean = ($trimmedValues | Measure-Object -Average).Average
+
+    return [pscustomobject]@{
+        Count = $sortedValues.Count
+        Average = Convert-ToRoundedNullable -Value $average
+        Median = Convert-ToRoundedNullable -Value (Get-PercentileValue -SortedValues $sortedValues -Percentile 50)
+        TrimmedMean = Convert-ToRoundedNullable -Value $trimmedMean
+        P90 = Convert-ToRoundedNullable -Value (Get-PercentileValue -SortedValues $sortedValues -Percentile 90)
+        Max = Convert-ToRoundedNullable -Value $sortedValues[-1]
+    }
+}
+
+function Get-RunPropertyStats {
+    param(
+        [object[]]$Runs,
+        [string]$PropertyName
+    )
+
+    $values = @(
+        $Runs |
+            ForEach-Object {
+                $value = $_.$PropertyName
+                if ($null -ne $value) { $value }
+            }
+    )
+
+    return Get-NumericStats -Values $values -TrimRatio $TrimRatio
+}
+
+function Get-RunTraceMetricStats {
+    param(
+        [object[]]$Runs,
+        [string]$Label,
+        [string]$Key
+    )
+
+    $values = @(
+        $Runs |
+            ForEach-Object {
+                $value = Get-TraceMetricValue -TraceEntries $_.Trace -Label $Label -Key $Key
+                if ($null -ne $value) { $value }
+            }
+    )
+
+    return Get-NumericStats -Values $values -TrimRatio $TrimRatio
+}
+
+function Add-StatsProperties {
+    param(
+        [System.Collections.IDictionary]$Target,
+        [string]$Prefix,
+        [pscustomobject]$Stats
+    )
+
+    $Target["${Prefix}SampleCount"] = $Stats.Count
+    $Target["${Prefix}Average"] = $Stats.Average
+    $Target["${Prefix}Median"] = $Stats.Median
+    $Target["${Prefix}TrimmedMean"] = $Stats.TrimmedMean
+    $Target["${Prefix}P90"] = $Stats.P90
+    $Target["${Prefix}Max"] = $Stats.Max
+}
+
 function Stop-ProcessGracefully {
     param([System.Diagnostics.Process]$Process)
 
@@ -477,9 +611,7 @@ function Start-TraceRun {
     $psi = [System.Diagnostics.ProcessStartInfo]::new($Variant.ExePath)
     $psi.WorkingDirectory = $Variant.PublishDir
     $psi.UseShellExecute = $false
-    $psi.ArgumentList.Add("--blank")
-    $psi.ArgumentList.Add("--new-window=on")
-    $psi.ArgumentList.Add("--reset-placement")
+    $psi.Arguments = "--blank --new-window=on --reset-placement"
     $psi.Environment["NEEVIEW_PROFILE"] = $ProfileDir
     if ($dotnet -ne "dotnet") {
         $dotnetRoot = Split-Path -Parent $dotnet
@@ -527,6 +659,9 @@ function Start-TraceRun {
         T3LoadedEndMs = [math]::Round((Get-TraceMetricValue -TraceEntries $trace -Label "MainWindow.Loaded" -Key "end_ms"), 1)
         T4ContentRenderedStartMs = [math]::Round((Get-TraceMetricValue -TraceEntries $trace -Label "MainWindow.ContentRendered" -Key "start_ms"), 1)
         T5ViewModelEndMs = [math]::Round((Get-TraceMetricValue -TraceEntries $trace -Label "MainWindow.ContentRendered.ViewModel" -Key "end_ms"), 1)
+        T0ToT3Ms = [math]::Round((Get-TraceMetricValue -TraceEntries $trace -Label "MainWindow.Loaded" -Key "end_ms"), 1)
+        T3ToT4Ms = [math]::Round((Get-TraceMetricDelta -TraceEntries $trace -StartLabel "MainWindow.Loaded" -StartKey "end_ms" -EndLabel "MainWindow.ContentRendered" -EndKey "start_ms"), 1)
+        T4ToT5Ms = [math]::Round((Get-TraceMetricDelta -TraceEntries $trace -StartLabel "MainWindow.ContentRendered" -StartKey "start_ms" -EndLabel "MainWindow.ContentRendered.ViewModel" -EndKey "end_ms"), 1)
         ContentRenderedEndMs = [math]::Round((Get-TraceMetricValue -TraceEntries $trace -Label "MainWindow.ContentRendered" -Key "end_ms"), 1)
         LoadedAsyncDurationMs = [math]::Round((Get-TraceMetricValue -TraceEntries $trace -Label "MainWindowModel.LoadedAsync" -Key "duration_ms"), 1)
         LoadedAsyncTailMs = [math]::Round((Get-TraceMetricDelta -TraceEntries $trace -StartLabel "MainWindowModel.LoadedAsync" -StartKey "end_ms" -EndLabel "MainWindow.ContentRendered.ViewModel" -EndKey "end_ms"), 1)
@@ -553,6 +688,8 @@ function Invoke-TraceRunWithRetry {
     )
 
     $maxAttempts = [Math]::Max(1, $TraceRetryCount + 1)
+    $timeoutAttemptCount = 0
+    $failureAttemptCount = 0
     for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
         New-CleanDirectory $ProfileDir
         Copy-DirectoryContents -Source $SeedProfileDir -Destination $ProfileDir
@@ -561,9 +698,19 @@ function Invoke-TraceRunWithRetry {
         Write-Host "$DisplayName$attemptSuffix" -ForegroundColor Yellow
 
         try {
-            return Start-TraceRun -Variant $Variant -ProfileDir $ProfileDir
+            $run = Start-TraceRun -Variant $Variant -ProfileDir $ProfileDir
+            $run | Add-Member -NotePropertyName AttemptCount -NotePropertyValue $attempt
+            $run | Add-Member -NotePropertyName TimeoutAttemptCount -NotePropertyValue $timeoutAttemptCount
+            $run | Add-Member -NotePropertyName FailureAttemptCount -NotePropertyValue $failureAttemptCount
+            $run | Add-Member -NotePropertyName HadTimeoutRetry -NotePropertyValue ($timeoutAttemptCount -gt 0)
+            return $run
         }
         catch {
+            $failureAttemptCount++
+            if (Test-IsTraceTimeoutException -Exception $_.Exception) {
+                $timeoutAttemptCount++
+            }
+
             if ($attempt -ge $maxAttempts) {
                 throw
             }
@@ -596,82 +743,78 @@ function Measure-Variant {
         $runs += Invoke-TraceRunWithRetry -Variant $Variant -SeedProfileDir $warmedTemplate -ProfileDir $runProfile -DisplayName "[$($Variant.Name)] Run $i/$($script:RunCount)"
     }
 
-    $t3Average = ($runs | Measure-Object -Property T3LoadedEndMs -Average).Average
-    $t4Average = ($runs | Measure-Object -Property T4ContentRenderedStartMs -Average).Average
-    $t5Average = ($runs | Measure-Object -Property T5ViewModelEndMs -Average).Average
-    $contentRenderedAverage = ($runs | Measure-Object -Property ContentRenderedEndMs -Average).Average
-    $loadedAsyncAverage = ($runs | Measure-Object -Property LoadedAsyncDurationMs -Average).Average
-    $loadedAsyncTailAverage = ($runs | ForEach-Object {
-        if ($null -ne $_.LoadedAsyncTailMs) { $_.LoadedAsyncTailMs }
-    } | Measure-Object -Average).Average
-    $loadedAsyncResumeGapAverage = ($runs | ForEach-Object {
-        if ($null -ne $_.LoadedAsyncResumeGapMs) { $_.LoadedAsyncResumeGapMs }
-    } | Measure-Object -Average).Average
-    $workingSetAverage = ($runs | Measure-Object -Property WorkingSetMB -Average).Average
-    $privateAverage = ($runs | Measure-Object -Property PrivateMemoryMB -Average).Average
-    $startupRequestBookmarkAverage = ($runs | ForEach-Object {
-        if ($null -ne $_.StartupRequestBookmarkMs) { $_.StartupRequestBookmarkMs }
-    } | Measure-Object -Average).Average
-    $startupRequestBookshelfAverage = ($runs | ForEach-Object {
-        if ($null -ne $_.StartupRequestBookshelfMs) { $_.StartupRequestBookshelfMs }
-    } | Measure-Object -Average).Average
-    $startupRequestBookmarkQueueAverage = ($runs | ForEach-Object {
-        if ($null -ne $_.StartupRequestBookmarkQueueMs) { $_.StartupRequestBookmarkQueueMs }
-    } | Measure-Object -Average).Average
-    $startupRequestBookshelfQueueAverage = ($runs | ForEach-Object {
-        if ($null -ne $_.StartupRequestBookshelfQueueMs) { $_.StartupRequestBookshelfQueueMs }
-    } | Measure-Object -Average).Average
+    $runCountActual = $runs.Count
+    $totalAttemptCount = ($runs | Measure-Object -Property AttemptCount -Sum).Sum
+    $failureAttemptCount = ($runs | Measure-Object -Property FailureAttemptCount -Sum).Sum
+    $timeoutAttemptCount = ($runs | Measure-Object -Property TimeoutAttemptCount -Sum).Sum
+    $timeoutRunCount = @($runs | Where-Object { $_.HadTimeoutRetry }).Count
 
-    $susieAverage = ($runs | ForEach-Object {
-        $value = Get-TraceMetricValue -TraceEntries $_.Trace -Label "MainWindowModel.LoadedAsync.SusiePluginManager.Initialize" -Key "duration_ms"
-        if ($null -ne $value) { $value }
-    } | Measure-Object -Average).Average
+    if ($null -eq $totalAttemptCount) { $totalAttemptCount = 0 }
+    if ($null -eq $failureAttemptCount) { $failureAttemptCount = 0 }
+    if ($null -eq $timeoutAttemptCount) { $timeoutAttemptCount = 0 }
 
-    $bookmarkWaitAverage = ($runs | ForEach-Object {
-        $value = Get-TraceMetricValue -TraceEntries $_.Trace -Label "MainWindowModel.LoadedAsync.BookmarkFolderList.WaitAsync" -Key "duration_ms"
-        if ($null -ne $value) { $value }
-    } | Measure-Object -Average).Average
+    $t3Stats = Get-RunPropertyStats -Runs $runs -PropertyName "T3LoadedEndMs"
+    $t4Stats = Get-RunPropertyStats -Runs $runs -PropertyName "T4ContentRenderedStartMs"
+    $t5Stats = Get-RunPropertyStats -Runs $runs -PropertyName "T5ViewModelEndMs"
+    $t0ToT3Stats = Get-RunPropertyStats -Runs $runs -PropertyName "T0ToT3Ms"
+    $t3ToT4Stats = Get-RunPropertyStats -Runs $runs -PropertyName "T3ToT4Ms"
+    $t4ToT5Stats = Get-RunPropertyStats -Runs $runs -PropertyName "T4ToT5Ms"
+    $contentRenderedStats = Get-RunPropertyStats -Runs $runs -PropertyName "ContentRenderedEndMs"
+    $loadedAsyncStats = Get-RunPropertyStats -Runs $runs -PropertyName "LoadedAsyncDurationMs"
+    $loadedAsyncTailStats = Get-RunPropertyStats -Runs $runs -PropertyName "LoadedAsyncTailMs"
+    $loadedAsyncResumeGapStats = Get-RunPropertyStats -Runs $runs -PropertyName "LoadedAsyncResumeGapMs"
+    $workingSetStats = Get-RunPropertyStats -Runs $runs -PropertyName "WorkingSetMB"
+    $privateMemoryStats = Get-RunPropertyStats -Runs $runs -PropertyName "PrivateMemoryMB"
+    $startupRequestBookmarkStats = Get-RunPropertyStats -Runs $runs -PropertyName "StartupRequestBookmarkMs"
+    $startupRequestBookshelfStats = Get-RunPropertyStats -Runs $runs -PropertyName "StartupRequestBookshelfMs"
+    $startupRequestBookmarkQueueStats = Get-RunPropertyStats -Runs $runs -PropertyName "StartupRequestBookmarkQueueMs"
+    $startupRequestBookshelfQueueStats = Get-RunPropertyStats -Runs $runs -PropertyName "StartupRequestBookshelfQueueMs"
 
-    $bookshelfWaitAverage = ($runs | ForEach-Object {
-        $value = Get-TraceMetricValue -TraceEntries $_.Trace -Label "MainWindowModel.LoadedAsync.BookshelfFolderList.WaitAsync" -Key "duration_ms"
-        if ($null -ne $value) { $value }
-    } | Measure-Object -Average).Average
+    $susieStats = Get-RunTraceMetricStats -Runs $runs -Label "MainWindowModel.LoadedAsync.SusiePluginManager.Initialize" -Key "duration_ms"
+    $bookmarkWaitStats = Get-RunTraceMetricStats -Runs $runs -Label "MainWindowModel.LoadedAsync.BookmarkFolderList.WaitAsync" -Key "duration_ms"
+    $bookshelfWaitStats = Get-RunTraceMetricStats -Runs $runs -Label "MainWindowModel.LoadedAsync.BookshelfFolderList.WaitAsync" -Key "duration_ms"
+    $warmupBookmarkStats = Get-RunTraceMetricStats -Runs $runs -Label "MainWindowModel.StartupWarmup.BookmarkFolderList.WaitAsync" -Key "duration_ms"
+    $warmupBookshelfStats = Get-RunTraceMetricStats -Runs $runs -Label "MainWindowModel.StartupWarmup.BookshelfFolderList.WaitAsync" -Key "duration_ms"
 
-    $warmupBookmarkAverage = ($runs | ForEach-Object {
-        $value = Get-TraceMetricValue -TraceEntries $_.Trace -Label "MainWindowModel.StartupWarmup.BookmarkFolderList.WaitAsync" -Key "duration_ms"
-        if ($null -ne $value) { $value }
-    } | Measure-Object -Average).Average
-
-    $warmupBookshelfAverage = ($runs | ForEach-Object {
-        $value = Get-TraceMetricValue -TraceEntries $_.Trace -Label "MainWindowModel.StartupWarmup.BookshelfFolderList.WaitAsync" -Key "duration_ms"
-        if ($null -ne $value) { $value }
-    } | Measure-Object -Average).Average
-
-    return [pscustomobject]@{
+    $summary = [ordered]@{
         Name = $Variant.Name
         PublishReadyToRun = $Variant.PublishReadyToRun
         SizeBytes = $Variant.SizeBytes
         SizeMB = [math]::Round($Variant.SizeBytes / 1MB, 1)
-        T3LoadedEndMsAverage = [math]::Round($t3Average, 1)
-        T4ContentRenderedStartMsAverage = [math]::Round($t4Average, 1)
-        T5ViewModelEndMsAverage = [math]::Round($t5Average, 1)
-        ContentRenderedEndMsAverage = [math]::Round($contentRenderedAverage, 1)
-        LoadedAsyncDurationMsAverage = [math]::Round($loadedAsyncAverage, 1)
-        LoadedAsyncTailMsAverage = if ($null -eq $loadedAsyncTailAverage) { $null } else { [math]::Round($loadedAsyncTailAverage, 1) }
-        LoadedAsyncResumeGapMsAverage = if ($null -eq $loadedAsyncResumeGapAverage) { $null } else { [math]::Round($loadedAsyncResumeGapAverage, 1) }
-        WorkingSetMBAverage = [math]::Round($workingSetAverage, 1)
-        PrivateMemoryMBAverage = [math]::Round($privateAverage, 1)
-        SusieInitializeDurationMsAverage = if ($null -eq $susieAverage) { $null } else { [math]::Round($susieAverage, 1) }
-        LoadedBookmarkWaitMsAverage = if ($null -eq $bookmarkWaitAverage) { $null } else { [math]::Round($bookmarkWaitAverage, 1) }
-        LoadedBookshelfWaitMsAverage = if ($null -eq $bookshelfWaitAverage) { $null } else { [math]::Round($bookshelfWaitAverage, 1) }
-        WarmupBookmarkWaitMsAverage = if ($null -eq $warmupBookmarkAverage) { $null } else { [math]::Round($warmupBookmarkAverage, 1) }
-        WarmupBookshelfWaitMsAverage = if ($null -eq $warmupBookshelfAverage) { $null } else { [math]::Round($warmupBookshelfAverage, 1) }
-        StartupRequestBookmarkMsAverage = if ($null -eq $startupRequestBookmarkAverage) { $null } else { [math]::Round($startupRequestBookmarkAverage, 1) }
-        StartupRequestBookshelfMsAverage = if ($null -eq $startupRequestBookshelfAverage) { $null } else { [math]::Round($startupRequestBookshelfAverage, 1) }
-        StartupRequestBookmarkQueueMsAverage = if ($null -eq $startupRequestBookmarkQueueAverage) { $null } else { [math]::Round($startupRequestBookmarkQueueAverage, 1) }
-        StartupRequestBookshelfQueueMsAverage = if ($null -eq $startupRequestBookshelfQueueAverage) { $null } else { [math]::Round($startupRequestBookshelfQueueAverage, 1) }
-        Runs = $runs
+        RunCountActual = $runCountActual
+        TotalAttemptCount = $totalAttemptCount
+        FailureAttemptCount = $failureAttemptCount
+        TimeoutAttemptCount = $timeoutAttemptCount
+        TimeoutRunCount = $timeoutRunCount
+        TimeoutRunRatePct = if ($runCountActual -eq 0) { $null } else { [math]::Round(($timeoutRunCount / $runCountActual) * 100.0, 1) }
+        TimeoutAttemptRatePct = if ($totalAttemptCount -eq 0) { $null } else { [math]::Round(($timeoutAttemptCount / $totalAttemptCount) * 100.0, 1) }
     }
+
+    Add-StatsProperties -Target $summary -Prefix "T3LoadedEndMs" -Stats $t3Stats
+    Add-StatsProperties -Target $summary -Prefix "T4ContentRenderedStartMs" -Stats $t4Stats
+    Add-StatsProperties -Target $summary -Prefix "T5ViewModelEndMs" -Stats $t5Stats
+    Add-StatsProperties -Target $summary -Prefix "T0ToT3Ms" -Stats $t0ToT3Stats
+    Add-StatsProperties -Target $summary -Prefix "T3ToT4Ms" -Stats $t3ToT4Stats
+    Add-StatsProperties -Target $summary -Prefix "T4ToT5Ms" -Stats $t4ToT5Stats
+    Add-StatsProperties -Target $summary -Prefix "ContentRenderedEndMs" -Stats $contentRenderedStats
+    Add-StatsProperties -Target $summary -Prefix "LoadedAsyncDurationMs" -Stats $loadedAsyncStats
+    Add-StatsProperties -Target $summary -Prefix "LoadedAsyncTailMs" -Stats $loadedAsyncTailStats
+    Add-StatsProperties -Target $summary -Prefix "LoadedAsyncResumeGapMs" -Stats $loadedAsyncResumeGapStats
+    Add-StatsProperties -Target $summary -Prefix "WorkingSetMB" -Stats $workingSetStats
+    Add-StatsProperties -Target $summary -Prefix "PrivateMemoryMB" -Stats $privateMemoryStats
+    Add-StatsProperties -Target $summary -Prefix "SusieInitializeDurationMs" -Stats $susieStats
+    Add-StatsProperties -Target $summary -Prefix "LoadedBookmarkWaitMs" -Stats $bookmarkWaitStats
+    Add-StatsProperties -Target $summary -Prefix "LoadedBookshelfWaitMs" -Stats $bookshelfWaitStats
+    Add-StatsProperties -Target $summary -Prefix "WarmupBookmarkWaitMs" -Stats $warmupBookmarkStats
+    Add-StatsProperties -Target $summary -Prefix "WarmupBookshelfWaitMs" -Stats $warmupBookshelfStats
+    Add-StatsProperties -Target $summary -Prefix "StartupRequestBookmarkMs" -Stats $startupRequestBookmarkStats
+    Add-StatsProperties -Target $summary -Prefix "StartupRequestBookshelfMs" -Stats $startupRequestBookshelfStats
+    Add-StatsProperties -Target $summary -Prefix "StartupRequestBookmarkQueueMs" -Stats $startupRequestBookmarkQueueStats
+    Add-StatsProperties -Target $summary -Prefix "StartupRequestBookshelfQueueMs" -Stats $startupRequestBookshelfQueueStats
+
+    $summary["Runs"] = $runs
+
+    return [pscustomobject]$summary
 }
 
 Assert-Prerequisites
@@ -723,40 +866,71 @@ try {
     $summary = $results | Select-Object `
         Name,
         SizeMB,
-        T3LoadedEndMsAverage,
-        T4ContentRenderedStartMsAverage,
-        T5ViewModelEndMsAverage,
-        ContentRenderedEndMsAverage,
-        LoadedAsyncDurationMsAverage,
-        LoadedAsyncTailMsAverage,
-        LoadedAsyncResumeGapMsAverage,
-        WorkingSetMBAverage,
-        PrivateMemoryMBAverage,
-        SusieInitializeDurationMsAverage,
-        LoadedBookmarkWaitMsAverage,
-        LoadedBookshelfWaitMsAverage,
-        WarmupBookmarkWaitMsAverage,
-        WarmupBookshelfWaitMsAverage,
-        StartupRequestBookmarkMsAverage,
-        StartupRequestBookshelfMsAverage,
-        StartupRequestBookmarkQueueMsAverage,
-        StartupRequestBookshelfQueueMsAverage
+        RunCountActual,
+        TimeoutRunCount,
+        TimeoutRunRatePct,
+        TimeoutAttemptRatePct,
+        T0ToT3MsMedian,
+        T0ToT3MsTrimmedMean,
+        T0ToT3MsP90,
+        T0ToT3MsMax,
+        T3ToT4MsMedian,
+        T3ToT4MsTrimmedMean,
+        T3ToT4MsP90,
+        T3ToT4MsMax,
+        T4ToT5MsMedian,
+        T4ToT5MsTrimmedMean,
+        T4ToT5MsP90,
+        T4ToT5MsMax,
+        LoadedAsyncDurationMsMedian,
+        LoadedAsyncDurationMsTrimmedMean,
+        LoadedAsyncDurationMsP90,
+        LoadedAsyncDurationMsMax,
+        LoadedAsyncTailMsMedian,
+        LoadedAsyncTailMsP90,
+        WorkingSetMBMedian,
+        PrivateMemoryMBMedian
 
-    $summary | Format-Table -AutoSize
+    $consoleSummary = $results | ForEach-Object {
+        [pscustomobject]@{
+            Name = $_.Name
+            Runs = $_.RunCountActual
+            TimeoutRunPct = $_.TimeoutRunRatePct
+            TimeoutAttemptPct = $_.TimeoutAttemptRatePct
+            T0ToT3Tm = $_.T0ToT3MsTrimmedMean
+            T0ToT3P90 = $_.T0ToT3MsP90
+            T0ToT3Max = $_.T0ToT3MsMax
+            T3ToT4Tm = $_.T3ToT4MsTrimmedMean
+            T3ToT4P90 = $_.T3ToT4MsP90
+            T4ToT5Tm = $_.T4ToT5MsTrimmedMean
+            T4ToT5P90 = $_.T4ToT5MsP90
+            LoadedAsyncTm = $_.LoadedAsyncDurationMsTrimmedMean
+            LoadedAsyncP90 = $_.LoadedAsyncDurationMsP90
+            LoadedAsyncMax = $_.LoadedAsyncDurationMsMax
+        }
+    }
+
+    $consoleSummary | Format-Table -AutoSize
 
     $baseline = $results | Where-Object { $_.Name -eq "trace-baseline" }
     $optimized = $results | Where-Object { $_.Name -eq "current-optimized" }
 
     $comparison = if ($baseline -and $optimized) {
         [pscustomobject]@{
-            T3LoadedEndMsDelta = [math]::Round($optimized.T3LoadedEndMsAverage - $baseline.T3LoadedEndMsAverage, 1)
-            T4ContentRenderedStartMsDelta = [math]::Round($optimized.T4ContentRenderedStartMsAverage - $baseline.T4ContentRenderedStartMsAverage, 1)
-            T5ViewModelEndMsDelta = [math]::Round($optimized.T5ViewModelEndMsAverage - $baseline.T5ViewModelEndMsAverage, 1)
-            ContentRenderedEndMsDelta = [math]::Round($optimized.ContentRenderedEndMsAverage - $baseline.ContentRenderedEndMsAverage, 1)
-            LoadedAsyncDurationMsDelta = [math]::Round($optimized.LoadedAsyncDurationMsAverage - $baseline.LoadedAsyncDurationMsAverage, 1)
-            LoadedAsyncTailMsDelta = if ($null -eq $baseline.LoadedAsyncTailMsAverage -or $null -eq $optimized.LoadedAsyncTailMsAverage) { $null } else { [math]::Round($optimized.LoadedAsyncTailMsAverage - $baseline.LoadedAsyncTailMsAverage, 1) }
-            WorkingSetMBDelta = [math]::Round($optimized.WorkingSetMBAverage - $baseline.WorkingSetMBAverage, 1)
-            PrivateMemoryMBDelta = [math]::Round($optimized.PrivateMemoryMBAverage - $baseline.PrivateMemoryMBAverage, 1)
+            T0ToT3MsTrimmedMeanDelta = [math]::Round($optimized.T0ToT3MsTrimmedMean - $baseline.T0ToT3MsTrimmedMean, 1)
+            T0ToT3MsP90Delta = [math]::Round($optimized.T0ToT3MsP90 - $baseline.T0ToT3MsP90, 1)
+            T0ToT3MsMaxDelta = [math]::Round($optimized.T0ToT3MsMax - $baseline.T0ToT3MsMax, 1)
+            T3ToT4MsTrimmedMeanDelta = [math]::Round($optimized.T3ToT4MsTrimmedMean - $baseline.T3ToT4MsTrimmedMean, 1)
+            T3ToT4MsP90Delta = [math]::Round($optimized.T3ToT4MsP90 - $baseline.T3ToT4MsP90, 1)
+            T4ToT5MsTrimmedMeanDelta = [math]::Round($optimized.T4ToT5MsTrimmedMean - $baseline.T4ToT5MsTrimmedMean, 1)
+            T4ToT5MsP90Delta = [math]::Round($optimized.T4ToT5MsP90 - $baseline.T4ToT5MsP90, 1)
+            LoadedAsyncDurationMsTrimmedMeanDelta = [math]::Round($optimized.LoadedAsyncDurationMsTrimmedMean - $baseline.LoadedAsyncDurationMsTrimmedMean, 1)
+            LoadedAsyncDurationMsP90Delta = [math]::Round($optimized.LoadedAsyncDurationMsP90 - $baseline.LoadedAsyncDurationMsP90, 1)
+            LoadedAsyncTailMsTrimmedMeanDelta = if ($null -eq $baseline.LoadedAsyncTailMsTrimmedMean -or $null -eq $optimized.LoadedAsyncTailMsTrimmedMean) { $null } else { [math]::Round($optimized.LoadedAsyncTailMsTrimmedMean - $baseline.LoadedAsyncTailMsTrimmedMean, 1) }
+            WorkingSetMBMedianDelta = [math]::Round($optimized.WorkingSetMBMedian - $baseline.WorkingSetMBMedian, 1)
+            PrivateMemoryMBMedianDelta = [math]::Round($optimized.PrivateMemoryMBMedian - $baseline.PrivateMemoryMBMedian, 1)
+            TimeoutRunRatePctDelta = if ($null -eq $baseline.TimeoutRunRatePct -or $null -eq $optimized.TimeoutRunRatePct) { $null } else { [math]::Round($optimized.TimeoutRunRatePct - $baseline.TimeoutRunRatePct, 1) }
+            TimeoutAttemptRatePctDelta = if ($null -eq $baseline.TimeoutAttemptRatePct -or $null -eq $optimized.TimeoutAttemptRatePct) { $null } else { [math]::Round($optimized.TimeoutAttemptRatePct - $baseline.TimeoutAttemptRatePct, 1) }
         }
     }
 
@@ -765,6 +939,7 @@ try {
         GeneratedAt = (Get-Date).ToString("s")
         BaselineRef = $BaselineRef
         RunCount = $RunCount
+        TrimRatio = $TrimRatio
         SeedProfilePath = $SeedProfilePath
         Summary = $summary
         Comparison = $comparison

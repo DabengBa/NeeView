@@ -35,6 +35,7 @@ namespace NeeView
 
         public MainView()
         {
+            using var startupScope = App.TryTraceStartupScope("MainView.Initialize.InitializeComponent");
             InitializeComponent();
 
             _background = new PageFrameBackground(_dpiProvider);
@@ -89,20 +90,33 @@ namespace NeeView
 
         public void Initialize()
         {
+            using var startupScope = App.TryTraceStartupScope("MainView.Initialize.Initialize", 10000);
             _vm = this.DataContext as MainViewViewModel;
             if (_vm is null)
             {
                 return;
             }
 
-            ContentDropManager.Current.SetDragDropEvent(this.View);
+            using (App.TryTraceStartupScope("MainView.Initialize.ContentDropManager.SetDragDropEvent", 10000))
+            {
+                ContentDropManager.Current.SetDragDropEvent(this.View);
+            }
 
-            this.NowLoadingView.Source = NowLoading.Current;
+            using (App.TryTraceStartupScope("MainView.Initialize.NowLoadingView.Source", 10000))
+            {
+                this.NowLoadingView.Source = NowLoading.Current;
+            }
 
-            _vm.ViewComponent.OpenContextMenuRequest += (s, e) => OpenContextMenu();
-            _vm.ViewComponent.FocusMainViewRequest += (s, e) => FocusMainView();
+            using (App.TryTraceStartupScope("MainView.Initialize.ViewComponentHooks", 10000))
+            {
+                _vm.ViewComponent.OpenContextMenuRequest += (s, e) => OpenContextMenu();
+                _vm.ViewComponent.FocusMainViewRequest += (s, e) => FocusMainView();
+            }
 
-            _mainViewCursor.Initialize();
+            using (App.TryTraceStartupScope("MainView.Initialize.MainViewCursor.Initialize", 10000))
+            {
+                _mainViewCursor.Initialize();
+            }
         }
 
         private void MainView_DataContextChanged(object? sender, DependencyPropertyChangedEventArgs e)

@@ -1,8 +1,12 @@
-﻿using NeeView.Windows;
+using NeeView.Windows;
+using NeeView.Windows.Controls;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shell;
+using System.Windows.Threading;
 
 namespace NeeView
 {
@@ -11,11 +15,18 @@ namespace NeeView
     /// </summary>
     public partial class MenuBarView : UserControl
     {
+        private static readonly Brush AlphaWatermarkBackground = CreateFrozenBrush(Color.FromRgb(0xF3, 0xBC, 0x2D));
+        private static readonly Brush AlphaWatermarkForeground = CreateFrozenBrush(Color.FromRgb(0x20, 0x20, 0x20));
+        private static readonly Brush BetaWatermarkBackground = CreateFrozenBrush(Color.FromRgb(0x2E, 0x69, 0xD1));
+
         private MenuBarViewModel? _vm;
+        private WindowCaptionButtons? _windowCaptionButtons;
+        private bool _isWindowCaptionButtonsInitializationQueued;
 
 
         public MenuBarView()
         {
+            using var startupScope = App.TryTraceStartupScope("MainWindow.InitializeComponent.MenuBarView");
             InitializeComponent();
 
             this.Watermark.Visibility = Environment.Watermark ? Visibility.Visible : Visibility.Collapsed;
@@ -28,13 +39,13 @@ namespace NeeView
             }
             else if (Environment.IsAlphaRelease)
             {
-                this.Watermark.Background = new SolidColorBrush(Color.FromRgb(0xF3, 0xBC, 0x2D));
-                this.WatermarkText.Foreground = new SolidColorBrush(Color.FromRgb(0x20, 0x20, 0x20));
+                this.Watermark.Background = AlphaWatermarkBackground;
+                this.WatermarkText.Foreground = AlphaWatermarkForeground;
                 this.WatermarkText.Text = Environment.ReleaseType + Environment.ReleaseNumber;
             }
             else if (Environment.IsBetaRelease)
             {
-                this.Watermark.Background = new SolidColorBrush(Color.FromRgb(0x2E, 0x69, 0xD1));
+                this.Watermark.Background = BetaWatermarkBackground;
                 this.WatermarkText.Foreground = Brushes.White;
                 this.WatermarkText.Text = Environment.ReleaseType + Environment.ReleaseNumber;
             }
@@ -45,9 +56,9 @@ namespace NeeView
                 this.WatermarkText.Text = Environment.PackageType;
             }
 
-            this.WindowCaptionButtons.MouseRightButtonUp += (s, e) => e.Handled = true;
             this.MainMenuJoint.MouseRightButtonUp += (s, e) => e.Handled = true;
             this.MouseRightButtonUp += MenuBarView_MouseRightButtonUp;
+            this.Loaded += MenuBarView_Loaded;
         }
 
 
@@ -68,8 +79,15 @@ namespace NeeView
 
         public void Initialize()
         {
+            using var startupScope = App.TryTraceStartupScope("MainWindow.Initialize.ViewSources.MenuBarView.Initialize");
             _vm = new MenuBarViewModel(this.Source, this);
             this.Root.DataContext = _vm;
+            QueueWindowCaptionButtonsInitialization();
+        }
+
+        public void UpdateWindowCaptionButtonsStrokeThickness(DpiScale dpi)
+        {
+            _windowCaptionButtons?.UpdateStrokeThickness(dpi);
         }
 
         // 単キーのショートカット無効
@@ -88,6 +106,63 @@ namespace NeeView
                 WindowTools.ShowSystemMenu(Window.GetWindow(this));
                 e.Handled = true;
             }
+        }
+
+        private void MenuBarView_Loaded(object sender, RoutedEventArgs e)
+        {
+            QueueWindowCaptionButtonsInitialization();
+        }
+
+        private void QueueWindowCaptionButtonsInitialization()
+        {
+            if (_windowCaptionButtons != null || _isWindowCaptionButtonsInitializationQueued || _vm is null || !this.IsLoaded)
+            {
+                return;
+            }
+
+            _isWindowCaptionButtonsInitializationQueued = true;
+            this.Dispatcher.BeginInvoke(() =>
+            {
+                _isWindowCaptionButtonsInitializationQueued = false;
+
+                if (_windowCaptionButtons != null || _vm is null || !this.IsLoaded)
+                {
+                    return;
+                }
+
+                using var startupScope = App.TryTraceStartupScope("MainWindow.DeferredWarmup.MenuBarView.WindowCaptionButtons");
+                _windowCaptionButtons = CreateWindowCaptionButtons();
+                this.WindowCaptionButtonsHost.Content = _windowCaptionButtons;
+            }, DispatcherPriority.Background);
+        }
+
+        private WindowCaptionButtons CreateWindowCaptionButtons()
+        {
+            var buttons = new WindowCaptionButtons()
+            {
+                VerticalAlignment = VerticalAlignment.Top,
+                MinHeight = 28,
+            };
+            WindowChrome.SetIsHitTestVisibleInChrome(buttons, false);
+            buttons.MouseRightButtonUp += (s, e) => e.Handled = true;
+
+            BindingOperations.SetBinding(
+                buttons,
+                WindowCaptionButtons.IsMaximizeButtonMouseOverProperty,
+                new Binding(nameof(MenuBarViewModel.IsMaximizeButtonMouseOver))
+                {
+                    Source = _vm,
+                    Mode = BindingMode.OneWayToSource,
+                });
+
+            return buttons;
+        }
+
+        private static Brush CreateFrozenBrush(Color color)
+        {
+            var brush = new SolidColorBrush(color);
+            brush.Freeze();
+            return brush;
         }
     }
 }

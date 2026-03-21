@@ -251,6 +251,17 @@
             </GridSplitter>
 
             <ContentControl x:Name="ListBoxContent" Grid.Column="1" Grid.Row="1" Content="{Binding FolderListBox}" Focusable="False" Margin="2,2,0,2" />
+
+            <Border Grid.Column="1" Grid.Row="1" Margin="2,2,0,2"
+                    Background="#66000000"
+                    IsHitTestVisible="False"
+                    Visibility="{Binding Model.IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock Text="{properties:TextBinding Word.NowLoading}"
+                           Foreground="White"
+                           FontSize="{DynamicResource PanelFontSize}"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center" />
+            </Border>
         </Grid>
 
     </DockPanel>

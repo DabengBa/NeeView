@@ -97,6 +97,35 @@
 - 后续启动优化重点已转向代码级关键路径，而不是继续深挖 ReadyToRun 微调
 - 最新代码级分段测试见 `docs/startup-performance-checklist.md`
 
+## 与当前代码级启动优化的关系（2026-03-21）
+
+ReadyToRun 结论在最近一轮代码级观测 / 稳定性改造后仍然没有变化：
+
+- ReadyToRun 仍然只是“小幅收益 + 明显体积/内存代价”
+- `Measure-StartupTrace.ps1` 现在默认会输出 `T0 -> T3`、`T3 -> T4`、`T4 -> T5`
+- 当前真正值得继续优化的，已经明确落在代码级主路径：
+  - `InitializeComponent`
+  - `MenuBar.Source`
+  - `AddressBarView` / `MenuBarView` 构造
+
+最新 `Startup.Trace` 对比见 `docs/startup-performance-checklist.md`。  
+截至 2026-03-21 的最新一轮（Baseline=`HEAD`，Optimized=`current working tree`，`Runs=5`）：
+
+- `T0 -> T3`: `1881.2 -> 1875.0 ms`
+- `T3 -> T4`: `274.2 -> 284.8 ms`
+- `T4 -> T5`: `14.0 -> 11.2 ms`
+- `LoadedAsync()`: `11.8 -> 10.0 ms`
+
+这组结果说明：
+
+- 本轮的主要产出是 **phase delta 默认化、热点归因、FolderList 加载反馈、ProcessJobEngine 启动保护**
+- 并不是一次显著的 ReadyToRun 相关收益放大
+
+因此当前推荐策略不变：
+
+- 保留 ReadyToRun 开关
+- 但后续优化优先级继续放在代码级关键路径和延迟初始化
+
 ## 前置条件
 
 - 需要安装与项目目标框架匹配的 .NET SDK

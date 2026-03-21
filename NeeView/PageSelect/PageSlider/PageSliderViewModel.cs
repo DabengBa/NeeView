@@ -20,16 +20,14 @@ namespace NeeView
             _model = model ?? throw new InvalidOperationException();
 
             Config.Current.Slider.AddPropertyChanged(nameof(SliderConfig.SliderIndexLayout),
-                (s, e) => RaisePropertyChanged(null));
+                (s, e) =>
+                {
+                    RaisePropertyChanged(nameof(IsSliderWithIndex));
+                    RaisePropertyChanged(nameof(SliderIndexDock));
+                });
 
             BookOperation.Current.BookChanged +=
                 (s, e) => RaisePropertyChanged(nameof(PageSliderVisibility));
-
-            FontParameters.Current.AddPropertyChanged(nameof(FontParameters.DefaultFontSize),
-                (s, e) => RaisePropertyChanged(nameof(FontSize)));
-
-            Config.Current.Slider.AddPropertyChanged(nameof(SliderConfig.Thickness),
-                (s, e) => RaisePropertyChanged(nameof(FontSize)));
         }
 
 
@@ -44,8 +42,6 @@ namespace NeeView
         public Dock SliderIndexDock => _model != null && Config.Current.Slider.SliderIndexLayout == SliderIndexLayout.Left ? Dock.Left : Dock.Right;
 
         public Visibility PageSliderVisibility => _model != null && BookOperation.Current.Control.Pages.Count > 0 ? Visibility.Visible : Visibility.Hidden;
-
-        public double FontSize => Math.Min(FontParameters.Current.DefaultFontSize, Config.Current.Slider.Thickness);
 
 
         public void MouseWheel(object? sender, MouseWheelEventArgs e)

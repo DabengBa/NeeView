@@ -1,4 +1,4 @@
-﻿using NeeView.Windows;
+using NeeView.Windows;
 using System;
 using System.Diagnostics;
 using System.Windows;
@@ -22,6 +22,7 @@ namespace NeeView
 
         public AddressBarView()
         {
+            using var startupScope = App.TryTraceStartupScope("MainWindow.InitializeComponent.AddressBarView");
             InitializeComponent();
 
             this.AddressTextBox.PreviewMouseLeftButtonDown += AddressTextBox_PreviewMouseLeftButtonDown;
@@ -49,6 +50,7 @@ namespace NeeView
 
         public void Initialize()
         {
+            using var startupScope = App.TryTraceStartupScope("MainWindow.Initialize.ViewSources.AddressBarView.Initialize");
             _vm = new AddressBarViewModel(this.Source);
             this.Root.DataContext = _vm;
         }
@@ -139,12 +141,61 @@ namespace NeeView
             }
         }
 
+        private void PageSortModePopup_Opened(object sender, EventArgs e)
+        {
+            Popup_Opened(sender, e);
+
+            var content = new PageSortModePalette()
+            {
+                ParentPopup = this.PageSortModePopup,
+            };
+            content.SelfClosed += PageSortModePopup_SelfClosed;
+
+            this.PageSortModePopupSocket.Content = content;
+        }
+
+        private void PageSortModePopup_Closed(object sender, EventArgs e)
+        {
+            Popup_Closed(sender, e);
+
+            if (this.PageSortModePopupSocket.Content is PageSortModePalette content)
+            {
+                content.SelfClosed -= PageSortModePopup_SelfClosed;
+            }
+            this.PageSortModePopupSocket.Content = null;
+        }
+
         private void BookButton_Click(object sender, RoutedEventArgs e)
         {
             if (CanOpenPopup(this.BookPopup))
             {
                 this.BookPopup.IsOpen = true;
             }
+        }
+
+        private void BookPopup_Opened(object sender, EventArgs e)
+        {
+            Popup_Opened(sender, e);
+
+            var content = new BookPopupContent()
+            {
+                DataContext = _vm?.Model,
+                ParentPopup = this.BookPopup,
+            };
+            content.SelfClosed += BookPopup_SelfClosed;
+
+            this.BookPopupSocket.Content = content;
+        }
+
+        private void BookPopup_Closed(object sender, EventArgs e)
+        {
+            Popup_Closed(sender, e);
+
+            if (this.BookPopupSocket.Content is BookPopupContent content)
+            {
+                content.SelfClosed -= BookPopup_SelfClosed;
+            }
+            this.BookPopupSocket.Content = null;
         }
 
         private void BookmarkButton_Click(object sender, RoutedEventArgs e)
@@ -179,12 +230,12 @@ namespace NeeView
             _popupClosedFocusElement?.Focus();
         }
 
-        private void PageSortModePopup_SelfClosed(object sender, EventArgs e)
+        private void PageSortModePopup_SelfClosed(object? sender, EventArgs e)
         {
             _popupClosedFocusElement = this.PageSortModeButton;
         }
 
-        private void BookPopup_SelfClosed(object sender, EventArgs e)
+        private void BookPopup_SelfClosed(object? sender, EventArgs e)
         {
             _popupClosedFocusElement = this.BookButton;
         }

@@ -572,6 +572,28 @@ namespace NeeView
             return new StartupTraceScope(Stopwatch, label);
         }
 
+        public IDisposable? TraceStartupScopeIfActive(string label, long maxElapsedMilliseconds = 5000)
+        {
+            if (!Stopwatch.IsRunning)
+            {
+                return null;
+            }
+
+            if (Stopwatch.ElapsedMilliseconds > maxElapsedMilliseconds)
+            {
+                return null;
+            }
+
+            return TraceStartupScope(label);
+        }
+
+        public static IDisposable? TryTraceStartupScope(string label, long maxElapsedMilliseconds = 5000)
+        {
+            return Application.Current is App app
+                ? app.TraceStartupScopeIfActive(label, maxElapsedMilliseconds)
+                : null;
+        }
+
         public void TraceStartupStamp(string label)
         {
             Trace.WriteLine(string.Format(CultureInfo.InvariantCulture, "Startup.Trace|{0}|mark_ms={1}", label, Stopwatch.ElapsedMilliseconds));

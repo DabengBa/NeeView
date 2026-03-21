@@ -8,6 +8,8 @@ namespace NeeView
     /// </summary>
     public class PageMarkersView : Canvas
     {
+        private bool _isInitialized;
+
         public PageMarkers Source
         {
             get { return (PageMarkers)GetValue(SourceProperty); }
@@ -28,8 +30,15 @@ namespace NeeView
 
         private void Initialize()
         {
+            if (_isInitialized || this.Source is null)
+            {
+                return;
+            }
+
+            using var startupScope = App.TryTraceStartupScope("MainWindow.DeferredWarmup.PageSliderView.PageMarkers.Initialize");
             _vm = new PageMarkersViewModel(this.Source, this);
             this.DataContext = _vm;
+            _isInitialized = true;
         }
     }
 }

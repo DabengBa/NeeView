@@ -18,6 +18,7 @@ namespace NeeView
 
         public MediaControlView()
         {
+            using var startupScope = App.TryTraceStartupScope("MainWindow.InitializeComponent.MediaControlView");
             InitializeComponent();
         }
 
@@ -62,6 +63,7 @@ namespace NeeView
 
         public void Initialize()
         {
+            using var startupScope = App.TryTraceStartupScope("MainWindow.Initialize.ViewSources.MediaControlView.Initialize");
             if (Source == null) return;
 
             _vm = new MediaControlViewModel(Source);

@@ -52,14 +52,17 @@ namespace NeeView
         public override bool SyncBookOnRename => false;
 
 
-        public void UpdateItems(DispatcherPriority priority = DispatcherPriority.Normal)
+        public bool UpdateItems(DispatcherPriority priority = DispatcherPriority.Normal)
         {
-            if (_disposedValue) return;
+            if (_disposedValue) return false;
 
             if (FolderCollection == null)
             {
                 RequestPlace(new QueryPath(QueryScheme.Bookmark, null), null, FolderSetPlaceOption.None, priority);
+                return true;
             }
+
+            return false;
         }
 
         public override bool CanMoveToParent()

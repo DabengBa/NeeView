@@ -190,6 +190,7 @@ namespace NeeView
         /// </summary>
         public SidePanelFrameView()
         {
+            using var startupScope = App.TryTraceStartupScope("MainWindow.InitializeComponent.SidePanelFrameView");
             InitializeComponent();
 
             this.Root.DataContext = this;
@@ -238,19 +239,48 @@ namespace NeeView
             if (model == null) return;
             if (_isViewModelInitialized) return;
 
-            CustomLayoutPanelManager.Initialize();
-            var leftPanelViewModel = new LeftPanelViewModel(this.LeftIconList, CustomLayoutPanelManager.Current.LeftDock, LeftPanelElementContains);
-            leftPanelViewModel.AddPropertyChanged(nameof(leftPanelViewModel.SelectedItem), (s, e) => model.RaisePanelPropertyChanged());
-            var rightPanelViewModel = new RightPanelViewModel(this.RightIconList, CustomLayoutPanelManager.Current.RightDock, RightPanelElementContains);
-            rightPanelViewModel.AddPropertyChanged(nameof(rightPanelViewModel.SelectedItem), (s, e) => model.RaisePanelPropertyChanged());
-            this.VM = new SidePanelFrameViewModel(model, leftPanelViewModel, rightPanelViewModel);
-            this.VM.PanelVisibilityChanged += (s, e) => UpdateCanvas();
+            using var startupScope = App.TryTraceStartupScope("MainWindow.DeferredWarmup.SidePanelFrame.InitializeViewModel", 10000);
 
-            InitializeColumnWidth(this.VM);
+            using (App.TryTraceStartupScope("MainWindow.DeferredWarmup.SidePanelFrame.InitializeViewModel.CustomLayoutPanelManager.Initialize", 10000))
+            {
+                CustomLayoutPanelManager.Initialize();
+            }
 
-            UpdateLeftAutoHide();
-            UpdateRightAutoHide();
-            UpdateCanvas();
+            LeftPanelViewModel leftPanelViewModel;
+            using (App.TryTraceStartupScope("MainWindow.DeferredWarmup.SidePanelFrame.InitializeViewModel.LeftPanelViewModel", 10000))
+            {
+                leftPanelViewModel = new LeftPanelViewModel(this.LeftIconList, CustomLayoutPanelManager.Current.LeftDock, LeftPanelElementContains);
+                leftPanelViewModel.AddPropertyChanged(nameof(leftPanelViewModel.SelectedItem), (s, e) => model.RaisePanelPropertyChanged());
+            }
+
+            RightPanelViewModel rightPanelViewModel;
+            using (App.TryTraceStartupScope("MainWindow.DeferredWarmup.SidePanelFrame.InitializeViewModel.RightPanelViewModel", 10000))
+            {
+                rightPanelViewModel = new RightPanelViewModel(this.RightIconList, CustomLayoutPanelManager.Current.RightDock, RightPanelElementContains);
+                rightPanelViewModel.AddPropertyChanged(nameof(rightPanelViewModel.SelectedItem), (s, e) => model.RaisePanelPropertyChanged());
+            }
+
+            using (App.TryTraceStartupScope("MainWindow.DeferredWarmup.SidePanelFrame.InitializeViewModel.SidePanelFrameViewModel", 10000))
+            {
+                this.VM = new SidePanelFrameViewModel(model, leftPanelViewModel, rightPanelViewModel);
+                this.VM.PanelVisibilityChanged += (s, e) => UpdateCanvas();
+            }
+
+            using (App.TryTraceStartupScope("MainWindow.DeferredWarmup.SidePanelFrame.InitializeViewModel.InitializeColumnWidth", 10000))
+            {
+                InitializeColumnWidth(this.VM);
+            }
+
+            using (App.TryTraceStartupScope("MainWindow.DeferredWarmup.SidePanelFrame.InitializeViewModel.UpdateAutoHide", 10000))
+            {
+                UpdateLeftAutoHide();
+                UpdateRightAutoHide();
+            }
+
+            using (App.TryTraceStartupScope("MainWindow.DeferredWarmup.SidePanelFrame.InitializeViewModel.UpdateCanvas", 10000))
+            {
+                UpdateCanvas();
+            }
             _isViewModelInitialized = true;
         }
 
