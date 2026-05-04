@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.Windows.Input;
+﻿using CommunityToolkit.Mvvm.Input;
 using NeeView.Properties;
 using NeeView.Windows.Property;
 using System;
@@ -45,7 +45,7 @@ namespace NeeView.Setting
     /// <summary>
     /// SettingPage: Script
     /// </summary>
-    class SettingPageScript : SettingPage
+    partial class SettingPageScript : SettingPage
     {
         public SettingPageScript() : base(TextResources.GetString("SettingPage.Script"))
         {
@@ -56,7 +56,7 @@ namespace NeeView.Setting
             section.Children.Add(new SettingItemProperty(PropertyMemberElement.Create(Config.Current.Script, nameof(ScriptConfig.ScriptFolder), new PropertyMemberElementOptions() { EmptyValue = SaveDataProfile.DefaultScriptsFolder }))
             {
                 IsStretch = true,
-                SubContent = UIElementTools.CreateHyperlink(TextResources.GetString("SettingPage.Script.OpenScriptFolder"), new RelayCommand(ScriptManager.Current.OpenScriptsFolder)),
+                SubContent = UIElementTools.CreateHyperlink(TextResources.GetString("SettingPage.Script.OpenScriptFolder"), OpenScriptsFolderCommand),
             });
 
             section.Children.Add(new SettingItemProperty(PropertyMemberElement.Create(Config.Current.Script, nameof(ScriptConfig.ErrorLevel))) { SubContent = CreateScriptErrorLevelRemarks() });
@@ -66,6 +66,11 @@ namespace NeeView.Setting
             this.Items.Add(section);
         }
 
+        [RelayCommand]
+        private void OpenScriptsFolder()
+        {
+            ScriptManager.Current.OpenScriptsFolder();
+        }
 
         private static TextBlock CreateScriptErrorLevelRemarks()
         {
@@ -103,37 +108,45 @@ namespace NeeView.Setting
     /// <summary>
     /// SettingPage: CommandList
     /// </summary>
-    class SettingPageCommandList : SettingPage
+    partial class SettingPageCommandList : SettingPage
     {
         public SettingPageCommandList() : base(TextResources.GetString("SettingPage.Command.Main"))
         {
-            var linkCommand = new RelayCommand(() => this.IsSelected = true);
-
             this.IsScrollEnabled = false;
             this.IsResetButtonConfirm = false;
             this.ResetButtonMargin = new Thickness(0, 0, 10, 15);
 
             var section = new SettingItemSection(TextResources.GetString("SettingPage.Command.Main"));
-            section.Children.Add(new SettingItemCommand() { SearchResultItem = new SettingItemLink(TextResources.GetString("SettingPage.Command.Main"), linkCommand) { IsContentOnly = true } });
+            section.Children.Add(new SettingItemCommand() { SearchResultItem = new SettingItemLink(TextResources.GetString("SettingPage.Command.Main"), LinkCommand) { IsContentOnly = true } });
             this.Items = new List<SettingItem>() { section };
+        }
+
+        [RelayCommand]
+        private void Link()
+        {
+            this.IsSelected = true;
         }
     }
 
     /// <summary>
     /// SettingPage: ContextMenu
     /// </summary>
-    class SettingPageContextMenu : SettingPage
+    partial class SettingPageContextMenu : SettingPage
     {
         public SettingPageContextMenu() : base(TextResources.GetString("SettingPage.ContextMenu"))
         {
-            var linkCommand = new RelayCommand(() => this.IsSelected = true);
-
             this.IsScrollEnabled = false;
             this.ResetButtonMargin = new Thickness(0, 0, 10, 15);
 
             var section = new SettingItemSection(TextResources.GetString("SettingPage.ContextMenu.Edit"));
-            section.Children.Add(new SettingItemContextMenu() { SearchResultItem = new SettingItemLink(TextResources.GetString("SettingPage.ContextMenu.Edit"), linkCommand) { IsContentOnly = true } });
+            section.Children.Add(new SettingItemContextMenu() { SearchResultItem = new SettingItemLink(TextResources.GetString("SettingPage.ContextMenu.Edit"), LinkCommand) { IsContentOnly = true } });
             this.Items = new List<SettingItem>() { section };
+        }
+
+        [RelayCommand]
+        private void Link()
+        {
+            this.IsSelected = true;
         }
     }
 }

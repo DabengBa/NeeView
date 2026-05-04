@@ -1,13 +1,13 @@
-﻿using NeeLaboratory;
-using NeeLaboratory.ComponentModel;
-using NeeLaboratory.Windows.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using NeeLaboratory;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 
 namespace NeeView
 {
-    public class ExternalAppDialogViewModel : BindableBase
+    public partial class ExternalAppDialogViewModel : ObservableObject
     {
         public ObservableCollection<ExternalApp> _items;
         private int _selectedIndex = -1;
@@ -16,12 +16,6 @@ namespace NeeView
         public ExternalAppDialogViewModel()
         {
             _items = new ObservableCollection<ExternalApp>(Config.Current.System.ExternalAppCollection);
-
-            AddCommand = new RelayCommand(AddCommand_Execute);
-            EditCommand = new RelayCommand(EditCommand_Execute, SelectedItemCommand_CanExecute);
-            DeleteCommand = new RelayCommand(DeleteCommand_Execute, SelectedItemCommand_CanExecute);
-            MoveUpCommand = new RelayCommand(MoveUpCommand_Execute, MoveUpCommand_CanExecute);
-            MoveDownCommand = new RelayCommand(MoveDownCommand_Execute, MoveDownCommand_CanExecute);
         }
 
 
@@ -41,35 +35,28 @@ namespace NeeView
             {
                 if (SetProperty(ref _selectedIndex, value))
                 {
-                    EditCommand.RaiseCanExecuteChanged();
-                    DeleteCommand.RaiseCanExecuteChanged();
-                    MoveUpCommand.RaiseCanExecuteChanged();
-                    MoveDownCommand.RaiseCanExecuteChanged();
+                    EditCommand.NotifyCanExecuteChanged();
+                    DeleteCommand.NotifyCanExecuteChanged();
+                    MoveUpCommand.NotifyCanExecuteChanged();
+                    MoveDownCommand.NotifyCanExecuteChanged();
                 }
             }
         }
 
 
-
-        public RelayCommand AddCommand { get; }
-        public RelayCommand EditCommand { get; }
-        public RelayCommand DeleteCommand { get; }
-        public RelayCommand MoveUpCommand { get; }
-        public RelayCommand MoveDownCommand { get; }
-
-
-
-        private void AddCommand_Execute()
+        [RelayCommand]
+        private void Add()
         {
             CallEditDialog(-1, new ExternalApp());
         }
 
-        private bool SelectedItemCommand_CanExecute()
+        private bool CanEdit()
         {
             return Items.Any() && _selectedIndex >= 0;
         }
 
-        private void EditCommand_Execute()
+        [RelayCommand(CanExecute = nameof(CanEdit))]
+        private void Edit()
         {
             if (_selectedIndex < 0) return;
 
@@ -106,7 +93,8 @@ namespace NeeView
             Items.Add(new ExternalApp() { Command = path });
         }
 
-        private void DeleteCommand_Execute()
+        [RelayCommand(CanExecute = nameof(CanEdit))]
+        private void Delete()
         {
             if (_selectedIndex < 0) return;
 
@@ -115,26 +103,28 @@ namespace NeeView
             SelectedIndex = MathUtility.Clamp(index, -1, Items.Count - 1);
         }
 
-        private bool MoveUpCommand_CanExecute()
+        private bool CanMoveUp()
         {
             return _selectedIndex > 0;
         }
 
-        private void MoveUpCommand_Execute()
+        [RelayCommand(CanExecute = nameof(CanMoveUp))]
+        private void MoveUp()
         {
-            if (!MoveUpCommand_CanExecute()) return;
+            if (!CanMoveUp()) return;
 
             Items.Move(_selectedIndex, _selectedIndex - 1);
         }
 
-        private bool MoveDownCommand_CanExecute()
+        private bool CanMoveDown()
         {
             return _selectedIndex >= 0 && _selectedIndex < Items.Count - 1;
         }
 
-        private void MoveDownCommand_Execute()
+        [RelayCommand(CanExecute = nameof(CanMoveDown))]
+        private void MoveDown()
         {
-            if (!MoveDownCommand_CanExecute()) return;
+            if (!CanMoveDown()) return;
 
             Items.Move(_selectedIndex, _selectedIndex + 1);
         }

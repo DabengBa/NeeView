@@ -1,8 +1,9 @@
-﻿using NeeLaboratory.ComponentModel;
-using NeeLaboratory.Windows.Input;
+﻿using CommunityToolkit.Mvvm.Input;
+using NeeLaboratory.ComponentModel;
 using NeeView.Properties;
 using NeeView.Windows;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -13,7 +14,7 @@ namespace NeeView
     /// <summary>
     /// BookmarkList : ViewModel
     /// </summary>
-    public class BookmarkListViewModel : BindableBase
+    public partial class BookmarkListViewModel : BindableBase
     {
         private readonly DpiScaleProvider _dpiProvider = new();
         private readonly BookmarkFolderList _model;
@@ -25,7 +26,7 @@ namespace NeeView
             _model = model;
 
             _model.PlaceChanged +=
-                (s, e) => MoveToUp.RaiseCanExecuteChanged();
+                (s, e) => MoveToUpCommand.NotifyCanExecuteChanged();
 
             _model.CollectionChanged +=
                 (s, e) =>
@@ -75,92 +76,54 @@ namespace NeeView
 
         public string MoveToUpToolTip { get; } = CommandTools.CreateToolTipText("Bookmark.Up.ToolTip", Key.Up, ModifierKeys.Alt);
 
-        /// <summary>
-        /// MoveTo command.
-        /// </summary>
-        private RelayCommand<QueryPath>? _MoveTo;
-        public RelayCommand<QueryPath> MoveTo
+
+        [RelayCommand]
+        private void MoveTo(QueryPath path)
         {
-            get { return _MoveTo = _MoveTo ?? new RelayCommand<QueryPath>(_model.MoveTo); }
+            _model.MoveTo(path);
         }
 
-        /// <summary>
-        /// MoveToUp command.
-        /// </summary>
-        private RelayCommand? _MoveToUp;
-        public RelayCommand MoveToUp
+        private bool CanMoveToUp() => _model.CanMoveToParent();
+
+        [RelayCommand(CanExecute = nameof(CanMoveToUp))]
+        private void MoveToUp()
         {
-            get { return _MoveToUp = _MoveToUp ?? new RelayCommand(_model.MoveToParent, _model.CanMoveToParent); }
+            _model.MoveToParent();
         }
 
-        private RelayCommand<FolderTreeLayout>? _SetFolderTreeLayout;
-        public RelayCommand<FolderTreeLayout> SetFolderTreeLayout
+        [RelayCommand]
+        private void SetFolderTreeLayout(FolderTreeLayout layout)
         {
-            get
-            {
-                return _SetFolderTreeLayout = _SetFolderTreeLayout ?? new RelayCommand<FolderTreeLayout>(Execute);
-
-                void Execute(FolderTreeLayout layout)
-                {
-                    _model.FolderListConfig.FolderTreeLayout = layout;
-                    SidePanelFrame.Current.SetVisibleBookmarkFolderTree(true, true);
-                }
-            }
+            _model.FolderListConfig.FolderTreeLayout = layout;
+            SidePanelFrame.Current.SetVisibleBookmarkFolderTree(true, true);
         }
 
-        private RelayCommand? _NewFolderCommand;
-        public RelayCommand NewFolderCommand
-        {
-            get { return _NewFolderCommand = _NewFolderCommand ?? new RelayCommand(NewFolderCommand_Executed); }
-        }
-
-        private void NewFolderCommand_Executed()
+        [RelayCommand]
+        private void NewFolder()
         {
             _model.NewFolder();
         }
 
-
-        private RelayCommand? _AddBookmarkCommand;
-        public RelayCommand AddBookmarkCommand
-        {
-            get { return _AddBookmarkCommand = _AddBookmarkCommand ?? new RelayCommand(AddBookmarkCommand_Executed); }
-        }
-
-        private void AddBookmarkCommand_Executed()
+        [RelayCommand]
+        private void AddBookmark()
         {
             _model.AddBookmark();
         }
 
-
-        private RelayCommand? _deleteInvalidBookmarkCommand;
-        public RelayCommand DeleteInvalidBookmarkCommand
-        {
-            get { return _deleteInvalidBookmarkCommand = _deleteInvalidBookmarkCommand ?? new RelayCommand(DeleteInvalidBookmark); }
-        }
-
-        private async void DeleteInvalidBookmark()
+        [RelayCommand]
+        private async Task DeleteInvalidBookmark()
         {
             await _model.DeleteInvalidBookmark();
         }
 
-        private RelayCommand? _ToggleVisibleFoldersTree;
-        public RelayCommand ToggleVisibleFoldersTree
-        {
-            get { return _ToggleVisibleFoldersTree = _ToggleVisibleFoldersTree ?? new RelayCommand(ToggleVisibleFoldersTree_Executed); }
-        }
-
-        private void ToggleVisibleFoldersTree_Executed()
+        [RelayCommand]
+        private void ToggleVisibleFoldersTree()
         {
             _model.FolderListConfig.IsFolderTreeVisible = !_model.FolderListConfig.IsFolderTreeVisible;
         }
 
-        private RelayCommand<PanelListItemStyle>? _SetListItemStyle;
-        public RelayCommand<PanelListItemStyle> SetListItemStyle
-        {
-            get { return _SetListItemStyle = _SetListItemStyle ?? new RelayCommand<PanelListItemStyle>(SetListItemStyle_Executed); }
-        }
-
-        private void SetListItemStyle_Executed(PanelListItemStyle style)
+        [RelayCommand]
+        private void SetListItemStyle(PanelListItemStyle style)
         {
             _model.FolderListConfig.PanelListItemStyle = style;
         }
@@ -211,7 +174,7 @@ namespace NeeView
 
             private MenuItem CreateListItemStyleMenuItem(string header, PanelListItemStyle style)
             {
-                return CreateListItemStyleMenuItem(header, _vm.SetListItemStyle, style, _vm.Model.FolderListConfig);
+                return CreateListItemStyleMenuItem(header, _vm.SetListItemStyleCommand, style, _vm.Model.FolderListConfig);
             }
 
             private MenuItem CreateCheckableMenuItem(string header, Binding binding)

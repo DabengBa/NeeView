@@ -1,5 +1,6 @@
-﻿using NeeLaboratory.ComponentModel;
-using NeeLaboratory.Windows.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using NeeLaboratory.ComponentModel;
 using NeeView.Properties;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ using System.Windows.Input;
 
 namespace NeeView
 {
-    public class MediaControlViewModel : BindableBase
+    public partial class MediaControlViewModel : ObservableObject
     {
         private readonly MediaControl _model;
         private readonly MouseWheelDelta _mouseWheelDelta = new();
@@ -25,10 +26,6 @@ namespace NeeView
             _model.Changed += Model_Changed;
             UpdateOperator(_model.LastChangedArgs);
 
-            PlayCommand = new RelayCommand(PlayCommand_Executed);
-            RepeatCommand = new RelayCommand(RepeatCommand_Executed);
-            MuteCommand = new RelayCommand(MuteCommand_Executed);
-
             MoreMenuDescription = new MediaPlayerMoreMenuDescription(this);
         }
 
@@ -41,7 +38,7 @@ namespace NeeView
                 if (_operator != value)
                 {
                     AttachOperator(value);
-                    RaisePropertyChanged();
+                    OnPropertyChanged();
                     IsMoreMenuEnabled = _operator?.CanControlTracks == true || _operator?.RateEnabled == true;
                 }
             }
@@ -56,11 +53,6 @@ namespace NeeView
         public bool IsPlaying => _operator?.IsPlaying ?? false;
 
 
-        public RelayCommand PlayCommand { get; }
-        public RelayCommand RepeatCommand { get; }
-        public RelayCommand MuteCommand { get; }
-
-
         private void AttachOperator(MediaPlayerOperator? op)
         {
             DetachOperator();
@@ -71,7 +63,7 @@ namespace NeeView
             _operatorEventDisposables = new();
 
             _operatorEventDisposables.Add(_operator.SubscribePropertyChanged(nameof(_operator.IsPlaying),
-                (s, e) => RaisePropertyChanged(nameof(IsPlaying))));
+                (s, e) => OnPropertyChanged(nameof(IsPlaying))));
         }
 
         private void DetachOperator()
@@ -83,19 +75,22 @@ namespace NeeView
             _operator = null;
         }
 
-        private void PlayCommand_Executed()
+        [RelayCommand]
+        private void Play()
         {
             if (Operator is null) return;
             Operator.TogglePlay();
         }
 
-        private void RepeatCommand_Executed()
+        [RelayCommand]
+        private void Repeat()
         {
             if (Operator is null) return;
             Operator.IsRepeat = !Operator.IsRepeat;
         }
 
-        private void MuteCommand_Executed()
+        [RelayCommand]
+        private void Mute()
         {
             if (Operator is null) return;
             Operator.IsMuted = !Operator.IsMuted;
@@ -128,7 +123,7 @@ namespace NeeView
                 Operator = null;
             }
 
-            RaisePropertyChanged("");
+            OnPropertyChanged("");
 
             // TODO: 特殊な処理になっているので整備が必要
             if (e.IsMainMediaPlayer)

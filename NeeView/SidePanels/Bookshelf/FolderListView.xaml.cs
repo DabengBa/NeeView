@@ -265,7 +265,7 @@ namespace NeeView
                 menu.Items.Add(new Separator());
             }
 
-            menu.Items.Add(new MenuItem() { Header = TextResources.GetString("Bookshelf.Home.Menu.Set"), Command = _vm.SetHome });
+            menu.Items.Add(new MenuItem() { Header = TextResources.GetString("Bookshelf.Home.Menu.Set"), Command = _vm.SetHomeCommand });
         }
 
         private List<MenuItem> CreateQuickAccessMenuItems(TreeListNode<QuickAccessEntry> node)
@@ -289,7 +289,7 @@ namespace NeeView
                     switch (child.Value)
                     {
                         case QuickAccess quickAccess:
-                            menuItem.Command = _vm.MoveTo;
+                            menuItem.Command = _vm.MoveToCommand;
                             menuItem.CommandParameter = new QueryPath(quickAccess.Path);
                             break;
                         case QuickAccessFolder folder:

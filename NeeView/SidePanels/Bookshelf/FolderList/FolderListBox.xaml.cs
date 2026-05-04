@@ -1,6 +1,6 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.Input;
+using NeeLaboratory.ComponentModel;
 using NeeLaboratory.Linq;
-using NeeLaboratory.Windows.Input;
 using NeeView.Collections.Generic;
 using NeeView.Properties;
 using NeeView.Windows;
@@ -634,25 +634,14 @@ namespace NeeView
             }
         }
 
-
-        private RelayCommand? _NewFolderCommand;
-        public RelayCommand NewFolderCommand
-        {
-            get { return _NewFolderCommand = _NewFolderCommand ?? new RelayCommand(NewFolderCommand_Executed); }
-        }
-
-        private void NewFolderCommand_Executed()
+        [RelayCommand]
+        private void NewFolder()
         {
             _vm.Model.NewFolder();
         }
 
-        private RelayCommand? _AddBookmarkCommand;
-        public RelayCommand AddBookmarkCommand
-        {
-            get { return _AddBookmarkCommand = _AddBookmarkCommand ?? new RelayCommand(AddBookmarkCommand_Executed); }
-        }
-
-        private void AddBookmarkCommand_Executed()
+        [RelayCommand]
+        private void AddBookmark()
         {
             _vm.Model.AddBookmark();
         }

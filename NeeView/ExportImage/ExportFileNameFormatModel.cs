@@ -1,12 +1,13 @@
-﻿using NeeLaboratory.ComponentModel;
-using NeeLaboratory.Windows.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using NeeLaboratory.ComponentModel;
 using NeeView.Properties;
 using System;
 using System.Text;
 
 namespace NeeView
 {
-    public class ExportFileNameFormatModel : BindableBase
+    public partial class ExportFileNameFormatModel : ObservableObject
     {
         private readonly PropertyProxy<ExportImageParameter, string> _property;
 
@@ -46,7 +47,7 @@ namespace NeeView
                 if (_property.GetValue() != value)
                 {
                     _property.SetValue(value);
-                    RaisePropertyChanged();
+                    OnPropertyChanged();
                 }
             }
         }
@@ -58,19 +59,12 @@ namespace NeeView
         public string HelpText { get; }
 
 
-        public RelayCommand LostFocusCommand
+        [RelayCommand]
+        private void LostFocus()
         {
-            get
+            if (string.IsNullOrWhiteSpace(FileNameFormat))
             {
-                return field ??= new RelayCommand(Execute);
-
-                void Execute()
-                {
-                    if (string.IsNullOrWhiteSpace(FileNameFormat))
-                    {
-                        FileNameFormat = DefaultFileNameFormat;
-                    }
-                }
+                FileNameFormat = DefaultFileNameFormat;
             }
         }
 

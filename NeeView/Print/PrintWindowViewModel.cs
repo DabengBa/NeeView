@@ -1,5 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
-using NeeLaboratory.Windows.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using NeeView.Properties;
 using System;
 using System.Collections.Generic;
@@ -16,16 +16,12 @@ namespace NeeView
     }
 
 
-    public class PrintWindowViewModel : BindableBase
+    public partial class PrintWindowViewModel : ObservableObject
     {
         private readonly PrintModel _model;
         private bool _isEnabled = true;
         private FrameworkElement? _mainContent;
         private List<FixedPage> _pageCollection = new();
-        private RelayCommand? _resetCommand;
-        private RelayCommand? _printCommand;
-        private RelayCommand? _cancelCommand;
-        private RelayCommand? _printDialogCommand;
 
 
         public PrintWindowViewModel(PrintContext context)
@@ -60,13 +56,13 @@ namespace NeeView
         public FrameworkElement? MainContent
         {
             get { return _mainContent; }
-            set { if (_mainContent != value) { _mainContent = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _mainContent, value); }
         }
 
         public List<FixedPage> PageCollection
         {
             get { return _pageCollection; }
-            set { if (_pageCollection != value) { _pageCollection = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _pageCollection, value); }
         }
 
         public double MarginLeft
@@ -91,26 +87,6 @@ namespace NeeView
         {
             get { return _model.Margin.Bottom; }
             set { if (_model.Margin.Bottom != value) { _model.Margin = _model.Margin with { Bottom = value }; } }
-        }
-
-        public RelayCommand ResetCommand
-        {
-            get { return _resetCommand = _resetCommand ?? new RelayCommand(ResetCommand_Execute); }
-        }
-
-        public RelayCommand PrintCommand
-        {
-            get { return _printCommand = _printCommand ?? new RelayCommand(PrintCommand_Execute); }
-        }
-
-        public RelayCommand CancelCommand
-        {
-            get { return _cancelCommand = _cancelCommand ?? new RelayCommand(CancelCommand_Execute); }
-        }
-
-        public RelayCommand PrintDialogCommand
-        {
-            get { return _printDialogCommand = _printDialogCommand ?? new RelayCommand(PrintDialogCommand_Execute); }
         }
 
 
@@ -141,7 +117,8 @@ namespace NeeView
             PageCollection = _model.CreatePageCollection();
         }
 
-        private void ResetCommand_Execute()
+        [RelayCommand]
+        private void Reset()
         {
             var dialog = new MessageDialog(TextResources.GetString("PrintResetDialog.Title"), TextResources.GetString("PrintResetDialog.Message"));
             dialog.Commands.Add(UICommands.OK);
@@ -154,18 +131,21 @@ namespace NeeView
             }
         }
 
-        private void PrintCommand_Execute()
+        [RelayCommand]
+        private void Print()
         {
             _model.Print();
             Close?.Invoke(this, new PrintWindowCloseEventArgs() { Result = true });
         }
 
-        private void CancelCommand_Execute()
+        [RelayCommand]
+        private void Cancel()
         {
             Close?.Invoke(this, new PrintWindowCloseEventArgs() { Result = false });
         }
 
-        private void PrintDialogCommand_Execute()
+        [RelayCommand]
+        private void PrintDialog()
         {
             if (_model.PrintDialogShown) return;
 

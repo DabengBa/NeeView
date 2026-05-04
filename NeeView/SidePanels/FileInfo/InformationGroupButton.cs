@@ -1,17 +1,15 @@
-﻿using NeeLaboratory.Windows.Input;
+﻿using CommunityToolkit.Mvvm.Input;
 using NeeView.Properties;
 using System.Windows;
 using System.Windows.Controls;
 
 namespace NeeView
 {
-    public class InformationGroupButton : Button
+    public partial class InformationGroupButton : Button
     {
 
         public InformationGroupButton() : base()
         {
-            OpenFolderCommand = new RelayCommand(OpenFolderCommand_Execute);
-            OpenMapCommand = new RelayCommand(OpenMapCommand_Execute);
         }
 
 
@@ -35,11 +33,6 @@ namespace NeeView
             DependencyProperty.Register("GroupName", typeof(string), typeof(InformationGroupButton), new PropertyMetadata(null, AnyPropertyChanged));
 
 
-        public RelayCommand OpenFolderCommand { get; }
-
-        public RelayCommand OpenMapCommand { get; }
-
-
         private static void AnyPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is InformationGroupButton control)
@@ -54,13 +47,13 @@ namespace NeeView
             {
                 this.Content = TextResources.GetString("Information.OpenFolder");
                 this.Command = OpenFolderCommand;
-                this.Visibility = OpenFolderCommand_CanExecute() ? Visibility.Visible : Visibility.Collapsed;
+                this.Visibility = CanOpenFolder() ? Visibility.Visible : Visibility.Collapsed;
             }
             else if (GroupName == InformationGroup.Gps.ToAliasName())
             {
                 this.Content = TextResources.GetString("Information.OpenMap");
                 this.Command = OpenMapCommand;
-                this.Visibility = OpenMapCommand_CanExecute() ? Visibility.Visible : Visibility.Collapsed;
+                this.Visibility = CanOpenMap() ? Visibility.Visible : Visibility.Collapsed;
             }
             else
             {
@@ -68,22 +61,24 @@ namespace NeeView
             }
         }
 
-        private bool OpenFolderCommand_CanExecute()
+        private bool CanOpenFolder()
         {
             return Source?.CanOpenPlace() == true;
         }
 
-        private void OpenFolderCommand_Execute()
+        [RelayCommand]
+        private void OpenFolder()
         {
             Source?.OpenPlace();
         }
 
-        private bool OpenMapCommand_CanExecute()
+        private bool CanOpenMap()
         {
             return Source?.CanOpenMap() == true;
         }
 
-        void OpenMapCommand_Execute()
+        [RelayCommand]
+        private void OpenMap()
         {
             Source?.OpenMap();
         }

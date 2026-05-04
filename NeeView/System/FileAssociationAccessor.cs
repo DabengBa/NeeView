@@ -1,5 +1,5 @@
-﻿using NeeLaboratory.Generators;
-using NeeLaboratory.Windows.Input;
+﻿using CommunityToolkit.Mvvm.Input;
+using NeeLaboratory.Generators;
 using NeeView.Windows;
 using System.ComponentModel;
 using System.Windows.Media.Imaging;
@@ -23,8 +23,6 @@ namespace NeeView
             _isEnabled = _source.IsEnabled;
             _icon = _source.Icon;
             _window = window;
-
-            ChangeIconCommand = new RelayCommand(ChangeIconCommand_Execute);
         }
 
 
@@ -66,10 +64,8 @@ namespace NeeView
         }
 
 
-        public RelayCommand ChangeIconCommand { get; }
-
-
-        private void ChangeIconCommand_Execute()
+        [RelayCommand]
+        private void ChangeIcon()
         {
             var icon = FileAssociationTools.ShowIconDialog(_window.GetWindowHandle(), Icon);
             if (icon is not null)

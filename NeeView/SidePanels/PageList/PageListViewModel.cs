@@ -1,16 +1,15 @@
-﻿using NeeLaboratory.ComponentModel;
-using NeeLaboratory.Windows.Input;
+﻿using CommunityToolkit.Mvvm.Input;
+using NeeLaboratory.ComponentModel;
 using NeeView.Properties;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 
 namespace NeeView
 {
-    public class PageListViewModel : BindableBase
+    public partial class PageListViewModel : BindableBase
     {
         private readonly PageList _pageList;
         private readonly PageListConfig _pageListConfig;
@@ -32,8 +31,6 @@ namespace NeeView
 
             _pageList.CollectionChanged +=
                 (s, e) => AppDispatcher.Invoke(() => UpdateMoveToUpCommandCanExecute());
-
-            InitializeCommands();
 
             MoreMenuDescription = new PageListMoreMenuDescription(this);
         }
@@ -57,56 +54,58 @@ namespace NeeView
 
         #region Commands
 
-        public RelayCommand MoveToPreviousCommand { get; private set; }
-        public RelayCommand MoveToNextCommand { get; private set; }
-        public RelayCommand<KeyValuePair<int, PageHistoryUnit>> MoveToHistoryCommand { get; private set; }
-        public RelayCommand MoveToUpCommand { get; private set; }
-
         public string MoveToPreviousCommandToolTip { get; } = CommandTools.CreateToolTipText("PageList.Back.ToolTip", Key.Left, ModifierKeys.Alt);
         public string MoveToNextCommandToolTip { get; } = CommandTools.CreateToolTipText("PageList.Next.ToolTip", Key.Right, ModifierKeys.Alt);
         public string MoveToUpCommandToolTip { get; } = CommandTools.CreateToolTipText("PageList.Up.ToolTip", Key.Up, ModifierKeys.Alt);
 
 
-        [MemberNotNull(nameof(MoveToPreviousCommand), nameof(MoveToNextCommand), nameof(MoveToHistoryCommand), nameof(MoveToUpCommand))]
-        private void InitializeCommands()
+        private bool CanMoveToPrevious() => _pageList.CanMoveToPrevious();
+
+        [RelayCommand(CanExecute = nameof(CanMoveToPrevious))]
+        private void MoveToPrevious()
         {
-            MoveToPreviousCommand = new RelayCommand(_pageList.MoveToPrevious, _pageList.CanMoveToPrevious);
-            MoveToNextCommand = new RelayCommand(_pageList.MoveToNext, _pageList.CanMoveToNext);
-            MoveToHistoryCommand = new RelayCommand<KeyValuePair<int, PageHistoryUnit>>(_pageList.MoveToHistory);
-            MoveToUpCommand = new RelayCommand(_pageList.MoveToParent, _pageList.CanMoveToParent);
+            _pageList.MoveToPrevious();
         }
 
+        private bool CanMoveToNext() => _pageList.CanMoveToNext();
 
-        private RelayCommand<PanelListItemStyle>? _setListItemStyle;
-        public RelayCommand<PanelListItemStyle> SetListItemStyle
+        [RelayCommand(CanExecute = nameof(CanMoveToNext))]
+        private void MoveToNext()
         {
-            get { return _setListItemStyle = _setListItemStyle ?? new RelayCommand<PanelListItemStyle>(SetListItemStyle_Executed); }
+            _pageList.MoveToNext();
         }
 
-        private void SetListItemStyle_Executed(PanelListItemStyle style)
+        [RelayCommand]
+        private void MoveToHistory(KeyValuePair<int, PageHistoryUnit> item)
+        {
+            _pageList.MoveToHistory(item);
+        }
+
+        private bool CanMoveToUp() => _pageList.CanMoveToParent();
+
+        [RelayCommand(CanExecute = nameof(CanMoveToUp))]
+        private void MoveToUp()
+        {
+            _pageList.CanMoveToParent();
+        }
+
+        [RelayCommand]
+        private void SetListItemStyle(PanelListItemStyle style)
         {
             Config.Current.PageList.PanelListItemStyle = style;
         }
 
-        private RelayCommand? _toggleVisibleFoldersTree;
-        public RelayCommand ToggleVisibleFoldersTree
+        [RelayCommand]
+        private void ToggleVisibleFoldersTree()
         {
-            get { return _toggleVisibleFoldersTree = _toggleVisibleFoldersTree ?? new RelayCommand(_pageList.ToggleVisibleFoldersTree); }
+            _pageList.ToggleVisibleFoldersTree();
         }
 
-        private RelayCommand<FolderTreeLayout>? _setFolderTreeLayout;
-        public RelayCommand<FolderTreeLayout> SetFolderTreeLayout
+        [RelayCommand]
+        private void SetFolderTreeLayout(FolderTreeLayout layout)
         {
-            get
-            {
-                return _setFolderTreeLayout = _setFolderTreeLayout ?? new RelayCommand<FolderTreeLayout>(Execute);
-
-                void Execute(FolderTreeLayout layout)
-                {
-                    _pageListConfig.FolderTreeLayout = layout;
-                    _pageListConfig.IsFolderTreeVisible = true;
-                }
-            }
+            _pageListConfig.FolderTreeLayout = layout;
+            _pageListConfig.IsFolderTreeVisible = true;
         }
 
         #endregion Commands
@@ -144,7 +143,7 @@ namespace NeeView
 
             private MenuItem CreateListItemStyleMenuItem(string header, PanelListItemStyle style)
             {
-                return CreateListItemStyleMenuItem(header, _vm.SetListItemStyle, style, Config.Current.PageList);
+                return CreateListItemStyleMenuItem(header, _vm.SetListItemStyleCommand, style, Config.Current.PageList);
             }
 
             private MenuItem CreateCheckableMenuItem(string header, Binding binding)
@@ -171,13 +170,13 @@ namespace NeeView
         /// </summary>
         private void UpdateMoveToHistoryCommandCanExecute()
         {
-            this.MoveToPreviousCommand.RaiseCanExecuteChanged();
-            this.MoveToNextCommand.RaiseCanExecuteChanged();
+            this.MoveToPreviousCommand.NotifyCanExecuteChanged();
+            this.MoveToNextCommand.NotifyCanExecuteChanged();
         }
 
         private void UpdateMoveToUpCommandCanExecute()
         {
-            this.MoveToUpCommand.RaiseCanExecuteChanged();
+            this.MoveToUpCommand.NotifyCanExecuteChanged();
         }
     }
 

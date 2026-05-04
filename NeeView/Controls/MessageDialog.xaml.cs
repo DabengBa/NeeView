@@ -1,5 +1,5 @@
-﻿using NeeLaboratory.Generators;
-using NeeLaboratory.Windows.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using NeeView.Properties;
 using NeeView.Windows.Media;
 using System;
@@ -15,16 +15,14 @@ namespace NeeView
     /// <summary>
     /// Standard MessageDialog
     /// </summary>
-    [NotifyPropertyChanged]
-    public partial class MessageDialog : Window, INotifyPropertyChanged
+    [INotifyPropertyChanged]
+    public partial class MessageDialog : Window
     {
         public readonly static RoutedCommand CopyCommand = new(nameof(CopyCommand), typeof(MessageDialog), new InputGestureCollection(new List<InputGesture>() { new KeyGesture(Key.C, ModifierKeys.Control) }));
         public static Window? OwnerWindow { get; set; }
 
         public static bool IsShowInTaskBar { get; set; } = true;
 
-
-        private RelayCommand<UICommand>? _buttonClickedCommand;
 
         private UICommand? _resultCommand;
 
@@ -69,9 +67,6 @@ namespace NeeView
         }
 
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-
         public List<UICommand> Commands { get; private set; } = new List<UICommand>();
 
         public int DefaultCommandIndex { get; set; }
@@ -83,19 +78,12 @@ namespace NeeView
         public bool IsStretchWindow { get; set; } = true;
 
 
-        public RelayCommand<UICommand> ButtonClickedCommand
+        [RelayCommand]
+        private void ButtonClicked(UICommand? command)
         {
-            get
-            {
-                return _buttonClickedCommand = _buttonClickedCommand ?? new RelayCommand<UICommand>(Execute);
-
-                void Execute(UICommand? command)
-                {
-                    _resultCommand = command;
-                    this.DialogResult = true;
-                    this.Close();
-                }
-            }
+            _resultCommand = command;
+            this.DialogResult = true;
+            this.Close();
         }
 
         private static FrameworkElement CreateTextContent(string content)

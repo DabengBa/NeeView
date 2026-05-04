@@ -1,6 +1,6 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.Input;
+using NeeLaboratory.ComponentModel;
 using NeeLaboratory.Generators;
-using NeeLaboratory.Windows.Input;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -50,7 +50,7 @@ namespace NeeView
 
 
 
-    public class DevInfoViewModel : BindableBase
+    public partial class DevInfoViewModel : BindableBase
     {
         public DevInfoViewModel()
         {
@@ -147,17 +147,8 @@ namespace NeeView
         // 開発用：
         ////public Development Development { get; private set; } = new Development();
 
-        /// <summary>
-        /// DevUpdateContentPosition command.
-        /// </summary>
-        private RelayCommand? _DevUpdateContentPosition;
-        public RelayCommand DevUpdateContentPosition
-        {
-            get { return _DevUpdateContentPosition = _DevUpdateContentPosition ?? new RelayCommand(DevUpdateContentPosition_Executed); }
-        }
-
-
-        private void DevUpdateContentPosition_Executed()
+        [RelayCommand]
+        private void DevUpdateContentPosition()
         {
             UpdateContentPosition();
         }

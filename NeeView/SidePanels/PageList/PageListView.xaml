@@ -89,14 +89,14 @@
             <DockPanel KeyboardNavigation.TabNavigation ="Local" Margin="0" >
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top">
                     <Button x:Name="IndexTreeButton" DockPanel.Dock="Right" Style="{StaticResource FolderListButtonStyle}" TabIndex="2" ToolTip="{properties:TextBinding Word.TableOfContents}"
-                        Command="{Binding ToggleVisibleFoldersTree}">
+                        Command="{Binding ToggleVisibleFoldersTreeCommand}">
                         <Image Source="{StaticResource ic_toc_a}" />
                         <Button.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="{properties:TextBinding FolderTreeLayout.Top}" IsChecked="{Binding FolderTreeLayout, Converter={StaticResource FolderTreeLayoutToBooleanConverter}, ConverterParameter={x:Static local:FolderTreeLayout.Top}}"
-                                              Command="{Binding SetFolderTreeLayout}" CommandParameter="{x:Static local:FolderTreeLayout.Top}"/>
+                                              Command="{Binding SetFolderTreeLayoutCommand}" CommandParameter="{x:Static local:FolderTreeLayout.Top}"/>
                                 <MenuItem Header="{properties:TextBinding FolderTreeLayout.Left}" IsChecked="{Binding FolderTreeLayout, Converter={StaticResource FolderTreeLayoutToBooleanConverter}, ConverterParameter={x:Static local:FolderTreeLayout.Left}}"
-                                              Command="{Binding SetFolderTreeLayout}" CommandParameter="{x:Static local:FolderTreeLayout.Left}"/>
+                                              Command="{Binding SetFolderTreeLayoutCommand}" CommandParameter="{x:Static local:FolderTreeLayout.Left}"/>
                             </ContextMenu>
                         </Button.ContextMenu>
                     </Button>

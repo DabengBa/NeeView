@@ -1,5 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
-using NeeLaboratory.Windows.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using NeeView.Properties;
 using System.Collections.Generic;
 using System.Globalization;
@@ -11,7 +11,7 @@ namespace NeeView.Setting
     /// <summary>
     /// MouseGestureSetting ViewModel
     /// </summary>
-    public class MouseGestureSettingViewModel : BindableBase
+    public partial class MouseGestureSettingViewModel : ObservableObject
     {
         private readonly IReadOnlyDictionary<string, CommandElement> _commandMap;
         private readonly string _key;
@@ -40,7 +40,7 @@ namespace NeeView.Setting
         public MouseGestureToken GestureToken
         {
             get { return _gestureToken; }
-            set { if (_gestureToken != value) { _gestureToken = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _gestureToken, value); }
         }
 
         public MouseSequence OriginalGesture { get; set; }
@@ -48,7 +48,7 @@ namespace NeeView.Setting
         public MouseSequence NewGesture
         {
             get { return _newGesture; }
-            set { if (_newGesture != value) { _newGesture = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _newGesture, value); }
         }
 
 
@@ -97,15 +97,10 @@ namespace NeeView.Setting
         }
 
         /// <summary>
-        /// Command: ClearCommand
+        /// ClearCommand
         /// </summary>
-        private RelayCommand? _clearCommand;
-        public RelayCommand ClearCommand
-        {
-            get { return _clearCommand = _clearCommand ?? new RelayCommand(ClearCommand_Executed); }
-        }
-
-        private void ClearCommand_Executed()
+        [RelayCommand]
+        private void Clear()
         {
             _commandMap[_key].MouseGesture = MouseSequence.Empty;
             _mouseGesture.Gesture.Reset();

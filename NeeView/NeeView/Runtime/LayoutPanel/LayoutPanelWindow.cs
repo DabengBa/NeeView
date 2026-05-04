@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.Windows.Input;
+﻿using CommunityToolkit.Mvvm.Input;
 using NeeView.Properties;
 using NeeView.Windows;
 using System;
@@ -9,7 +9,7 @@ using System.Windows.Controls;
 
 namespace NeeView.Runtime.LayoutPanel
 {
-    public class LayoutPanelWindow : Window, IDpiScaleProvider
+    public partial class LayoutPanelWindow : Window, IDpiScaleProvider
     {
         private readonly DpiScaleProvider _dpiProvider;
 
@@ -18,8 +18,6 @@ namespace NeeView.Runtime.LayoutPanel
         {
             _dpiProvider = new DpiScaleProvider();
             this.DpiChanged += (s, e) => _dpiProvider.SetDipScale(e.NewDpi);
-
-            OpenDockCommand = new RelayCommand(OpenDockCommand_Execute);
         }
 
 
@@ -41,10 +39,6 @@ namespace NeeView.Runtime.LayoutPanel
 
         public static readonly DependencyProperty LayoutPanelProperty =
             DependencyProperty.Register("LayoutPanel", typeof(LayoutPanel), typeof(LayoutPanelWindow), new PropertyMetadata(null));
-
-
-        public RelayCommand OpenDockCommand { get; }
-
 
 
         protected override void OnSourceInitialized(EventArgs e)
@@ -104,7 +98,8 @@ namespace NeeView.Runtime.LayoutPanel
             return LayoutPanelWindowManager?.Resources[key] ?? TextResources.GetLiteral(key);
         }
 
-        private void OpenDockCommand_Execute()
+        [RelayCommand]
+        private void OpenDock()
         {
             if (LayoutPanel != null)
             {

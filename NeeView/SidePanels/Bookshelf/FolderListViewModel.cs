@@ -1,10 +1,9 @@
-﻿using NeeLaboratory.ComponentModel;
-using NeeLaboratory.Windows.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using NeeView.Properties;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -14,7 +13,7 @@ namespace NeeView
     /// <summary>
     /// FolderList : ViewModel
     /// </summary>
-    public class FolderListViewModel : BindableBase
+    public partial class FolderListViewModel : ObservableObject
     {
         private readonly BookshelfFolderList _model;
         private Dictionary<FolderOrder, string> _folderOrderList = AliasNameExtensions.GetAliasNameDictionary<FolderOrder>();
@@ -29,13 +28,13 @@ namespace NeeView
                 (s, e) => AppDispatcher.Invoke(() => UpdateCommandCanExecute());
 
             _model.PlaceChanged +=
-                (s, e) => AppDispatcher.Invoke(() => MoveToUp.RaiseCanExecuteChanged());
+                (s, e) => AppDispatcher.Invoke(() => MoveToUpCommand.NotifyCanExecuteChanged());
 
             _model.CollectionChanged +=
                 (s, e) => AppDispatcher.Invoke(() => Model_CollectionChanged(s, e));
 
             _model.AddPropertyChanged(nameof(_model.SearchBoxModel),
-                (s, e) => RaisePropertyChanged(nameof(SearchBoxModel)));
+                (s, e) => OnPropertyChanged(nameof(SearchBoxModel)));
 
             MoreMenuDescription = new FolderListMoreMenuDescription(this);
         }
@@ -73,164 +72,126 @@ namespace NeeView
 
         #region Commands
 
-        private RelayCommand? _setHome;
-        private RelayCommand? _moveToHome;
-        private RelayCommand<QueryPath>? _moveTo;
-        private RelayCommand? _moveToPrevious;
-        private RelayCommand? _moveToNext;
-        private RelayCommand<KeyValuePair<int, QueryPath>>? _moveToHistory;
-        private RelayCommand? _moveToUp;
-        private RelayCommand? _sync;
-        private RelayCommand? _toggleFolderRecursive;
-        private RelayCommand? _addQuickAccess;
-        private RelayCommand<FolderTreeLayout>? _setFolderTreeLayout;
-        private RelayCommand? _newFolderCommand;
-        private RelayCommand? _addBookmarkCommand;
-        private RelayCommand<PanelListItemStyle>? _setListItemStyle;
-        private RelayCommand? _toggleVisibleFoldersTree;
-        private RelayCommand? _clearHistoryInPlace;
-
         public string MoveToHomeToolTip { get; } = CommandTools.CreateToolTipText("Bookshelf.Home.ToolTip", Key.Home, ModifierKeys.Alt);
         public string MoveToPreviousToolTip { get; } = CommandTools.CreateToolTipText("Bookshelf.Back.ToolTip", Key.Left, ModifierKeys.Alt);
         public string MoveToNextToolTip { get; } = CommandTools.CreateToolTipText("Bookshelf.Next.ToolTip", Key.Right, ModifierKeys.Alt);
         public string MoveToUpToolTip { get; } = CommandTools.CreateToolTipText("Bookshelf.Up.ToolTip", Key.Up, ModifierKeys.Alt);
 
 
-        public RelayCommand ToggleVisibleFoldersTree
+        [RelayCommand]
+        private void ToggleVisibleFoldersTree()
         {
-            get { return _toggleVisibleFoldersTree = _toggleVisibleFoldersTree ?? new RelayCommand(_model.ToggleVisibleFoldersTree); }
+            _model.ToggleVisibleFoldersTree();
         }
 
-        public RelayCommand SetHome
+        private bool CanSetHome() => _model.CanSetHome();
+
+        [RelayCommand(CanExecute = nameof(CanSetHome))]
+        private void SetHome()
         {
-            get { return _setHome = _setHome ?? new RelayCommand(_model.SetHome, _model.CanSetHome); }
+            _model.SetHome();
         }
 
-        public RelayCommand MoveToHome
+        [RelayCommand]
+        private void MoveToHome()
         {
-            get { return _moveToHome = _moveToHome ?? new RelayCommand(_model.MoveToHome); }
+            _model.MoveToHome();
         }
 
-        public RelayCommand<QueryPath> MoveTo
+        [RelayCommand]
+        private void MoveTo(QueryPath path)
         {
-            get { return _moveTo = _moveTo ?? new RelayCommand<QueryPath>(_model.MoveTo); }
+            _model.MoveTo(path);
         }
 
-        public RelayCommand MoveToPrevious
+        private bool CanMoveToPrevious() => _model.CanMoveToPrevious();
+
+        [RelayCommand(CanExecute = nameof(CanMoveToPrevious))]
+        private void MoveToPrevious()
         {
-            get { return _moveToPrevious = _moveToPrevious ?? new RelayCommand(_model.MoveToPrevious, _model.CanMoveToPrevious); }
+            _model.MoveToPrevious();
         }
 
-        public RelayCommand MoveToNext
+        private bool CanMoveToNext() => _model.CanMoveToNext();
+
+        [RelayCommand(CanExecute = nameof(CanMoveToNext))]
+        private void MoveToNext()
         {
-            get { return _moveToNext = _moveToNext ?? new RelayCommand(_model.MoveToNext, _model.CanMoveToNext); }
+            _model.MoveToNext();
         }
 
-        public RelayCommand<KeyValuePair<int, QueryPath>> MoveToHistory
+        [RelayCommand]
+        private void MoveToHistory(KeyValuePair<int, QueryPath> item)
         {
-            get { return _moveToHistory = _moveToHistory ?? new RelayCommand<KeyValuePair<int, QueryPath>>(_model.MoveToHistory); }
+            _model.MoveToHistory(item);
         }
 
-        public RelayCommand MoveToUp
+        private bool CanMoveToParent() => _model.CanMoveToParent();
+
+        [RelayCommand(CanExecute = nameof(CanMoveToParent))]
+        private void MoveToUp()
         {
-            get { return _moveToUp = _moveToUp ?? new RelayCommand(_model.MoveToParent, _model.CanMoveToParent); }
+            _model.MoveToParent();
         }
 
-        public RelayCommand Sync
+        [RelayCommand]
+        private void Sync()
         {
-            get { return _sync = _sync ?? new RelayCommand(_model.Sync); }
+            _model.Sync();
+        }
+        
+        [RelayCommand]
+        private void ToggleFolderRecursive()
+        {
+            _model.ToggleFolderRecursive();
         }
 
-        public RelayCommand ToggleFolderRecursive
+        private bool CanAddQuickAccess() => _model.Place != null;
+
+        [RelayCommand(CanExecute = nameof(CanAddQuickAccess))]
+        private void AddQuickAccess()
         {
-            get { return _toggleFolderRecursive = _toggleFolderRecursive ?? new RelayCommand(_model.ToggleFolderRecursive); }
+            _model.AddQuickAccess();
         }
 
-        public RelayCommand AddQuickAccess
+        [RelayCommand]
+        private void ClearHistoryInPlace()
         {
-            get
-            {
-                return _addQuickAccess = _addQuickAccess ?? new RelayCommand(Execute, CanExecute);
-
-                bool CanExecute()
-                {
-                    return _model.Place != null;
-                }
-
-                void Execute()
-                {
-                    _model.AddQuickAccess();
-                }
-            }
+            _model.ClearHistoryInPlace();
         }
 
-        public RelayCommand ClearHistoryInPlace
+        [RelayCommand]
+        private void SetFolderTreeLayout(FolderTreeLayout layout)
         {
-            get { return _clearHistoryInPlace = _clearHistoryInPlace ?? new RelayCommand(_model.ClearHistoryInPlace); }
+            _model.FolderListConfig.FolderTreeLayout = layout;
+            SidePanelFrame.Current.SetVisibleBookshelfFolderTree(true, true);
         }
 
-        public RelayCommand<FolderTreeLayout> SetFolderTreeLayout
+        [RelayCommand]
+        private void NewFolder()
         {
-            get
-            {
-                return _setFolderTreeLayout = _setFolderTreeLayout ?? new RelayCommand<FolderTreeLayout>(Execute);
-
-                void Execute(FolderTreeLayout layout)
-                {
-                    _model.FolderListConfig.FolderTreeLayout = layout;
-                    SidePanelFrame.Current.SetVisibleBookshelfFolderTree(true, true);
-                }
-            }
+            _model.NewFolder();
         }
 
-        public RelayCommand NewFolderCommand
+        [RelayCommand]
+        private void AddBookmark()
         {
-            get
-            {
-                return _newFolderCommand = _newFolderCommand ?? new RelayCommand(Execute);
-
-                void Execute()
-                {
-                    _model.NewFolder();
-                }
-            }
+            _model.AddBookmark();
         }
 
-        public RelayCommand AddBookmarkCommand
+        [RelayCommand]
+        private void SetListItemStyle(PanelListItemStyle style)
         {
-            get
-            {
-                return _addBookmarkCommand = _addBookmarkCommand ?? new RelayCommand(Execute);
-
-                void Execute()
-                {
-                    _model.AddBookmark();
-                }
-
-            }
+            _model.FolderListConfig.PanelListItemStyle = style;
         }
-
-        public RelayCommand<PanelListItemStyle> SetListItemStyle
-        {
-            get
-            {
-                return _setListItemStyle = _setListItemStyle ?? new RelayCommand<PanelListItemStyle>(Execute);
-
-                void Execute(PanelListItemStyle style)
-                {
-                    _model.FolderListConfig.PanelListItemStyle = style;
-                }
-            }
-        }
-
 
         /// <summary>
         /// コマンド実行可能状態を更新
         /// </summary>
         private void UpdateCommandCanExecute()
         {
-            this.MoveToPrevious.RaiseCanExecuteChanged();
-            this.MoveToNext.RaiseCanExecuteChanged();
+            this.MoveToPreviousCommand.NotifyCanExecuteChanged();
+            this.MoveToNextCommand.NotifyCanExecuteChanged();
         }
 
         #endregion Commands
@@ -276,14 +237,14 @@ namespace NeeView
                 }
 
                 items.Add(new Separator());
-                items.Add(CreateCommandMenuItem(TextResources.GetString("Bookshelf.MoreMenu.AddQuickAccess"), _vm.AddQuickAccess));
+                items.Add(CreateCommandMenuItem(TextResources.GetString("Bookshelf.MoreMenu.AddQuickAccess"), _vm.AddQuickAccessCommand));
                 items.Add(CreateCommandMenuItem(TextResources.GetString("Bookshelf.MoreMenu.ClearHistory"), "ClearHistoryInPlace"));
 
                 switch (_vm._model.FolderCollection)
                 {
                     case FolderEntryCollection:
                         items.Add(new Separator());
-                        items.Add(CreateCommandMenuItem(TextResources.GetString("Bookshelf.MoreMenu.Subfolder"), _vm.ToggleFolderRecursive, new Binding("FolderCollection.FolderParameter.IsFolderRecursive") { Source = _vm._model }));
+                        items.Add(CreateCommandMenuItem(TextResources.GetString("Bookshelf.MoreMenu.Subfolder"), _vm.ToggleFolderRecursiveCommand, new Binding("FolderCollection.FolderParameter.IsFolderRecursive") { Source = _vm._model }));
                         break;
 
                     case FolderArchiveCollection:
@@ -304,7 +265,7 @@ namespace NeeView
 
             private MenuItem CreateListItemStyleMenuItem(string header, PanelListItemStyle style)
             {
-                return CreateListItemStyleMenuItem(header, _vm.SetListItemStyle, style, _vm._model.FolderListConfig);
+                return CreateListItemStyleMenuItem(header, _vm.SetListItemStyleCommand, style, _vm._model.FolderListConfig);
             }
 
             private MenuItem CreateCheckableMenuItem(string header, Binding binding)
@@ -328,7 +289,7 @@ namespace NeeView
         private void Model_CollectionChanged(object? sender, EventArgs e)
         {
             UpdateFolderOrderList();
-            RaisePropertyChanged(nameof(FolderCollection));
+            OnPropertyChanged(nameof(FolderCollection));
         }
 
         /// <summary>
@@ -355,7 +316,7 @@ namespace NeeView
             if (FolderCollection is null) return;
 
             FolderOrderList = FolderCollection.FolderOrderClass.GetFolderOrderMap();
-            RaisePropertyChanged(nameof(FolderOrder));
+            OnPropertyChanged(nameof(FolderOrder));
         }
 
         /// <summary>

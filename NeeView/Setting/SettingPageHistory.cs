@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.Windows.Input;
+﻿using CommunityToolkit.Mvvm.Input;
 using NeeView.Data;
 using NeeView.Properties;
 using NeeView.Windows.Property;
@@ -13,7 +13,7 @@ namespace NeeView.Setting
     /// <summary>
     /// Setting: History
     /// </summary>
-    public class SettingPageHistory : SettingPage
+    public partial class SettingPageHistory : SettingPage
     {
         public SettingPageHistory() : base(TextResources.GetString("SettingPage.History"))
         {
@@ -26,7 +26,7 @@ namespace NeeView.Setting
             section.Children.Add(new SettingItemProperty(PropertyMemberElement.Create(Config.Current.History, nameof(HistoryConfig.IsUncHistoryEnabled))));
             section.Children.Add(new SettingItemProperty(PropertyMemberElement.Create(Config.Current.History, nameof(HistoryConfig.IsForceUpdateHistory))));
             section.Children.Add(new SettingItemProperty(PropertyMemberElement.Create(Config.Current.History, nameof(HistoryConfig.IsAutoCleanupEnabled))));
-            section.Children.Add(new SettingItemButton(TextResources.GetString("SettingPage.History.GeneralDelete"), TextResources.GetString("SettingPage.History.GeneralDeleteButton"), RemoveHistory));
+            section.Children.Add(new SettingItemButton(TextResources.GetString("SettingPage.History.GeneralDelete"), TextResources.GetString("SettingPage.History.GeneralDeleteButton"), RemoveHistoryCommand));
             this.Items.Add(section);
 
             section = new SettingItemSection(TextResources.GetString("SettingPage.History.GeneralLimit"), TextResources.GetString("SettingPage.History.GeneralLimit.Remarks"));
@@ -46,13 +46,8 @@ namespace NeeView.Setting
 
         #region Commands
 
-        private RelayCommand<UIElement>? _RemoveHistory;
-        public RelayCommand<UIElement> RemoveHistory
-        {
-            get { return _RemoveHistory = _RemoveHistory ?? new RelayCommand<UIElement>(RemoveHistory_Executed); }
-        }
-
-        private void RemoveHistory_Executed(UIElement? element)
+        [RelayCommand]
+        private void RemoveHistory(UIElement? element)
         {
             BookHistoryCollection.Current.Clear();
 

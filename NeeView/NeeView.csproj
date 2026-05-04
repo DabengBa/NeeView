@@ -38,6 +38,7 @@
   
   <ItemGroup>
     <PackageReference Include="bblanchon.PDFium.Win32" Version="143.0.7497" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="Generator.Equals" Version="3.3.0" />
     <PackageReference Include="Jint" Version="4.4.2" />
     <PackageReference Include="MetadataExtractor" Version="2.9.0" />

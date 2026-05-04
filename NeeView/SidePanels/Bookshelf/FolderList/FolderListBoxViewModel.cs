@@ -1,5 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
-using NeeLaboratory.Windows.Input;
+﻿using CommunityToolkit.Mvvm.Input;
+using NeeLaboratory.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,7 +8,7 @@ using System.Windows;
 
 namespace NeeView
 {
-    public class FolderListBoxViewModel : BindableBase
+    public partial class FolderListBoxViewModel : BindableBase
     {
         private readonly FolderList _model;
         private readonly PanelThumbnailItemSize _thumbnailItemSize;
@@ -64,33 +64,17 @@ namespace NeeView
         public bool SyncBookOnRename => _model.SyncBookOnRename;
 
 
-        #region RelayCommands
-
-        private RelayCommand? _toggleFolderRecursive;
-        private RelayCommand? _newFolderCommand;
-
-
-        public RelayCommand ToggleFolderRecursive
+        [RelayCommand]
+        private void ToggleFolderRecursive()
         {
-            get { return _toggleFolderRecursive = _toggleFolderRecursive ?? new RelayCommand(_model.ToggleFolderRecursive_Executed); }
+            _model.ToggleFolderRecursive();
         }
 
-        // HACK: 未使用？
-        public RelayCommand NewFolderCommand
+        [RelayCommand]
+        private void NewFolder()
         {
-            get
-            {
-                return _newFolderCommand = _newFolderCommand ?? new RelayCommand(Execute);
-
-                void Execute()
-                {
-                    _model.NewFolder();
-                }
-            }
+            _model.NewFolder();
         }
-
-        #endregion RelayCommands
-
 
         private void Model_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {

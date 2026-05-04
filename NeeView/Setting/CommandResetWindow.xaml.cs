@@ -1,5 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
-using NeeLaboratory.Windows.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using System.Windows;
 using System.Windows.Input;
 
@@ -44,11 +44,9 @@ namespace NeeView.Setting
     }
 
 
-    public class CommandResetWindowViewModel : BindableBase
+    public partial class CommandResetWindowViewModel : ObservableObject
     {
         private InputScheme _inputScheme;
-        private RelayCommand<Window>? _okCommand;
-        private RelayCommand<Window>? _cancelCommand;
 
         public InputScheme InputScheme
         {
@@ -56,18 +54,9 @@ namespace NeeView.Setting
             set { SetProperty(ref _inputScheme, value); }
         }
 
-        public RelayCommand<Window> OkCommand
-        {
-            get { return _okCommand = _okCommand ?? new RelayCommand<Window>(OkCommand_Executed); }
-        }
 
-        public RelayCommand<Window> CancelCommand
-        {
-            get { return _cancelCommand = _cancelCommand ?? new RelayCommand<Window>(CancelCommand_Executed); }
-        }
-
-
-        private void OkCommand_Executed(Window? window)
+        [RelayCommand]
+        private void Ok(Window? window)
         {
             if (window is null) return;
 
@@ -75,7 +64,8 @@ namespace NeeView.Setting
             window.Close();
         }
 
-        private void CancelCommand_Executed(Window? window)
+        [RelayCommand]
+        private void Cancel(Window? window)
         {
             if (window is null) return;
 

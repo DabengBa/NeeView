@@ -41,7 +41,7 @@
         <TextBlock DockPanel.Dock="Top" Text="{Binding CursorPointRoot}"/>
         <TextBlock DockPanel.Dock="Top" Text="{Binding Message}"/>
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-            <Button Content="Update" Width="100" Command="{Binding DevUpdateContentPosition}"/>
+            <Button Content="Update" Width="100" Command="{Binding DevUpdateContentPositionCommand}"/>
             <TextBlock Text="{Binding ContentPosition}" Margin="5"/>
         </StackPanel>
         <TextBlock DockPanel.Dock="Top" Text="{Binding JobEngine.Scheduler.JobCount}"/>

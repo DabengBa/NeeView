@@ -1,6 +1,6 @@
-﻿using NeeLaboratory;
+﻿using CommunityToolkit.Mvvm.Input;
+using NeeLaboratory;
 using NeeLaboratory.ComponentModel;
-using NeeLaboratory.Windows.Input;
 using NeeView.Properties;
 using System;
 using System.Collections.Generic;
@@ -13,7 +13,7 @@ namespace NeeView
     /// <summary>
     /// Navigate : ViewModel
     /// </summary>
-    public class NavigateViewModel : BindableBase
+    public partial class NavigateViewModel : BindableBase
     {
         private readonly NavigateModel _model;
 
@@ -26,14 +26,6 @@ namespace NeeView
             Config.Current.BookSetting.PropertyChanged += BookSetting_PropertyChanged;
             Config.Current.View.PropertyChanged += ViewConfig_PropertyChanged;
             Config.Current.Navigator.PropertyChanged += NavigatorConfig_PropertyChanged;
-
-            RotateLeftCommand = new RelayCommand(_model.RotateLeft);
-            RotateRightCommand = new RelayCommand(_model.RotateRight);
-            RotateResetCommand = new RelayCommand(_model.RotateReset);
-            ScaleDownCommand = new RelayCommand(_model.ScaleDown);
-            ScaleUpCommand = new RelayCommand(_model.ScaleUp);
-            ScaleResetCommand = new RelayCommand(_model.ScaleReset);
-            StretchCommand = new RelayCommand(_model.Stretch);
 
             MoreMenuDescription = new NavigateMoreMenuDescription();
         }
@@ -194,15 +186,47 @@ namespace NeeView
         }
 
 
-        public RelayCommand RotateLeftCommand { get; private set; }
-        public RelayCommand RotateRightCommand { get; private set; }
-        public RelayCommand RotateResetCommand { get; private set; }
-        public RelayCommand ScaleDownCommand { get; private set; }
-        public RelayCommand ScaleUpCommand { get; private set; }
-        public RelayCommand ScaleResetCommand { get; private set; }
-        public RelayCommand StretchCommand { get; private set; }
+        [RelayCommand]
+        private void RotateLeft()
+        {
+            _model.RotateLeft();
+        }
 
+        [RelayCommand]
+        private void RotateRight()
+        {
+            _model.RotateRight();
+        }
 
+        [RelayCommand]
+        private void RotateReset()
+        {
+            _model.RotateReset();
+        }
+
+        [RelayCommand]
+        private void ScaleDown()
+        {
+            _model.ScaleDown();
+        }
+
+        [RelayCommand]
+        private void ScaleUp()
+        {
+            _model.ScaleUp();
+        }
+
+        [RelayCommand]
+        private void ScaleReset()
+        {
+            _model.ScaleReset();
+        }
+
+        [RelayCommand]
+        private void Stretch()
+        {
+            _model.Stretch();
+        }
 
         private void Model_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {

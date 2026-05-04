@@ -1,5 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
-using NeeLaboratory.Windows.Input;
+﻿using CommunityToolkit.Mvvm.Input;
+using NeeLaboratory.ComponentModel;
 using NeeView.Properties;
 using System.Collections.Generic;
 using System.Globalization;
@@ -22,17 +22,22 @@ namespace NeeView.Setting
             this.DataContext = new ResolveConflictDialogVM(context);
 
             // ESCでウィンドウを閉じる
-            this.InputBindings.Add(new KeyBinding(new RelayCommand(Close), new KeyGesture(Key.Escape)));
+            this.InputBindings.Add(new KeyBinding(CloseWindowCommand, new KeyGesture(Key.Escape)));
         }
 
-        //
+        [RelayCommand]
+        private void CloseWindow()
+        {
+            this.Close();
+        }
+
+
         private void OKButton_Click(object sender, RoutedEventArgs e)
         {
             this.DialogResult = true;
             this.Close();
         }
 
-        //
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             this.DialogResult = false;

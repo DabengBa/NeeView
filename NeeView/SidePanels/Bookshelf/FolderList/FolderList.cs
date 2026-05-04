@@ -1039,14 +1039,6 @@ namespace NeeView
 
         public abstract void Sync();
 
-
-        public void ToggleFolderRecursive()
-        {
-            if (_disposedValue) return;
-
-            ToggleFolderRecursive_Executed();
-        }
-
         protected virtual void CloseBookIfNecessary()
         {
         }
@@ -1460,7 +1452,7 @@ namespace NeeView
             return orders.ElementAt((index + 1) % orders.Count);
         }
 
-        public void ToggleFolderRecursive_Executed()
+        public void ToggleFolderRecursive()
         {
             if (_disposedValue) return;
 

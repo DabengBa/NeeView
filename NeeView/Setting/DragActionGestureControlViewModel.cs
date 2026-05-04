@@ -1,7 +1,6 @@
-﻿using NeeLaboratory.Generators;
-using NeeLaboratory.Windows.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using NeeView.Properties;
-using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
@@ -12,15 +11,13 @@ namespace NeeView.Setting
     /// <summary>
     /// MouseDragSetting ViewModel
     /// </summary>
-    [NotifyPropertyChanged]
-    public partial class DragActionGestureControlViewModel : INotifyPropertyChanged
+    public partial class DragActionGestureControlViewModel : ObservableObject
     {
         private readonly DragActionCollection _sources;
         private readonly string _key;
         private DragToken _dragToken = new();
         private DragKey _originalDrag = DragKey.Empty;
         private DragKey _newDrag = DragKey.Empty;
-        private RelayCommand? _clearCommand;
 
 
         public DragActionGestureControlViewModel(DragActionCollection memento, string key, FrameworkElement gestureSender)
@@ -33,9 +30,6 @@ namespace NeeView.Setting
             OriginalDrag = NewDrag = _sources[_key].MouseButton ?? DragKey.Empty;
             UpdateGestureToken(NewDrag);
         }
-
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
 
         public DragToken DragToken
@@ -101,16 +95,8 @@ namespace NeeView.Setting
             _sources[_key].MouseButton = NewDrag;
         }
 
-
-        /// <summary>
-        /// Command: ClearCommand
-        /// </summary>
-        public RelayCommand ClearCommand
-        {
-            get { return _clearCommand = _clearCommand ?? new RelayCommand(ClearCommand_Executed); }
-        }
-
-        private void ClearCommand_Executed()
+        [RelayCommand]
+        private void Clear()
         {
             UpdateGestureToken(DragKey.Empty);
         }

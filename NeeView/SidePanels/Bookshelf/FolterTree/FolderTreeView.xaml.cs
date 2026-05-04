@@ -1,10 +1,9 @@
-﻿using NeeLaboratory.Windows.Input;
+﻿using CommunityToolkit.Mvvm.Input;
 using NeeView.Collections.Generic;
 using NeeView.Properties;
 using NeeView.Windows;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,16 +21,6 @@ namespace NeeView
         private readonly FolderTreeViewModel _vm;
         private readonly SimpleTextSearch _textSearch = new();
         private readonly FolderTreeViewDropAssist _dropAssist;
-
-        private RelayCommand? _addQuickAccessCommand;
-        private RelayCommand? _removeCommand;
-        private RelayCommand? _propertyCommand;
-        private RelayCommand? _refreshFolderCommand;
-        private RelayCommand? _openExplorerCommand;
-        private RelayCommand? _newFolderCommand;
-        private RelayCommand? _renameCommand;
-        private RelayCommand? _addBookmarkCommand;
-
 
         public FolderTreeView()
         {
@@ -79,178 +68,122 @@ namespace NeeView
 
         #region Commands
 
-        public RelayCommand AddQuickAccessCommand
+        [RelayCommand]
+        private void AddQuickAccess()
         {
-            get
+            var item = this.TreeView.SelectedItem as TreeListNode<QuickAccessEntry>;
+            if (item != null)
             {
-                return _addQuickAccessCommand = _addQuickAccessCommand ?? new RelayCommand(Execute);
-
-                void Execute()
-                {
-                    var item = this.TreeView.SelectedItem as TreeListNode<QuickAccessEntry>;
-                    if (item != null)
-                    {
-                        _vm.AddCurrentPlaceQuickAccess(item);
-                    }
-                }
+                _vm.AddCurrentPlaceQuickAccess(item);
             }
         }
 
-        public RelayCommand RemoveCommand
+        [RelayCommand]
+        private void Remove()
         {
-            get
+            switch (this.TreeView.SelectedItem)
             {
-                return _removeCommand = _removeCommand ?? new RelayCommand(Execute);
+                case TreeListNode<QuickAccessEntry> quickAccess:
+                    _vm.RemoveQuickAccess(quickAccess);
+                    break;
 
-                void Execute()
-                {
-                    switch (this.TreeView.SelectedItem)
-                    {
-                        case TreeListNode<QuickAccessEntry> quickAccess:
-                            _vm.RemoveQuickAccess(quickAccess);
-                            break;
+                case RootBookmarkFolderNode rootBookmarkFolder:
+                    break;
 
-                        case RootBookmarkFolderNode rootBookmarkFolder:
-                            break;
-
-                        case BookmarkFolderNode bookmarkFolder:
-                            _vm.RemoveBookmarkFolder(bookmarkFolder);
-                            break;
-                    }
-                }
+                case BookmarkFolderNode bookmarkFolder:
+                    _vm.RemoveBookmarkFolder(bookmarkFolder);
+                    break;
             }
         }
 
-        public RelayCommand PropertyCommand
+        [RelayCommand]
+        private void OpenProperty()
         {
-            get
+            switch (this.TreeView.SelectedItem)
             {
-                return _propertyCommand = _propertyCommand ?? new RelayCommand(Execute);
-
-                void Execute()
-                {
-                    switch (this.TreeView.SelectedItem)
+                case TreeListNode<QuickAccessEntry> { Value: QuickAccess quickAccess }:
                     {
-                        case TreeListNode<QuickAccessEntry> { Value: QuickAccess quickAccess }:
-                            {
-                                var work = (QuickAccess)quickAccess.Clone();
-                                var dialog = new QuickAccessPropertyDialog(work)
-                                {
-                                    Owner = Window.GetWindow(this),
-                                    WindowStartupLocation = WindowStartupLocation.CenterOwner,
-                                };
-                                var result = dialog.ShowDialog();
-                                if (result == true)
-                                {
-                                    quickAccess.Restore(work.CreateMemento());
-                                }
-                            }
-                            break;
+                        var work = (QuickAccess)quickAccess.Clone();
+                        var dialog = new QuickAccessPropertyDialog(work)
+                        {
+                            Owner = Window.GetWindow(this),
+                            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                        };
+                        var result = dialog.ShowDialog();
+                        if (result == true)
+                        {
+                            quickAccess.Restore(work.CreateMemento());
+                        }
                     }
-                }
+                    break;
             }
         }
 
-        public RelayCommand RefreshFolderCommand
+        [RelayCommand]
+        private void RefreshFolder()
         {
-            get
-            {
-                return _refreshFolderCommand = _refreshFolderCommand ?? new RelayCommand(Execute);
+            _vm.RefreshFolder();
+        }
 
-                void Execute()
-                {
-                    _vm.RefreshFolder();
-                }
+        [RelayCommand]
+        private void OpenExplorer()
+        {
+            if (this.TreeView.SelectedItem is DirectoryNode item)
+            {
+                ExternalProcess.OpenWithFileManager(item.Path, true);
             }
         }
 
-        public RelayCommand OpenExplorerCommand
+        [RelayCommand]
+        private async Task NewFolder()
         {
-            get
+            switch (this.TreeView.SelectedItem)
             {
-                return _openExplorerCommand = _openExplorerCommand ?? new RelayCommand(Execute);
-
-                void Execute()
-                {
-                    if (this.TreeView.SelectedItem is DirectoryNode item)
+                case TreeListNode<QuickAccessEntry> { Value: QuickAccessFolder } quickAccess:
                     {
-                        ExternalProcess.OpenWithFileManager(item.Path, true);
+                        var newItem = _vm.NewQuickAccessFolder(quickAccess);
+                        if (newItem != null)
+                        {
+                            this.TreeView.UpdateLayout();
+                            await RenameQuickAccess(newItem);
+                        }
                     }
-                }
+                    break;
+
+                case BookmarkFolderNode bookmarkFolderNode:
+                    {
+                        var newItem = _vm.NewBookmarkFolder(bookmarkFolderNode);
+                        if (newItem != null)
+                        {
+                            this.TreeView.UpdateLayout();
+                            await RenameBookmarkFolder(newItem);
+                        }
+                    }
+                    break;
             }
         }
 
-        public RelayCommand NewFolderCommand
+        [RelayCommand]
+        private async Task Rename()
         {
-            get
+            switch (this.TreeView.SelectedItem)
             {
-                return _newFolderCommand = _newFolderCommand ?? new RelayCommand(Execute);
+                case TreeListNode<QuickAccessEntry> quickAccess:
+                    await RenameQuickAccess(quickAccess);
+                    break;
 
-                async void Execute()
-                {
-                    switch (this.TreeView.SelectedItem)
-                    {
-                        case TreeListNode<QuickAccessEntry> { Value: QuickAccessFolder } quickAccess:
-                            {
-                                var newItem = _vm.NewQuickAccessFolder(quickAccess);
-                                if (newItem != null)
-                                {
-                                    this.TreeView.UpdateLayout();
-                                    await RenameQuickAccess(newItem);
-                                }
-                            }
-                            break;
-
-                        case BookmarkFolderNode bookmarkFolderNode:
-                            {
-                                var newItem = _vm.NewBookmarkFolder(bookmarkFolderNode);
-                                if (newItem != null)
-                                {
-                                    this.TreeView.UpdateLayout();
-                                    await RenameBookmarkFolder(newItem);
-                                }
-                            }
-                            break;
-                    }
-                }
+                case BookmarkFolderNode bookmarkFolderNode:
+                    await RenameBookmarkFolder(bookmarkFolderNode);
+                    break;
             }
         }
 
-        public RelayCommand RenameCommand
+        [RelayCommand]
+        private void AddBookmark()
         {
-            get
+            if (this.TreeView.SelectedItem is BookmarkFolderNode item)
             {
-                return _renameCommand = _renameCommand ?? new RelayCommand(Execute);
-
-                async void Execute()
-                {
-                    switch (this.TreeView.SelectedItem)
-                    {
-                        case TreeListNode<QuickAccessEntry> quickAccess:
-                            await RenameQuickAccess(quickAccess);
-                            break;
-
-                        case BookmarkFolderNode bookmarkFolderNode:
-                            await RenameBookmarkFolder(bookmarkFolderNode);
-                            break;
-                    }
-                }
-            }
-        }
-
-        public RelayCommand AddBookmarkCommand
-        {
-            get
-            {
-                return _addBookmarkCommand = _addBookmarkCommand ?? new RelayCommand(Execute);
-
-                void Execute()
-                {
-                    if (this.TreeView.SelectedItem is BookmarkFolderNode item)
-                    {
-                        _vm.AddBookmarkTo(item);
-                    }
-                }
+                _vm.AddBookmarkTo(item);
             }
         }
 
@@ -485,7 +418,7 @@ namespace NeeView
                             contextMenu.Items.Add(CreateMenuItem(TextResources.GetString("FolderTree.Menu.Delete"), RemoveCommand, Key.Delete.ToString()));
                             contextMenu.Items.Add(CreateMenuItem(TextResources.GetString("FolderTree.Menu.Rename"), RenameCommand, Key.F2.ToString()));
                             contextMenu.Items.Add(new Separator());
-                            contextMenu.Items.Add(CreateMenuItem(TextResources.GetString("FolderTree.Menu.Property"), PropertyCommand));
+                            contextMenu.Items.Add(CreateMenuItem(TextResources.GetString("FolderTree.Menu.Property"), OpenPropertyCommand));
                             break;
                     }
                     break;

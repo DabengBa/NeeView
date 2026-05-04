@@ -186,3 +186,11 @@ Code-in:
 * Copyright 2020 Diego Frata
 * URL: [Generator.Equals](https://github.com/diegofrata/Generator.Equals)
 * License: [MIT license](https://github.com/diegofrata/Generator.Equals/blob/main/LICENCE.md)
+
+### .NET Community Toolkit
+
+DLL: CommunityToolkit.Mvvm.dll
+
+* Copyright © .NET Foundation and Contributors All rights reserved.
+* URL: [.NET Community Toolkit](https://github.com/CommunityToolkit/dotnet)
+* License: [MIT License ](https://github.com/CommunityToolkit/dotnet/blob/main/License.md)

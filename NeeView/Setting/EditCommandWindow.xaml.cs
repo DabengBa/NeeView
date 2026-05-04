@@ -1,5 +1,5 @@
-﻿using NeeLaboratory.Generators;
-using NeeLaboratory.Windows.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using NeeView.Properties;
 using System;
 using System.ComponentModel;
@@ -23,8 +23,8 @@ namespace NeeView.Setting
     /// <summary>
     /// EditCommandWindow.xaml の相互作用ロジック
     /// </summary>
-    [NotifyPropertyChanged]
-    public partial class EditCommandWindow : Window, INotifyPropertyChanged
+    [INotifyPropertyChanged]
+    public partial class EditCommandWindow : Window
     {
         private CommandCollection _memento;
         private string _key;
@@ -43,9 +43,6 @@ namespace NeeView.Setting
 
             Initialize(key, start);
         }
-
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
 
         public bool IsShowMessage
@@ -118,7 +115,13 @@ namespace NeeView.Setting
             }
 
             // ESCでウィンドウを閉じる
-            this.InputBindings.Add(new KeyBinding(new RelayCommand(Close), new KeyGesture(Key.Escape)));
+            this.InputBindings.Add(new KeyBinding(CloseWindowCommand, new KeyGesture(Key.Escape)));
+        }
+
+        [RelayCommand]
+        private void CloseWindow()
+        {
+            this.Close();
         }
 
         private void Parameter_ParameterChanged(object? sender, PropertyChangedEventArgs e)

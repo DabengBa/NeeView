@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.Windows.Input;
+﻿using CommunityToolkit.Mvvm.Input;
 using NeeView.Properties;
 using NeeView.Windows.Property;
 using System;
@@ -42,7 +42,7 @@ namespace NeeView.Setting
     /// <summary>
     /// Setting: Window
     /// </summary>
-    public class SettingPageWindow : SettingPage
+    public partial class SettingPageWindow : SettingPage
     {
         public SettingPageWindow() : base(TextResources.GetString("SettingPage.Window"))
         {
@@ -63,7 +63,7 @@ namespace NeeView.Setting
             section.Children.Add(new SettingItemProperty(PropertyMemberElement.Create(Config.Current.Theme, nameof(ThemeConfig.CustomThemeFolder)))
             {
                 IsStretch = true,
-                SubContent = UIElementTools.CreateHyperlink(TextResources.GetString("SettingPage.Window.Theme.OpenCustomThemeFolder"), OpenCustomThemeFolder),
+                SubContent = UIElementTools.CreateHyperlink(TextResources.GetString("SettingPage.Window.Theme.OpenCustomThemeFolder"), OpenCustomThemeFolderCommand),
             });
             this.Items.Add(section);
 
@@ -79,19 +79,12 @@ namespace NeeView.Setting
             this.Items.Add(section);
         }
 
-        #region Commands
-        private RelayCommand? _openCustomThemeFolder;
-        public RelayCommand OpenCustomThemeFolder
-        {
-            get { return _openCustomThemeFolder = _openCustomThemeFolder ?? new RelayCommand(OpenCustomThemeFolder_Execute); }
-        }
 
-        private void OpenCustomThemeFolder_Execute()
+        [RelayCommand]
+        private void OpenCustomThemeFolder()
         {
             ThemeManager.OpenCustomThemeFolder();
         }
-        #endregion
-
     }
 
 

@@ -1,8 +1,9 @@
-﻿using NeeLaboratory.ComponentModel;
-using NeeLaboratory.Windows.Input;
+﻿using CommunityToolkit.Mvvm.Input;
+using NeeLaboratory.ComponentModel;
 using NeeView.Properties;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Data;
 
@@ -11,7 +12,7 @@ namespace NeeView
     /// <summary>
     /// 
     /// </summary>
-    public class HistoryListViewModel : BindableBase
+    public partial class HistoryListViewModel : BindableBase
     {
         private readonly HistoryList _model;
 
@@ -68,7 +69,7 @@ namespace NeeView
 
             private MenuItem CreateListItemStyleMenuItem(string header, PanelListItemStyle style)
             {
-                return CreateListItemStyleMenuItem(header, _vm.SetListItemStyle, style, Config.Current.History);
+                return CreateListItemStyleMenuItem(header, _vm.SetListItemStyleCommand, style, Config.Current.History);
             }
 
             private MenuItem CreateCheckableMenuItem(string header, Binding binding)
@@ -88,32 +89,15 @@ namespace NeeView
         #region Commands
 
         private CancellationTokenSource? _removeUnlinkedCommandCancellationToken;
-        private RelayCommand<PanelListItemStyle>? _setListItemStyle;
-        private RelayCommand? _removeAllCommand;
-        private RelayCommand? _removeUnlinkedCommand;
 
-        /// <summary>
-        /// SetListItemStyle command.
-        /// </summary>
-        public RelayCommand<PanelListItemStyle> SetListItemStyle
-        {
-            get { return _setListItemStyle = _setListItemStyle ?? new RelayCommand<PanelListItemStyle>(SetListItemStyle_Executed); }
-        }
-
-        private void SetListItemStyle_Executed(PanelListItemStyle style)
+        [RelayCommand]
+        private void SetListItemStyle(PanelListItemStyle style)
         {
             Config.Current.History.PanelListItemStyle = style;
         }
 
-        /// <summary>
-        /// RemoveAllCommand command
-        /// </summary>
-        public RelayCommand RemoveAllCommand
-        {
-            get { return _removeAllCommand = _removeAllCommand ?? new RelayCommand(RemoveAll_Executed); }
-        }
-
-        private void RemoveAll_Executed()
+        [RelayCommand]
+        private void RemoveAll()
         {
             if (BookHistoryCollection.Current.Items.Any())
             {
@@ -127,15 +111,8 @@ namespace NeeView
             BookHistoryCollection.Current.Clear();
         }
 
-        /// <summary>
-        /// RemoveUnlinkedCommand command.
-        /// </summary>
-        public RelayCommand RemoveUnlinkedCommand
-        {
-            get { return _removeUnlinkedCommand = _removeUnlinkedCommand ?? new RelayCommand(RemoveUnlinkedCommand_Executed); }
-        }
-
-        private async void RemoveUnlinkedCommand_Executed()
+        [RelayCommand]
+        private async Task RemoveUnlinked()
         {
             // 直前の命令はキャンセル
             _removeUnlinkedCommandCancellationToken?.Cancel();

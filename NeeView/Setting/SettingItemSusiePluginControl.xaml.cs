@@ -1,5 +1,5 @@
-﻿using NeeLaboratory.Generators;
-using NeeLaboratory.Windows.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using NeeView.Susie;
 using NeeView.Windows;
 using System.Collections.ObjectModel;
@@ -15,8 +15,8 @@ namespace NeeView.Setting
     /// <summary>
     /// SettingItemSusiePluginControl.xaml の相互作用ロジック
     /// </summary>
-    [NotifyPropertyChanged]
-    public partial class SettingItemSusiePluginControl : UserControl, INotifyPropertyChanged
+    [INotifyPropertyChanged]
+    public partial class SettingItemSusiePluginControl : UserControl 
     {
         private readonly SusiePluginType _pluginType;
 
@@ -37,26 +37,18 @@ namespace NeeView.Setting
         }
 
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-
         public string DragDataFormat { get; private set; }
 
 
         #region Commands
-
-        private RelayCommand? _configCommand;
-        public RelayCommand ConfigCommand
-        {
-            get { return _configCommand = _configCommand ?? new RelayCommand(OpenConfigDialog_Executed, CanOpenConfigDialog); }
-        }
 
         private bool CanOpenConfigDialog()
         {
             return this.PluginList.SelectedItem is SusiePluginInfo;
         }
 
-        private void OpenConfigDialog_Executed()
+        [RelayCommand(CanExecute =nameof(CanOpenConfigDialog))]
+        private void OpenConfig()
         {
             if (this.PluginList.SelectedItem is not SusiePluginInfo item) return;
 
@@ -77,14 +69,8 @@ namespace NeeView.Setting
             UpdateExtensions();
         }
 
-
-        private RelayCommand? _moveUpCommand;
-        public RelayCommand MoveUpCommand
-        {
-            get { return _moveUpCommand = _moveUpCommand ?? new RelayCommand(MoveUpCommand_Executed); }
-        }
-
-        private void MoveUpCommand_Executed()
+        [RelayCommand]
+        private void MoveUp()
         {
             var index = this.PluginList.SelectedIndex;
             if (this.PluginList.Tag is not ObservableCollection<SusiePluginInfo> collection) return;
@@ -96,13 +82,8 @@ namespace NeeView.Setting
             }
         }
 
-        private RelayCommand? _moveDownCommand;
-        public RelayCommand MoveDownCommand
-        {
-            get { return _moveDownCommand = _moveDownCommand ?? new RelayCommand(MoveDownCommand_Executed); }
-        }
-
-        private void MoveDownCommand_Executed()
+        [RelayCommand]
+        private void MoveDown()
         {
             var index = this.PluginList.SelectedIndex;
             if (this.PluginList.Tag is not ObservableCollection<SusiePluginInfo> collection) return;
@@ -114,13 +95,8 @@ namespace NeeView.Setting
             }
         }
 
-        private RelayCommand? _switchAllCommand;
-        public RelayCommand SwitchAllCommand
-        {
-            get { return _switchAllCommand = _switchAllCommand ?? new RelayCommand(SwitchAllCommand_Executed); }
-        }
-
-        private void SwitchAllCommand_Executed()
+        [RelayCommand]
+        private void SwitchAll()
         {
             if (this.PluginList.Tag is ObservableCollection<SusiePluginInfo> collection)
             {
@@ -164,7 +140,7 @@ namespace NeeView.Setting
         // 選択項目変更
         private void PluginList_SelectionChanged(object? sender, SelectionChangedEventArgs e)
         {
-            ConfigCommand.RaiseCanExecuteChanged();
+            OpenConfigCommand.NotifyCanExecuteChanged();
         }
 
         // 項目ダブルクリック

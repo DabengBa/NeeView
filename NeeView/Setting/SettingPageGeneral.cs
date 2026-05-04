@@ -1,5 +1,5 @@
-﻿using NeeLaboratory.Collection;
-using NeeLaboratory.Windows.Input;
+﻿using CommunityToolkit.Mvvm.Input;
+using NeeLaboratory.Collection;
 using NeeView.Data;
 using NeeView.Properties;
 using NeeView.Windows;
@@ -133,7 +133,7 @@ namespace NeeView.Setting
     /// <summary>
     /// Setting: SaveData
     /// </summary>
-    public class SettingPageSaveData : SettingPage
+    public partial class SettingPageSaveData : SettingPage
     {
         public SettingPageSaveData() : base(TextResources.GetString("SettingPage.General.SaveData"))
         {
@@ -175,27 +175,19 @@ namespace NeeView.Setting
 
             if (Environment.ConfigType == "Debug" || (Environment.IsUseLocalApplicationDataFolder && !Environment.IsAppxPackage))
             {
-                section.Children.Add(new SettingItemButton(TextResources.GetString("SettingPage.General.SaveDataRemove"), TextResources.GetString("SettingItem.Remove"), RemoveAllData) { Tips = TextResources.GetString("SettingItem.Remove.Remarks"), });
+                section.Children.Add(new SettingItemButton(TextResources.GetString("SettingPage.General.SaveDataRemove"), TextResources.GetString("SettingItem.Remove"), RemoveAllDataCommand) { Tips = TextResources.GetString("SettingItem.Remove.Remarks"), });
             }
 
             this.Items = new List<SettingItem>() { section };
         }
 
-        #region Commands
 
-        private RelayCommand<UIElement>? _RemoveAllData;
-        public RelayCommand<UIElement> RemoveAllData
-        {
-            get { return _RemoveAllData = _RemoveAllData ?? new RelayCommand<UIElement>(RemoveAllData_Executed); }
-        }
-
-        private void RemoveAllData_Executed(UIElement? element)
+        [RelayCommand]
+        private void RemoveAllData(UIElement? element)
         {
             var window = element != null ? Window.GetWindow(element) : null;
             Environment.RemoveApplicationData(window);
         }
-
-        #endregion
     }
 
 
@@ -225,7 +217,7 @@ namespace NeeView.Setting
     /// <summary>
     /// Setting: Thumbnail
     /// </summary>
-    public class SettingPageThumbnail : SettingPage
+    public partial class SettingPageThumbnail : SettingPage
     {
         public SettingPageThumbnail() : base(TextResources.GetString("SettingPage.Thumbnail"))
         {
@@ -234,7 +226,7 @@ namespace NeeView.Setting
             var section = new SettingItemSection(TextResources.GetString("SettingPage.Thumbnail.Cache"));
             section.Children.Add(new SettingItemProperty(PropertyMemberElement.Create(Config.Current.Thumbnail, nameof(ThumbnailConfig.IsCacheEnabled))));
             section.Children.Add(new SettingItemIndexValue<TimeSpan>(PropertyMemberElement.Create(Config.Current.Thumbnail, nameof(ThumbnailConfig.CacheLimitSpan)), new CacheLimitSpan(), true));
-            section.Children.Add(new SettingItemButton(TextResources.GetString("SettingPage.Thumbnail.CacheClear"), TextResources.GetString("SettingPage.Thumbnail.CacheClearButton"), RemoveCache));
+            section.Children.Add(new SettingItemButton(TextResources.GetString("SettingPage.Thumbnail.CacheClear"), TextResources.GetString("SettingPage.Thumbnail.CacheClearButton"), RemoveCacheCommand));
             this.Items.Add(section);
 
             section = new SettingItemSection(TextResources.GetString("SettingPage.Thumbnail.Advance"));
@@ -247,15 +239,9 @@ namespace NeeView.Setting
             this.Items.Add(section);
         }
 
-        #region Commands
 
-        private RelayCommand<UIElement>? _RemoveCache;
-        public RelayCommand<UIElement> RemoveCache
-        {
-            get { return _RemoveCache = _RemoveCache ?? new RelayCommand<UIElement>(RemoveCache_Executed); }
-        }
-
-        private void RemoveCache_Executed(UIElement? element)
+        [RelayCommand]
+        private void RemoveCache(UIElement? element)
         {
             try
             {
@@ -279,7 +265,6 @@ namespace NeeView.Setting
             }
         }
 
-        #endregion
 
         /// <summary>
         /// 履歴期限テーブル

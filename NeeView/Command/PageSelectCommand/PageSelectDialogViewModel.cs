@@ -1,5 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
-using NeeLaboratory.Windows.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using NeeView.Properties;
 using System;
 using System.Globalization;
@@ -16,18 +16,16 @@ namespace NeeView
         public bool Result { get; set; }
     }
 
-    public class PageSelectDialogViewModel : BindableBase
+    public partial class PageSelectDialogViewModel : ObservableObject
     {
         private readonly PageSelectDialogModel _model;
-        private RelayCommand? _decideCommand;
-        private RelayCommand? _cancelCommand;
 
         public PageSelectDialogViewModel(PageSelectDialogModel model)
         {
             _model = model;
 
             _model.AddPropertyChanged(nameof(_model.Value),
-                (s, e) => RaisePropertyChanged(nameof(Value)));
+                (s, e) => OnPropertyChanged(nameof(Value)));
         }
 
 
@@ -40,37 +38,22 @@ namespace NeeView
 
         public int Value
         {
-            get { return _model.Value; }
-            set { _model.Value = value; }
+            get => _model.Value;
+            set => _model.Value = value;
         }
 
 
-        public RelayCommand DecideCommand
+        [RelayCommand]
+        private void Decide()
         {
-            get
-            {
-                return _decideCommand = _decideCommand ?? new RelayCommand(Execute);
-
-                void Execute()
-                {
-                    Decided?.Invoke(this, new PageSelectDialogDecidedEventArgs(true));
-                }
-            }
+            Decided?.Invoke(this, new PageSelectDialogDecidedEventArgs(true));
         }
 
-        public RelayCommand CancelCommand
+        [RelayCommand]
+        private void Cancel()
         {
-            get
-            {
-                return _cancelCommand = _cancelCommand ?? new RelayCommand(Execute);
-
-                void Execute()
-                {
-                    Decided?.Invoke(this, new PageSelectDialogDecidedEventArgs(false));
-                }
-            }
+            Decided?.Invoke(this, new PageSelectDialogDecidedEventArgs(false));
         }
-
 
         public void AddValue(int delta)
         {

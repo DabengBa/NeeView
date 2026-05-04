@@ -1,16 +1,14 @@
-﻿using NeeLaboratory.ComponentModel;
-using NeeLaboratory.Generators;
-using NeeLaboratory.Windows.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using NeeLaboratory.ComponentModel;
 using NeeView.Windows;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 
 namespace NeeView.Setting
 {
-    [NotifyPropertyChanged]
-    public partial class SettingItemFileAssociationGroupViewModel : INotifyPropertyChanged
+    public partial class SettingItemFileAssociationGroupViewModel : ObservableObject
     {
         private FileAssociationCategory _category;
         private List<FileAssociationAccessor> _items;
@@ -25,12 +23,8 @@ namespace NeeView.Setting
             _category = category;
             _items = collection.Where(e => e.Category == category).ToList();
             _window = window;
-            ChangeCategoryIconCommand = new RelayCommand(ChangeCategoryIconCommand_Execute);
             UpdateCheckedFlag();
         }
-
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
 
         public string Title => _category.ToAliasName();
@@ -47,10 +41,9 @@ namespace NeeView.Setting
             set { SetCheckedFlag(value); }
         }
 
-        public RelayCommand ChangeCategoryIconCommand { get; }
 
-
-        void ChangeCategoryIconCommand_Execute()
+        [RelayCommand]
+        void ChangeCategoryIcon()
         {
             var icon = FileAssociationTools.ShowIconDialog(_window.GetWindowHandle(), new FileAssociationIcon(_category));
             if (icon is not null)
@@ -100,7 +93,7 @@ namespace NeeView.Setting
                 _isChecked = null;
             }
 
-            RaisePropertyChanged(nameof(IsChecked));
+            OnPropertyChanged(nameof(IsChecked));
         }
 
         public void Attach()

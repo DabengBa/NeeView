@@ -1,29 +1,19 @@
-﻿using NeeLaboratory.Generators;
-using NeeLaboratory.Windows.Input;
-using System.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace NeeView
 {
-    [NotifyPropertyChanged]
-    public partial class SearchBoxModel : INotifyPropertyChanged
+    public partial class SearchBoxModel : ObservableObject
     {
         private string? _keyword;
         private string? _keywordErrorMessage;
-        private RelayCommand _searchCommand;
-        private RelayCommand<string> _deleteCommand;
         private readonly ISearchBoxComponent _component;
 
 
         public SearchBoxModel(ISearchBoxComponent component)
         {
             _component = component;
-
-            _searchCommand = new RelayCommand(Search);
-            _deleteCommand = new RelayCommand<string>(DeleteSearchHistory);
         }
-
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
 
         /// <summary>
@@ -37,7 +27,7 @@ namespace NeeView
                 if (SetProperty(ref _keyword, value))
                 {
                     OnKeywordChanged();
-                    RaisePropertyChanged(nameof(FixedKeyword));
+                    OnPropertyChanged(nameof(FixedKeyword));
                 }
             }
         }
@@ -71,16 +61,6 @@ namespace NeeView
         /// </summary>
         public bool IsIncrementalSearchEnabled => _component.IsIncrementalSearchEnabled;
 
-        /// <summary>
-        /// 検索コマンド
-        /// </summary>
-        public RelayCommand SearchCommand => _searchCommand;
-
-        /// <summary>
-        /// 履歴削除コマンド
-        /// </summary>
-        public RelayCommand<string> DeleteCommand => _deleteCommand;
-
 
         /// <summary>
         /// キーワードプロパティ変更処理
@@ -101,6 +81,7 @@ namespace NeeView
         /// <summary>
         /// 検索実行
         /// </summary>
+        [RelayCommand]
         public void Search()
         {
             if (IsKeywordError) return;
@@ -146,7 +127,8 @@ namespace NeeView
         /// 履歴削除
         /// </summary>
         /// <param name="keyword"></param>
-        public void DeleteSearchHistory(string? keyword)
+        [RelayCommand]
+        public void Delete(string? keyword)
         {
             if (string.IsNullOrEmpty(keyword)) return;
             History?.Remove(keyword);
@@ -163,7 +145,7 @@ namespace NeeView
                 UpdateSearchHistory();
                 // 入力文字のみ更新
                 _keyword = keyword;
-                RaisePropertyChanged(nameof(Keyword));
+                OnPropertyChanged(nameof(Keyword));
             }
         }
     }

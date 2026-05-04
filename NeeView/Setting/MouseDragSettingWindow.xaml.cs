@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.Windows.Input;
+﻿using CommunityToolkit.Mvvm.Input;
 using NeeView.Properties;
 using System.Collections.Generic;
 using System.Windows;
@@ -42,9 +42,14 @@ namespace NeeView.Setting
             }
 
             // ESCでウィンドウを閉じる
-            this.InputBindings.Add(new KeyBinding(new RelayCommand(Close), new KeyGesture(Key.Escape)));
+            this.InputBindings.Add(new KeyBinding(CloseWindowCommand, new KeyGesture(Key.Escape)));
         }
 
+        [RelayCommand]
+        private void CloseWindow()
+        {
+            this.Close();
+        }
 
         private void MouseDragSettingWindow_Loaded(object sender, RoutedEventArgs e)
         {
