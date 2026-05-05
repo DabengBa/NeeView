@@ -218,9 +218,7 @@ namespace NeeView
         /// </summary>
         public void SaveLastBookMemento()
         {
-            if (_box is null) return;
-
-            if (Config.Current.StartUp.IsOpenLastBook)
+            if (Config.Current.StartUp.IsOpenLastBook && _box is not null)
             {
                 var bookMemento = _box.BookMementoControl.CreateBookMement();
                 Config.Current.StartUp.LastBook = bookMemento;
