@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.Generators;
 using System;
 using System.Collections.Generic;
@@ -12,7 +12,7 @@ namespace NeeView.Windows.Data
     /// <summary>
     /// 値の遅延反映
     /// </summary>
-    public partial class DelayValue<T> : BindableBase, IDisposable
+    public partial class DelayValue<T> : ObservableObject, IDisposable
     {
         private T? _value;
         private T? _delayValue;
@@ -136,7 +136,7 @@ namespace NeeView.Windows.Data
             {
                 _value = _delayValue;
                 ValueChanged?.Invoke(this, EventArgs.Empty);
-                RaisePropertyChanged(nameof(Value));
+                OnPropertyChanged(nameof(Value));
             }
         }
 

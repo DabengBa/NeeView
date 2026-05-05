@@ -1,11 +1,11 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.PageFrames;
 using NeeView.StringTemplate;
 using System.Linq;
 
 namespace NeeView
 {
-    public class TitleString : BindableBase
+    public class TitleString : ObservableObject
     {
         private string _title = "";
         private string _format = "";

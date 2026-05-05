@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Properties;
 using System;
 using System.Diagnostics;
@@ -14,7 +14,7 @@ namespace NeeView
     /// <summary>
     /// バージョンチェッカー
     /// </summary>
-    public class VersionChecker : BindableBase
+    public class VersionChecker : ObservableObject
     {
         private volatile bool _isChecking = false;
         private volatile bool _isChecked = false;
@@ -49,7 +49,7 @@ namespace NeeView
         public string? Message
         {
             get { return _message; }
-            set { _message = value; RaisePropertyChanged(); }
+            set { _message = value; OnPropertyChanged(); }
         }
 
 

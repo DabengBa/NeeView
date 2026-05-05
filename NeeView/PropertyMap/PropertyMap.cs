@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Properties;
 using System;
 using System.Collections;
@@ -12,8 +12,8 @@ namespace NeeView
     /// <summary>
     /// プロパティで構成されたアクセスマップ
     /// </summary>
-    [NotifyPropertyChanged]
-    public partial class PropertyMap : PropertyMapNode, INotifyPropertyChanged, IEnumerable<KeyValuePair<string, PropertyMapNode>>
+    [INotifyPropertyChanged]
+    public partial class PropertyMap : PropertyMapNode, IEnumerable<KeyValuePair<string, PropertyMapNode>>
     {
         private static readonly PropertyMapConverter _defaultConverter;
         private static readonly PropertyMapOptions _defaultOptions;
@@ -79,13 +79,10 @@ namespace NeeView
         }
 
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-
         public object? this[string key]
         {
             get { return GetValue(_items[key]); }
-            set { SetValue(_items[key], value); RaisePropertyChanged(key); }
+            set { SetValue(_items[key], value); OnPropertyChanged(key); }
         }
 
         internal bool ContainsKey(string key)

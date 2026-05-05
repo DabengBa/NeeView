@@ -1,7 +1,6 @@
-﻿using NeeLaboratory.ComponentModel;
-using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using System;
-using System.ComponentModel;
 using System.Windows.Media;
 
 namespace NeeView
@@ -9,17 +8,12 @@ namespace NeeView
     /// <summary>
     /// ページ背景ブラシ
     /// </summary>
-    [NotifyPropertyChanged]
-    public partial class PageBackgroundSource : INotifyPropertyChanged, IDisposable
+    public partial class PageBackgroundSource : ObservableObject, IDisposable
     {
         private readonly BackgroundConfig _backgroundConfig;
         private Brush? _pageBackgroundBrush = null;
         private bool _disposedValue;
         private readonly DisposableCollection _disposables = new();
-
-
-        [Subscribable]
-        public event PropertyChangedEventHandler? PropertyChanged;
 
 
         public PageBackgroundSource()

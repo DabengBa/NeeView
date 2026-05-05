@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NeeLaboratory.ComponentModel;
+using System;
 
 namespace NeeView
 {
@@ -20,10 +21,10 @@ namespace NeeView
             _playlistView = playlistView;
             _playlistHub = playlistModel;
 
-            _playlistHub.AddPropertyChanged(nameof(PlaylistHub.Playlist),
+            _playlistHub.SubscribePropertyChanged(nameof(PlaylistHub.Playlist),
                 (s, e) => UpdateListBox());
 
-            Config.Current.Playlist.AddPropertyChanged(nameof(PlaylistConfig.PanelListItemStyle),
+            Config.Current.Playlist.SubscribePropertyChanged(nameof(PlaylistConfig.PanelListItemStyle),
                 (s, e) => UpdateListBoxContent());
 
             _playlistView.Created += (s, e) => UpdateListBox();

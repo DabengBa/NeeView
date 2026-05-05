@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeLaboratory.Generators;
 using NeeView.Data;
 using System;
@@ -8,7 +9,7 @@ namespace NeeView
     /// <summary>
     /// PageSlider : Model
     /// </summary>
-    public partial class PageSlider : BindableBase
+    public partial class PageSlider : ObservableObject
     {
         static PageSlider() => Current = new PageSlider();
         public static PageSlider Current { get; }
@@ -27,7 +28,7 @@ namespace NeeView
 
             PageSelector.Current.SelectionChanged += PageSelector_SelectionChanged;
 
-            Config.Current.Slider.AddPropertyChanged(nameof(SliderConfig.SliderDirection), (s, e) =>
+            Config.Current.Slider.SubscribePropertyChanged(nameof(SliderConfig.SliderDirection), (s, e) =>
             {
                 UpdateIsSliderDirectionReversed();
             });
@@ -56,7 +57,7 @@ namespace NeeView
                 if (_isSliderDirectionReversed != value)
                 {
                     _isSliderDirectionReversed = value;
-                    RaisePropertyChanged();
+                    OnPropertyChanged();
                     FilmStrip.Current.IsSliderDirectionReversed = _isSliderDirectionReversed;
                     this.PageMarkers.IsSliderDirectionReversed = _isSliderDirectionReversed;
                     SliderDirectionChanged?.Invoke(this, new ValueChangedEventArgs<bool>() { NewValue = _isSliderDirectionReversed });
@@ -76,7 +77,7 @@ namespace NeeView
                 if (newValue != PageSelector.SelectedIndex)
                 {
                     SetSelectedIndex(newValue);
-                    RaisePropertyChanged(nameof(SelectedIndexRaw));
+                    OnPropertyChanged(nameof(SelectedIndexRaw));
                 }
             }
         }
@@ -90,7 +91,7 @@ namespace NeeView
                 if (value != PageSelector.SelectedIndex)
                 {
                     SetSelectedIndex(value);
-                    RaisePropertyChanged(nameof(SelectedIndex));
+                    OnPropertyChanged(nameof(SelectedIndex));
                 }
             }
         }
@@ -173,8 +174,8 @@ namespace NeeView
         private void PageSelector_SelectionChanged(object? sender, EventArgs e)
         {
             if (sender == this) return;
-            RaisePropertyChanged(nameof(SelectedIndex));
-            RaisePropertyChanged(nameof(SelectedIndexRaw));
+            OnPropertyChanged(nameof(SelectedIndex));
+            OnPropertyChanged(nameof(SelectedIndexRaw));
         }
 
         // スライダー方向更新

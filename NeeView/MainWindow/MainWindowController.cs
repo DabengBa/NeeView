@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeView.Windows;
 using System.ComponentModel;
 using System.Windows;
@@ -8,8 +9,8 @@ namespace NeeView
     /// <summary>
     /// MainWindowに特化したウィンドウ制御
     /// </summary>
-    [NotifyPropertyChanged]
-    public partial class MainWindowController : WindowController, INotifyPropertyChanged
+    [INotifyPropertyChanged]
+    public partial class MainWindowController : WindowController
     {
         private readonly Window _window;
         private readonly WindowStateManager _manager;
@@ -23,24 +24,21 @@ namespace NeeView
             _manager = manager;
             _manager.StateChanged += WindowStateManager_StateChanged;
 
-            Config.Current.Window.AddPropertyChanged(nameof(WindowConfig.IsTopmost),
-                (s, e) => RaisePropertyChanged(nameof(IsTopmost)));
+            Config.Current.Window.SubscribePropertyChanged(nameof(WindowConfig.IsTopmost),
+                (s, e) => OnPropertyChanged(nameof(IsTopmost)));
 
-            Config.Current.Window.AddPropertyChanged(nameof(WindowConfig.State),
+            Config.Current.Window.SubscribePropertyChanged(nameof(WindowConfig.State),
                 (s, e) => _manager.SetWindowState(Config.Current.Window.State));
 
-            Config.Current.Window.AddPropertyChanged(nameof(WindowConfig.IsAutoHideInNormal),
+            Config.Current.Window.SubscribePropertyChanged(nameof(WindowConfig.IsAutoHideInNormal),
                 (s, e) => UpdatePanelHideMode());
 
-            Config.Current.Window.AddPropertyChanged(nameof(WindowConfig.IsAutoHideInMaximized),
+            Config.Current.Window.SubscribePropertyChanged(nameof(WindowConfig.IsAutoHideInMaximized),
                 (s, e) => UpdatePanelHideMode());
 
-            Config.Current.Window.AddPropertyChanged(nameof(WindowConfig.IsAutoHideInFullScreen),
+            Config.Current.Window.SubscribePropertyChanged(nameof(WindowConfig.IsAutoHideInFullScreen),
                 (s, e) => UpdatePanelHideMode());
         }
-
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
 
         public override bool IsTopmost
@@ -101,7 +99,7 @@ namespace NeeView
             ValidateWindowState();
             UpdatePanelHideMode();
             _manager.SetWindowState(Config.Current.Window.State);
-            RaisePropertyChanged(null);
+            OnPropertyChanged("");
         }
     }
 }

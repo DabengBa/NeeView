@@ -1,5 +1,5 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Windows.Property;
 
 namespace NeeView
@@ -8,7 +8,7 @@ namespace NeeView
     /// 設定のみ
     /// </summary>
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class ExportImageParameter : BindableBase, IExportImageParameter
+    public partial class ExportImageParameter : ObservableObject, IExportImageParameter
     {
         [DefaultEquality] private ExportImageMode _mode;
         [DefaultEquality] private bool _hasBackground;

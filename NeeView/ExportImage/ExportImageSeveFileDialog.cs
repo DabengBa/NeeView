@@ -23,7 +23,7 @@ namespace NeeView
 
         public bool CanSelectFormat { get; set; }
 
-        public bool OverwritePrompt { get;  set; }
+        public bool OverwritePrompt { get; set; }
 
 
         public bool? ShowDialog(Window owner)

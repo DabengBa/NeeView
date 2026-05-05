@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.Win32;
 using NeeLaboratory;
 using NeeLaboratory.ComponentModel;
 using NeeLaboratory.IO.Search;
@@ -15,7 +16,7 @@ namespace NeeView
     /// <summary>
     /// MainWindow : Model
     /// </summary>
-    public class MainWindowModel : BindableBase
+    public class MainWindowModel : ObservableObject
     {
         private static MainWindowModel? _current;
         public static MainWindowModel Current => _current ?? throw new InvalidOperationException();
@@ -60,62 +61,62 @@ namespace NeeView
                     RefreshCanHideMenu();
                 });
 
-            Config.Current.MenuBar.AddPropertyChanged(nameof(MenuBarConfig.IsHideMenuInAutoHideMode), (s, e) =>
+            Config.Current.MenuBar.SubscribePropertyChanged(nameof(MenuBarConfig.IsHideMenuInAutoHideMode), (s, e) =>
             {
                 RefreshCanHideMenu();
             });
 
-            Config.Current.MenuBar.AddPropertyChanged(nameof(MenuBarConfig.IsHideMenu), (s, e) =>
+            Config.Current.MenuBar.SubscribePropertyChanged(nameof(MenuBarConfig.IsHideMenu), (s, e) =>
             {
                 RefreshCanHideMenu();
             });
 
-            Config.Current.Slider.AddPropertyChanged(nameof(SliderConfig.IsEnabled), (s, e) =>
+            Config.Current.Slider.SubscribePropertyChanged(nameof(SliderConfig.IsEnabled), (s, e) =>
             {
                 RefreshCanHidePageSlider();
             });
 
-            Config.Current.Slider.AddPropertyChanged(nameof(SliderConfig.IsHidePageSliderInAutoHideMode), (s, e) =>
+            Config.Current.Slider.SubscribePropertyChanged(nameof(SliderConfig.IsHidePageSliderInAutoHideMode), (s, e) =>
             {
                 RefreshCanHidePageSlider();
             });
 
-            Config.Current.Slider.AddPropertyChanged(nameof(SliderConfig.IsHidePageSlider), (s, e) =>
+            Config.Current.Slider.SubscribePropertyChanged(nameof(SliderConfig.IsHidePageSlider), (s, e) =>
             {
                 RefreshCanHidePageSlider();
             });
 
-            Config.Current.FilmStrip.AddPropertyChanged(nameof(FilmStripConfig.IsEnabled), (s, e) =>
+            Config.Current.FilmStrip.SubscribePropertyChanged(nameof(FilmStripConfig.IsEnabled), (s, e) =>
             {
                 RefreshCanHideFilmStrip();
             });
 
-            Config.Current.FilmStrip.AddPropertyChanged(nameof(FilmStripConfig.IsHideFilmStripInAutoHideMode), (s, e) =>
+            Config.Current.FilmStrip.SubscribePropertyChanged(nameof(FilmStripConfig.IsHideFilmStripInAutoHideMode), (s, e) =>
             {
                 RefreshCanHideFilmStrip();
             });
 
-            Config.Current.FilmStrip.AddPropertyChanged(nameof(FilmStripConfig.IsHideFilmStrip), (s, e) =>
+            Config.Current.FilmStrip.SubscribePropertyChanged(nameof(FilmStripConfig.IsHideFilmStrip), (s, e) =>
             {
                 RefreshCanHideFilmStrip();
             });
 
-            Config.Current.Panels.AddPropertyChanged(nameof(PanelsConfig.IsHideLeftPanelInAutoHideMode), (s, e) =>
+            Config.Current.Panels.SubscribePropertyChanged(nameof(PanelsConfig.IsHideLeftPanelInAutoHideMode), (s, e) =>
             {
                 RefreshCanHideLeftPanel();
             });
 
-            Config.Current.Panels.AddPropertyChanged(nameof(PanelsConfig.IsHideRightPanelInAutoHideMode), (s, e) =>
+            Config.Current.Panels.SubscribePropertyChanged(nameof(PanelsConfig.IsHideRightPanelInAutoHideMode), (s, e) =>
             {
                 RefreshCanHideRightPanel();
             });
 
-            Config.Current.Panels.AddPropertyChanged(nameof(PanelsConfig.IsHideLeftPanel), (s, e) =>
+            Config.Current.Panels.SubscribePropertyChanged(nameof(PanelsConfig.IsHideLeftPanel), (s, e) =>
             {
                 RefreshCanHideLeftPanel();
             });
 
-            Config.Current.Panels.AddPropertyChanged(nameof(PanelsConfig.IsHideRightPanel), (s, e) =>
+            Config.Current.Panels.SubscribePropertyChanged(nameof(PanelsConfig.IsHideRightPanel), (s, e) =>
             {
                 RefreshCanHideRightPanel();
             });
@@ -199,7 +200,7 @@ namespace NeeView
                 if (_isPanelVisibleLocked != value)
                 {
                     _isPanelVisibleLocked = value;
-                    RaisePropertyChanged();
+                    OnPropertyChanged();
                     SidePanelFrame.Current.IsVisibleLocked = _isPanelVisibleLocked;
                 }
             }

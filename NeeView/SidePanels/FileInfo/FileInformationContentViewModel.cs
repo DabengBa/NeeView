@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using System;
 using System.ComponentModel;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Windows.Data;
 namespace NeeView
 {
     // TODO: 今のところ破棄されないので不要であるが、正しく上位からDispose()を呼ぶようにしておく
-    public class FileInformationContentViewModel : BindableBase, IDisposable
+    public class FileInformationContentViewModel : ObservableObject, IDisposable
     {
         private static readonly FileInformationRecord _extraEmptyRecord = new FileInformationRecord(InformationKey.ExtraEmpty, null);
         private readonly MappedCollection<FileInformationKey, FileInformationRecord> _collection;
@@ -67,6 +68,7 @@ namespace NeeView
             switch (e.PropertyName)
             {
                 case null:
+                case "":
                 case nameof(InformationConfig.IsVisibleFile):
                 case nameof(InformationConfig.IsVisibleImage):
                 case nameof(InformationConfig.IsVisibleDescription):

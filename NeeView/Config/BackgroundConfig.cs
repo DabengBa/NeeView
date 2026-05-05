@@ -1,12 +1,12 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Windows.Property;
 using System.Windows.Media;
 
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class BackgroundConfig : BindableBase
+    public partial class BackgroundConfig : ObservableObject
     {
         [DefaultEquality] private BackgroundType _backgroundType = BackgroundType.Black;
         [DefaultEquality] private BrushSource _customBackground = new();

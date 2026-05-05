@@ -1,9 +1,9 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Diagnostics;
 
 namespace NeeView
 {
-    public class FileInformationRecord : BindableBase, IHasKey<FileInformationKey>
+    public class FileInformationRecord : ObservableObject, IHasKey<FileInformationKey>
     {
         private object? _value;
 

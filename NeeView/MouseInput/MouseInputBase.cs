@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Diagnostics;
 using System.Windows;
@@ -46,7 +46,7 @@ namespace NeeView
     /// <summary>
     /// マウス入力処理既定クラス
     /// </summary>
-    public abstract class MouseInputBase : BindableBase
+    public abstract class MouseInputBase : ObservableObject
     {
         /// <summary>
         /// 状態遷移通知

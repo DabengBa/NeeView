@@ -1,11 +1,11 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Windows.Property;
 
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class NoticeConfig : BindableBase
+    public partial class NoticeConfig : ObservableObject
     {
         [DefaultEquality] private ShowMessageStyle _noticeShowMessageStyle = ShowMessageStyle.Normal;
         [DefaultEquality] private ShowMessageStyle _bookNameShowMessageStyle = ShowMessageStyle.Normal;

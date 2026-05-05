@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -12,7 +12,7 @@ namespace NeeView
     /// <summary>
     /// TreeViewNode基底.
     /// </summary>
-    public abstract class FolderTreeNodeBase : BindableBase, IRenameable, IDisposable, ITreeViewNode
+    public abstract class FolderTreeNodeBase : ObservableObject, IRenameable, IDisposable, ITreeViewNode
     {
         private bool _isDisposed;
         private bool _isSelected;
@@ -142,12 +142,12 @@ namespace NeeView
 
         public virtual void RefreshAllProperties()
         {
-            RaisePropertyChanged("");
+            OnPropertyChanged("");
         }
 
         public virtual void RefreshIcon()
         {
-            RaisePropertyChanged(nameof(Icon));
+            OnPropertyChanged(nameof(Icon));
         }
 
         public void RefreshChildren(bool isExpanded = false)
@@ -163,7 +163,7 @@ namespace NeeView
             }
             _children = null;
 
-            RaisePropertyChanged(nameof(Children));
+            OnPropertyChanged(nameof(Children));
         }
 
         /// <summary>
@@ -277,8 +277,8 @@ namespace NeeView
             var node = FindChild(source);
             if (node != null)
             {
-                node.RaisePropertyChanged(nameof(Name));
-                node.RaisePropertyChanged(nameof(DisplayName));
+                node.OnPropertyChanged(nameof(Name));
+                node.OnPropertyChanged(nameof(DisplayName));
                 Sort(node);
             }
         }

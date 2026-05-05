@@ -1,5 +1,5 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Windows.Controls;
 using NeeView.Windows.Property;
 using System;
@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class ThemeConfig : BindableBase
+    public partial class ThemeConfig : ObservableObject
     {
         [DefaultEquality] private ThemeSource _themeType = new(NeeView.ThemeType.Dark);
         [DefaultEquality] private string? _customThemeFolder;
@@ -23,7 +23,7 @@ namespace NeeView
             {
                 if (SetProperty(ref _themeType, value))
                 {
-                    RaisePropertyChanged(nameof(ThemeString));
+                    OnPropertyChanged(nameof(ThemeString));
                 }
             }
         }

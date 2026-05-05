@@ -1,14 +1,13 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Data;
 
 namespace NeeView
 {
-    [NotifyPropertyChanged]
-    public partial class HistoryListBoxViewModel : INotifyPropertyChanged
+    public partial class HistoryListBoxViewModel : ObservableObject
     {
         private readonly HistoryList _model;
         private readonly PanelThumbnailItemSize _thumbnailItemSize;
@@ -17,18 +16,14 @@ namespace NeeView
         {
             _model = model;
 
-            _model.AddPropertyChanged(nameof(HistoryList.SelectedItem),
-                (s, e) => RaisePropertyChanged(nameof(SelectedItem)));
+            _model.SubscribePropertyChanged(nameof(HistoryList.SelectedItem),
+                (s, e) => OnPropertyChanged(nameof(SelectedItem)));
 
             _thumbnailItemSize = new PanelThumbnailItemSize(Config.Current.Panels.ThumbnailItemProfile, 5.0 + 1.0, 4.0 + 1.0, new Size(18.0, 18.0));
-            _thumbnailItemSize.AddPropertyChanged(nameof(PanelThumbnailItemSize.ItemSize), (s, e) => RaisePropertyChanged(nameof(ThumbnailItemSize)));
+            _thumbnailItemSize.SubscribePropertyChanged(nameof(PanelThumbnailItemSize.ItemSize), (s, e) => OnPropertyChanged(nameof(ThumbnailItemSize)));
 
             DetailToolTip = new PanelListItemDetailToolTip(Config.Current.History);
         }
-
-
-        [Subscribable]
-        public event PropertyChangedEventHandler? PropertyChanged;
 
 
         public bool IsThumbnailVisible => _model.IsThumbnailVisible;

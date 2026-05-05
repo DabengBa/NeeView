@@ -1,4 +1,5 @@
-﻿using NeeLaboratory;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory;
 using NeeLaboratory.ComponentModel;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ using System.Windows.Input;
 
 namespace NeeView
 {
-    public class PlaylistListBoxViewModel : BindableBase
+    public class PlaylistListBoxViewModel : ObservableObject
     {
         private Playlist? _model;
         private ObservableCollection<PlaylistItem>? _items;
@@ -26,29 +27,29 @@ namespace NeeView
             this.CollectionViewSource = new CollectionViewSource();
             this.CollectionViewSource.Filter += CollectionViewSourceFilter;
 
-            Config.Current.Playlist.AddPropertyChanged(nameof(PlaylistConfig.IsGroupBy),
+            Config.Current.Playlist.SubscribePropertyChanged(nameof(PlaylistConfig.IsGroupBy),
                 (s, e) => UpdateGroupBy());
 
-            Config.Current.Playlist.AddPropertyChanged(nameof(PlaylistConfig.IsCurrentBookFilterEnabled),
+            Config.Current.Playlist.SubscribePropertyChanged(nameof(PlaylistConfig.IsCurrentBookFilterEnabled),
                 (s, e) => UpdateFilter(true));
 
-            Config.Current.Panels.AddPropertyChanged(nameof(PanelsConfig.IsDecoratePlace),
+            Config.Current.Panels.SubscribePropertyChanged(nameof(PanelsConfig.IsDecoratePlace),
                 (s, e) => UpdateDisplayPlace());
 
-            Config.Current.Playlist.AddPropertyChanged(nameof(PlaylistConfig.IsFirstIn),
+            Config.Current.Playlist.SubscribePropertyChanged(nameof(PlaylistConfig.IsFirstIn),
                 (s, e) => UpdateIsFirstIn());
 
-            Config.Current.Playlist.AddPropertyChanged(nameof(PlaylistConfig.PanelListItemStyle),
-                (s, e) => RaisePropertyChanged(nameof(PanelListItemStyle)));
+            Config.Current.Playlist.SubscribePropertyChanged(nameof(PlaylistConfig.PanelListItemStyle),
+                (s, e) => OnPropertyChanged(nameof(PanelListItemStyle)));
 
             BookOperation.Current.BookChanged +=
                 (s, e) => UpdateFilter(false);
 
             PageFrameBoxPresenter.Current.ViewPageChanged +=
-                (s, e) => RaisePropertyChanged(nameof(IsAddButtonEnabled));
+                (s, e) => OnPropertyChanged(nameof(IsAddButtonEnabled));
 
             _thumbnailItemSize = new PanelThumbnailItemSize(Config.Current.Panels.ThumbnailItemProfile, 5.0 + 1.0, 4.0 + 1.0, new Size(18.0, 18.0));
-            _thumbnailItemSize.AddPropertyChanged(nameof(PanelThumbnailItemSize.ItemSize), (s, e) => RaisePropertyChanged(nameof(ThumbnailItemSize)));
+            _thumbnailItemSize.SubscribePropertyChanged(nameof(PanelThumbnailItemSize.ItemSize), (s, e) => OnPropertyChanged(nameof(ThumbnailItemSize)));
 
             DetailToolTip = new PanelListItemDetailToolTip(Config.Current.Playlist);
         }
@@ -80,7 +81,7 @@ namespace NeeView
         public Visibility Visibility
         {
             get { return _visibility; }
-            set { _visibility = value; RaisePropertyChanged(); }
+            set { _visibility = value; OnPropertyChanged(); }
         }
 
         public bool IsEditable
@@ -130,8 +131,8 @@ namespace NeeView
 
         private void UpdateIsFirstIn()
         {
-            RaisePropertyChanged(nameof(IsFirstIn));
-            RaisePropertyChanged(nameof(IsLastIn));
+            OnPropertyChanged(nameof(IsFirstIn));
+            OnPropertyChanged(nameof(IsLastIn));
         }
 
         public void SetModel(Playlist model)
@@ -140,14 +141,14 @@ namespace NeeView
 
             _model = model;
 
-            _model.AddPropertyChanged(nameof(_model.Items),
+            _model.SubscribePropertyChanged(nameof(_model.Items),
                 (s, e) => AppDispatcher.Invoke(() => UpdateItems()));
 
-            _model.AddPropertyChanged(nameof(_model.IsEditable),
-                (s, e) => RaisePropertyChanged(nameof(IsEditable)));
+            _model.SubscribePropertyChanged(nameof(_model.IsEditable),
+                (s, e) => OnPropertyChanged(nameof(IsEditable)));
 
-            _model.AddPropertyChanged(nameof(_model.ErrorMessage),
-                (s, e) => RaisePropertyChanged(nameof(ErrorMessage)));
+            _model.SubscribePropertyChanged(nameof(_model.ErrorMessage),
+                (s, e) => OnPropertyChanged(nameof(ErrorMessage)));
 
             UpdateItems();
         }
@@ -192,7 +193,7 @@ namespace NeeView
 
         private void UpdateGroupBy()
         {
-            RaisePropertyChanged(nameof(IsGroupBy));
+            OnPropertyChanged(nameof(IsGroupBy));
 
             this.CollectionViewSource.GroupDescriptions.Clear();
             if (Config.Current.Playlist.IsGroupBy)

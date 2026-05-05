@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -6,7 +7,7 @@ using System.Windows.Media;
 
 namespace NeeView
 {
-    public class MainMenu : BindableBase
+    public class MainMenu : ObservableObject
     {
         static MainMenu() => Current = new MainMenu();
         public static MainMenu Current { get; }
@@ -24,7 +25,7 @@ namespace NeeView
         {
             _mainMenuSource = MenuTree.CreateDefault();
 
-            Config.Current.MenuBar.AddPropertyChanged(nameof(MenuBarConfig.IsHamburgerMenu),
+            Config.Current.MenuBar.SubscribePropertyChanged(nameof(MenuBarConfig.IsHamburgerMenu),
                 (s, e) => Update());
 
             RoutedCommandTable.Current.Changed +=

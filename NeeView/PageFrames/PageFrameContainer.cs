@@ -1,7 +1,7 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeLaboratory.Generators;
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -15,15 +15,10 @@ using System.Windows.Media.Animation;
 
 namespace NeeView.PageFrames
 {
-    [NotifyPropertyChanged]
-    public partial class PageFrameActivity : INotifyPropertyChanged
+    public partial class PageFrameActivity : ObservableObject
     {
         private bool _isSelected;
         private bool _isVisible = true;
-
-        [Subscribable]
-        public event PropertyChangedEventHandler? PropertyChanged;
-
 
         public bool IsSelected
         {

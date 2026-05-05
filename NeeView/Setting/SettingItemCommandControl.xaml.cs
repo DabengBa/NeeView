@@ -1,6 +1,5 @@
-﻿using NeeLaboratory.Collection;
-using NeeLaboratory.ComponentModel;
-using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.Collection;
 using NeeLaboratory.IO.Search;
 using NeeView.Properties;
 using System;
@@ -35,11 +34,11 @@ namespace NeeView.Setting
     /// <summary>
     /// SettingItemCommandControl.xaml の相互作用ロジック
     /// </summary>
-    [NotifyPropertyChanged]
-    public partial class SettingItemCommandControl : UserControl, INotifyPropertyChanged
+    [INotifyPropertyChanged]
+    public partial class SettingItemCommandControl : UserControl
     {
         // コマンド項目
-        public class CommandItem : BindableBase
+        public class CommandItem : ObservableObject
         {
             public CommandItem(string key, CommandElement command)
             {
@@ -84,9 +83,6 @@ namespace NeeView.Setting
 
             this.SearchBoxModel = new SearchBoxModel(new CommandSearchBoxComponent(this));
         }
-
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
 
         #region Commands

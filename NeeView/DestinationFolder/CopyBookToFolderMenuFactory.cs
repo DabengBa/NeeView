@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Properties;
 using System;
 using System.Windows.Data;
@@ -44,7 +44,7 @@ namespace NeeView
             }
         }
 
-        private class CopyableViewBookBindingSource : BindableBase
+        private class CopyableViewBookBindingSource : ObservableObject
         {
             private readonly DestinationFolder _dummyFolder = new DestinationFolder();
 
@@ -57,7 +57,7 @@ namespace NeeView
 
             private void BookOperation_BookChanged(object? sender, BookChangedEventArgs e)
             {
-                RaisePropertyChanged(nameof(CanCopyBook));
+                OnPropertyChanged(nameof(CanCopyBook));
             }
         }
 

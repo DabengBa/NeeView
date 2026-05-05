@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.Collection;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.Collection;
 using NeeLaboratory.ComponentModel;
 using NeeView.Properties;
 using System;
@@ -11,7 +12,7 @@ using System.Windows.Media;
 
 namespace NeeView
 {
-    public class ThemeManager : BindableBase
+    public class ThemeManager : ObservableObject
     {
         static ThemeManager() => Current = new ThemeManager();
         public static ThemeManager Current { get; }
@@ -32,16 +33,16 @@ namespace NeeView
         {
             RefreshThemeColor();
 
-            Config.Current.Theme.AddPropertyChanged(nameof(ThemeConfig.ThemeType),
+            Config.Current.Theme.SubscribePropertyChanged(nameof(ThemeConfig.ThemeType),
                 (s, e) => RefreshThemeColor());
 
-            SystemVisualParameters.Current.AddPropertyChanged(nameof(SystemVisualParameters.IsHighContrast),
+            SystemVisualParameters.Current.SubscribePropertyChanged(nameof(SystemVisualParameters.IsHighContrast),
                 (s, e) => RefreshThemeColor());
 
-            SystemVisualParameters.Current.AddPropertyChanged(nameof(SystemVisualParameters.Theme),
+            SystemVisualParameters.Current.SubscribePropertyChanged(nameof(SystemVisualParameters.Theme),
                 (s, e) => RefreshThemeColor());
 
-            SystemVisualParameters.Current.AddPropertyChanged(nameof(SystemVisualParameters.AccentColor),
+            SystemVisualParameters.Current.SubscribePropertyChanged(nameof(SystemVisualParameters.AccentColor),
                 (s, e) => RefreshThemeColor());
         }
 

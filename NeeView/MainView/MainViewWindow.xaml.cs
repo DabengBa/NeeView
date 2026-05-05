@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeView.ComponentModel;
 using NeeView.PageFrames;
 using NeeView.Windows;
@@ -16,8 +17,8 @@ namespace NeeView
     /// <summary>
     /// MainViewWindow.xaml の相互作用ロジック
     /// </summary>
-    [NotifyPropertyChanged]
-    public partial class MainViewWindow : Window, INotifyPropertyChanged, IDpiScaleProvider, IHasWindowController, IMainViewWindow, IWindowProcedure
+    [INotifyPropertyChanged]
+    public partial class MainViewWindow : Window, IDpiScaleProvider, IHasWindowController, IMainViewWindow, IWindowProcedure
     {
         private readonly DpiScaleProvider _dpiProvider = new();
         private readonly WindowStateManager _windowStateManager;
@@ -48,15 +49,16 @@ namespace NeeView
             _routedCommandBinding = new RoutedCommandBinding(this, RoutedCommandTable.Current);
 
             _mainViewConfig = new WeakBindableBase<MainViewConfig>(Config.Current.MainView);
-            _mainViewConfig.AddPropertyChanged(nameof(MainViewConfig.IsHideTitleBar), (s, e) =>
+
+            _mainViewConfig.SubscribePropertyChanged(nameof(MainViewConfig.IsHideTitleBar), (s, e) =>
             {
-                RaisePropertyChanged(nameof(IsAutoHide));
+                OnPropertyChanged(nameof(IsAutoHide));
                 UpdateCaptionBar();
             });
 
-            _mainViewConfig.AddPropertyChanged(nameof(MainViewConfig.IsTopmost), (s, e) =>
+            _mainViewConfig.SubscribePropertyChanged(nameof(MainViewConfig.IsTopmost), (s, e) =>
             {
-                RaisePropertyChanged(nameof(IsTopmost));
+                OnPropertyChanged(nameof(IsTopmost));
             });
 
             MenuAutoHideDescription = new MainViewMenuAutoHideDescription(this.CaptionBar);
@@ -80,9 +82,6 @@ namespace NeeView
 
             _mouseActivate = new MouseActivate(this);
         }
-
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
 
         public WindowProcedure WindowProcedure => _windowProcedure;
@@ -180,7 +179,7 @@ namespace NeeView
         private void WindowStateManager_StateChanged(object? sender, EventArgs e)
         {
             UpdateCaptionBar();
-            RaisePropertyChanged(nameof(IsFullScreen));
+            OnPropertyChanged(nameof(IsFullScreen));
         }
 
         private void MainViewWindow_Closing(object? sender, CancelEventArgs e)
@@ -225,7 +224,7 @@ namespace NeeView
 
         public WindowStateEx StoreWindowResumeState()
         {
-            return _windowStateManager.IsFullScreen? _windowStateManager.ResumeState : WindowStateEx.Normal;
+            return _windowStateManager.IsFullScreen ? _windowStateManager.ResumeState : WindowStateEx.Normal;
         }
 
         public void RestoreWindowResumeState(WindowStateEx state)

@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Properties;
 using System;
 using System.Windows;
@@ -9,7 +9,7 @@ namespace NeeView
     /// <summary>
     /// Navigate : Panel
     /// </summary>
-    public class NavigatePanel : BindableBase, IPanel
+    public class NavigatePanel : ObservableObject, IPanel
     {
         private readonly Lazy<NavigateView> _view;
 

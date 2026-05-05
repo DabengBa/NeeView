@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Effects;
 using NeeView.Properties;
 using System;
@@ -10,7 +10,7 @@ namespace NeeView
     /// <summary>
     /// ImageEffect : Panel
     /// </summary>
-    public class ImageEffectPanel : BindableBase, IPanel
+    public class ImageEffectPanel : ObservableObject, IPanel
     {
         private readonly Lazy<FrameworkElement> _view;
 

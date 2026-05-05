@@ -1,5 +1,6 @@
 ﻿//#define LOCAL_DEBUG
 
+using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.ComponentModel;
 using NeeLaboratory.Generators;
 using NeeLaboratory.Linq;
@@ -7,15 +8,13 @@ using NeeView.PageFrames;
 using NeeView.Threading;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 
 namespace NeeView
 {
     [LocalDebug]
-    [NotifyPropertyChanged]
-    public partial class MainViewComponent : INotifyPropertyChanged, IDisposable
+    public partial class MainViewComponent : ObservableObject, IDisposable
     {
         private static MainViewComponent? _current;
         public static MainViewComponent Current => _current ?? throw new InvalidOperationException();
@@ -73,9 +72,6 @@ namespace NeeView
             _processLocker.LockCountChanged += ProcessLocker_LockCountChanged;
         }
 
-
-        [Subscribable]
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// コンテキストメニューを開く要求イベント

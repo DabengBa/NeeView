@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Properties;
 using System;
 using System.Windows;
@@ -10,7 +10,7 @@ namespace NeeView
     /// 履歴パネル
     /// Type: ControlModel? ViewModelParts?
     /// </summary>
-    public class PageListPanel : BindableBase, IPanel
+    public class PageListPanel : ObservableObject, IPanel
     {
         private readonly LazyEx<PageListView> _view;
         private readonly PageListPresenter _presenter;

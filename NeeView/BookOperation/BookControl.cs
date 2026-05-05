@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeLaboratory.Generators;
 using NeeView.Collections.Generic;
 using NeeView.IO;
@@ -14,7 +15,7 @@ using System.Windows;
 namespace NeeView
 {
     [LocalDebug]
-    public partial class BookControl : BindableBase, IBookControl, IDisposable, IPendingBook
+    public partial class BookControl : ObservableObject, IBookControl, IDisposable, IPendingBook
     {
         private readonly PageFrameBox _box;
         private readonly Book _book;
@@ -31,7 +32,7 @@ namespace NeeView
             _box = box;
             _book = box.Book;
 
-            _disposables.Add(_box.SubscribePropertyChanged(nameof(_box.IsBusy), (s, e) => RaisePropertyChanged(nameof(IsBusy))));
+            _disposables.Add(_box.SubscribePropertyChanged(nameof(_box.IsBusy), (s, e) => OnPropertyChanged(nameof(IsBusy))));
             _disposables.Add(_watcher.SubscribeDeleted(FileSystemWatcher_Deleted));
         }
 
@@ -195,7 +196,7 @@ namespace NeeView
                 _nextBookLoader = new NextFolderListBookLoader(BookshelfFolderList.Current).Ready(Path);
                 _watcher.Start(Path);
             }
-            RaisePropertyChanged(nameof(PendingCount));
+            OnPropertyChanged(nameof(PendingCount));
         }
 
         public void DecrementPendingCount()
@@ -205,7 +206,7 @@ namespace NeeView
             {
                 _watcher.Stop();
             }
-            RaisePropertyChanged(nameof(PendingCount));
+            OnPropertyChanged(nameof(PendingCount));
         }
 
         /// <summary>
@@ -361,7 +362,7 @@ namespace NeeView
                     BookmarkCollectionService.Remove(query, parentNode);
                 }
 
-                RaisePropertyChanged(nameof(IsBookmark));
+                OnPropertyChanged(nameof(IsBookmark));
             }
         }
 

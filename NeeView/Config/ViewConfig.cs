@@ -1,5 +1,5 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Windows.Property;
 using System;
 using System.Text.Json.Serialization;
@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class ViewConfig : BindableBaseFull
+    public partial class ViewConfig : ObservableObject
     {
         [DefaultEquality] private PageStretchMode _stretchMode = PageStretchMode.Uniform;
         [DefaultEquality] private PageStretchMode _validStretchMode = PageStretchMode.Uniform;
@@ -375,8 +375,8 @@ namespace NeeView
             {
                 _stretchMode = value;
                 _validStretchMode = _stretchMode != PageStretchMode.None ? value : _validStretchMode;
-                RaisePropertyChanged(nameof(StretchMode));
-                RaisePropertyChanged(nameof(ValidStretchMode));
+                OnPropertyChanged(nameof(StretchMode));
+                OnPropertyChanged(nameof(ValidStretchMode));
             }
         }
     }

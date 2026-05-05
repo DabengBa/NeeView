@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Properties;
 using System;
 using System.Windows.Data;
@@ -42,7 +42,7 @@ namespace NeeView
         }
 
 
-        private class BookExternalAppBindingSource : BindableBase
+        private class BookExternalAppBindingSource : ObservableObject
         {
             private readonly DummyExternalApp _dummyExternalApp = new DummyExternalApp();
 
@@ -55,7 +55,7 @@ namespace NeeView
 
             private void BookOperation_BookChanged(object? sender, BookChangedEventArgs e)
             {
-                RaisePropertyChanged(nameof(CanOpenExternalApp));
+                OnPropertyChanged(nameof(CanOpenExternalApp));
             }
         }
 

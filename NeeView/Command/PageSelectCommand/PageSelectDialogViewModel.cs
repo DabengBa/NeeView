@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using NeeLaboratory.ComponentModel;
 using NeeView.Properties;
 using System;
 using System.Globalization;
@@ -24,7 +25,7 @@ namespace NeeView
         {
             _model = model;
 
-            _model.AddPropertyChanged(nameof(_model.Value),
+            _model.SubscribePropertyChanged(nameof(_model.Value),
                 (s, e) => OnPropertyChanged(nameof(Value)));
         }
 

@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -243,7 +244,7 @@ namespace NeeView
     /// <summary>
     /// global NVScrollBar settings
     /// </summary>
-    public class ScrollBarSettings : BindableBase
+    public class ScrollBarSettings : ObservableObject
     {
         private static readonly ScrollBarSettings _instance = new();
         public static ScrollBarSettings Instance => _instance;

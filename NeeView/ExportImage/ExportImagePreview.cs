@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -6,7 +7,7 @@ using System.Windows;
 
 namespace NeeView
 {
-    public class ExportImagePreview : BindableBase, IDisposable
+    public class ExportImagePreview : ObservableObject, IDisposable
     {
         private ExportImageParameter _parameter;
         private ExportImageSource _source;
@@ -76,7 +77,7 @@ namespace NeeView
                 {
                     _exporter?.Dispose();
                     _exporter = value;
-                    RaisePropertyChanged();
+                    OnPropertyChanged();
                 }
             }
         }

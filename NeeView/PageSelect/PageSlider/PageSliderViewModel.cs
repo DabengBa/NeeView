@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -9,7 +10,7 @@ namespace NeeView
     /// <summary>
     /// PageSlider : ViewModel
     /// </summary>
-    public class PageSliderViewModel : BindableBase
+    public class PageSliderViewModel : ObservableObject
     {
         private PageSlider _model;
         private readonly MouseWheelDelta _mouseWheelDelta = new();
@@ -19,24 +20,24 @@ namespace NeeView
         {
             _model = model ?? throw new InvalidOperationException();
 
-            Config.Current.Slider.AddPropertyChanged(nameof(SliderConfig.SliderIndexLayout),
-                (s, e) => RaisePropertyChanged(null));
+            Config.Current.Slider.SubscribePropertyChanged(nameof(SliderConfig.SliderIndexLayout),
+                (s, e) => OnPropertyChanged(""));
 
             BookOperation.Current.BookChanged +=
-                (s, e) => RaisePropertyChanged(nameof(PageSliderVisibility));
+                (s, e) => OnPropertyChanged(nameof(PageSliderVisibility));
 
-            FontParameters.Current.AddPropertyChanged(nameof(FontParameters.DefaultFontSize),
-                (s, e) => RaisePropertyChanged(nameof(FontSize)));
+            FontParameters.Current.SubscribePropertyChanged(nameof(FontParameters.DefaultFontSize),
+                (s, e) => OnPropertyChanged(nameof(FontSize)));
 
-            Config.Current.Slider.AddPropertyChanged(nameof(SliderConfig.Thickness),
-                (s, e) => RaisePropertyChanged(nameof(FontSize)));
+            Config.Current.Slider.SubscribePropertyChanged(nameof(SliderConfig.Thickness),
+                (s, e) => OnPropertyChanged(nameof(FontSize)));
         }
 
 
         public PageSlider Model
         {
             get { return _model; }
-            set { if (_model != value) { _model = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _model, value); }
         }
 
         public bool IsSliderWithIndex => _model != null && Config.Current.Slider.SliderIndexLayout != SliderIndexLayout.None;

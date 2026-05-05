@@ -1,5 +1,5 @@
-﻿using NeeLaboratory;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory;
 using NeeView.Media.Imaging;
 using NeeView.Properties;
 using System;
@@ -37,7 +37,7 @@ namespace NeeView
     /// <summary>
     /// Print Model
     /// </summary>
-    public class PrintModel : BindableBase
+    public class PrintModel : ObservableObject
     {
         // NOTE: アプリ起動中の PrintDialog 設定を維持するため、静的にする
         private static PrintDialog _printDialog = new PrintDialog();
@@ -85,7 +85,7 @@ namespace NeeView
                         _ => PageOrientation.Portrait,
                     };
                     UpdatePrintOrientation();
-                    RaisePropertyChanged();
+                    OnPropertyChanged();
                 }
             }
         }
@@ -99,7 +99,7 @@ namespace NeeView
         public PrintMode PrintMode
         {
             get { return _printMode; }
-            set { if (_printMode != value) { _printMode = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _printMode, value); }
         }
 
         public Dictionary<PrintMode, string> PrintModeList
@@ -110,37 +110,37 @@ namespace NeeView
         public bool IsBackground
         {
             get { return _isBackground; }
-            set { if (_isBackground != value) { _isBackground = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _isBackground, value); }
         }
 
         public bool IsDotScale
         {
             get { return _isDotScale; }
-            set { if (_isDotScale != value) { _isDotScale = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _isDotScale, value); }
         }
 
         public PrintQueue? PrintQueue
         {
             get { return _printQueue; }
-            set { if (_printQueue != value) { _printQueue = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _printQueue, value); }
         }
 
         public int Columns
         {
             get { return _columns; }
-            set { if (_columns != value) { _columns = MathUtility.Clamp(value, 1, 4); RaisePropertyChanged(); } }
+            set { SetProperty(ref _columns, MathUtility.Clamp(value, 1, 4)); }
         }
 
         public int Rows
         {
             get { return _rows; }
-            set { if (_rows != value) { _rows = MathUtility.Clamp(value, 1, 4); ; RaisePropertyChanged(); } }
+            set { SetProperty(ref _rows, MathUtility.Clamp(value, 1, 4)); }
         }
 
         public HorizontalAlignment HorizontalAlignment
         {
             get { return _horizontalAlignment; }
-            set { if (_horizontalAlignment != value) { _horizontalAlignment = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _horizontalAlignment, value); }
         }
 
         public Dictionary<HorizontalAlignment, string> HorizontalAlignmentList { get; } = new Dictionary<HorizontalAlignment, string>()
@@ -153,7 +153,7 @@ namespace NeeView
         public VerticalAlignment VerticalAlignment
         {
             get { return _verticalAlignment; }
-            set { if (_verticalAlignment != value) { _verticalAlignment = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _verticalAlignment, value); }
         }
 
         public Dictionary<VerticalAlignment, string> VerticalAlignmentList { get; } = new Dictionary<VerticalAlignment, string>()
@@ -166,7 +166,7 @@ namespace NeeView
         public Margin Margin
         {
             get { return _margin; }
-            set { if (_margin != value) { _margin = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _margin, value); }
         }
 
 

@@ -1,14 +1,36 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using System;
 using System.Windows;
 
 namespace NeeView
 {
     /// <summary>
-    /// TinyInfomessage : ViewModel
+    /// TinyInfoMessage : ViewModel
     /// </summary>
-    public class TinyInfoMessageViewModel : BindableBase
+    public class TinyInfoMessageViewModel : ObservableObject
     {
+        private int _changeCount;
+        private TinyInfoMessage _model;
+
+        public TinyInfoMessageViewModel(TinyInfoMessage model)
+        {
+            _model = model;
+
+            _model.SubscribePropertyChanged(nameof(_model.Message),
+                (s, e) =>
+                {
+                    if (!string.IsNullOrWhiteSpace(_model.Message)) ChangeCount++;
+                    OnPropertyChanged(nameof(Visibility));
+                });
+
+            _model.SubscribePropertyChanged(nameof(_model.DisplayTime),
+                (s, e) =>
+                {
+                    OnPropertyChanged(nameof(DisplayTime));
+                });
+        }
+
         /// <summary>
         /// ChangeCount property.
         /// 表示の更新通知に利用される。
@@ -16,11 +38,8 @@ namespace NeeView
         public int ChangeCount
         {
             get { return _changeCount; }
-            set { if (_changeCount != value) { _changeCount = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _changeCount, value); }
         }
-
-        private int _changeCount;
-
 
         /// <summary>
         /// Model property.
@@ -28,39 +47,11 @@ namespace NeeView
         public TinyInfoMessage Model
         {
             get { return _model; }
-            set { if (_model != value) { _model = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _model, value); }
         }
 
-        private TinyInfoMessage _model;
-
-
-        //
         public TimeSpan DisplayTime => TimeSpan.FromSeconds(_model.DisplayTime);
 
-        //
         public Visibility Visibility => string.IsNullOrEmpty(_model.Message) ? Visibility.Collapsed : Visibility.Visible;
-
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="model"></param>
-        public TinyInfoMessageViewModel(TinyInfoMessage model)
-        {
-            _model = model;
-
-            _model.AddPropertyChanged(nameof(_model.Message),
-                (s, e) =>
-                {
-                    if (!string.IsNullOrWhiteSpace(_model.Message)) ChangeCount++;
-                    RaisePropertyChanged(nameof(Visibility));
-                });
-
-            _model.AddPropertyChanged(nameof(_model.DisplayTime),
-                (s, e) =>
-                {
-                    RaisePropertyChanged(nameof(DisplayTime));
-                });
-        }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading;
-using System.Windows;
 
 namespace NeeView
 {
@@ -25,7 +24,7 @@ namespace NeeView
             if (_stopwatch is null) return;
 
             if (!App.Current.IsTraceLogEnabled) return;
-           
+
             _stopwatch.Stop();
 
             var elapsed = _stopwatch.ElapsedMilliseconds;
@@ -33,7 +32,7 @@ namespace NeeView
             if (elapsed > _thresholdMs)
             {
                 bool isSTA = Thread.CurrentThread.GetApartmentState() == ApartmentState.STA;
-                
+
                 bool isUIThread = App.Current?.Dispatcher.CheckAccess() ?? false;
 
                 if (isSTA && isUIThread)

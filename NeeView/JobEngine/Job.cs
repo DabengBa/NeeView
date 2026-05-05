@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.Threading.Tasks;
 using System;
 using System.Diagnostics;
@@ -26,7 +26,7 @@ namespace NeeView
     /// <summary>
     /// ジョブ
     /// </summary>
-    public class Job : BindableBase, IDisposable
+    public class Job : ObservableObject, IDisposable
     {
         private readonly ManualResetEventSlim _completed = new();
         private readonly CancellationToken _cancellationToken;
@@ -187,7 +187,7 @@ namespace NeeView
         {
             DebugLog = DebugLog ?? new DebugSimpleLog();
             DebugLog.WriteLine(msg);
-            RaisePropertyChanged(nameof(DebugLog));
+            OnPropertyChanged(nameof(DebugLog));
         }
 
         #endregion

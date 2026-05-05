@@ -1,21 +1,18 @@
-﻿using NeeLaboratory.Generators;
-using System.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 
 namespace NeeView
 {
-    [NotifyPropertyChanged]
-    public partial class PageLoadingViewModel : INotifyPropertyChanged
+    public partial class PageLoadingViewModel : ObservableObject
     {
         private PageLoading _model;
 
         public PageLoadingViewModel(PageLoading model)
         {
             _model = model;
-            _model.SubscribePropertyChanged(nameof(_model.IsActive), (s, e) => RaisePropertyChanged(nameof(IsActive)));
-            _model.SubscribePropertyChanged(nameof(_model.Message), (s, e) => RaisePropertyChanged(nameof(Message)));
+            _model.SubscribePropertyChanged(nameof(_model.IsActive), (s, e) => OnPropertyChanged(nameof(IsActive)));
+            _model.SubscribePropertyChanged(nameof(_model.Message), (s, e) => OnPropertyChanged(nameof(Message)));
         }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         public bool IsActive
         {

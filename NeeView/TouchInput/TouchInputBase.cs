@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Windows;
 using System.Windows.Input;
@@ -8,7 +8,7 @@ namespace NeeView
     /// <summary>
     /// タッチ入力処理既定クラス
     /// </summary>
-    public abstract class TouchInputBase : BindableBase
+    public abstract class TouchInputBase : ObservableObject
     {
         /// <summary>
         /// 状態コンテキスト

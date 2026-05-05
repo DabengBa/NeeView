@@ -1,5 +1,6 @@
 ﻿using Generator.Equals;
 using Microsoft.Expression.Media.Effects;
+using NeeLaboratory.ComponentModel;
 using NeeView.Windows.Property;
 using System.ComponentModel;
 using System.Windows;

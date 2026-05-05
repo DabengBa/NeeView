@@ -1,8 +1,8 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.Generators;
 using NeeLaboratory.Threading;
 using NeeView.ComponentModel;
 using System;
-using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -10,8 +10,7 @@ using System.Windows.Media;
 
 namespace NeeView
 {
-    [NotifyPropertyChanged]
-    public partial class ViewSource : IDataSource, IMemoryElement, IHasImageSource, INotifyPropertyChanged
+    public partial class ViewSource : ObservableObject, IDataSource, IMemoryElement, IHasImageSource
     {
         private readonly PageContent _pageContent;
         private readonly BookMemoryService _bookMemoryService;
@@ -36,10 +35,6 @@ namespace NeeView
         [Subscribable]
         public event EventHandler<DataSourceChangedEventArgs>? DataSourceChanged;
 
-        [Subscribable]
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-
 
         public PageDataSource DataSource
         {
@@ -54,11 +49,11 @@ namespace NeeView
                     }
                     DataSourceChanged?.Invoke(this, new DataSourceChangedEventArgs(_data));
 
-                    RaisePropertyChanged(nameof(Data));
-                    RaisePropertyChanged(nameof(DataSize));
-                    RaisePropertyChanged(nameof(ErrorMessage));
-                    RaisePropertyChanged(nameof(IsLoaded));
-                    RaisePropertyChanged(nameof(IsFailed));
+                    OnPropertyChanged(nameof(Data));
+                    OnPropertyChanged(nameof(DataSize));
+                    OnPropertyChanged(nameof(ErrorMessage));
+                    OnPropertyChanged(nameof(IsLoaded));
+                    OnPropertyChanged(nameof(IsFailed));
                 }
             }
         }

@@ -1,5 +1,6 @@
 ﻿//#define LOCAL_DEBUG
 
+using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.ComponentModel;
 using NeeView.Effects;
 using NeeView.PageFrames;
@@ -11,7 +12,7 @@ using System.Windows.Controls;
 
 namespace NeeView
 {
-    public class MainViewViewModel : BindableBase
+    public class MainViewViewModel : ObservableObject
     {
         private readonly MainViewComponent _viewComponent;
         private readonly PageFrameBoxPresenter _presenter;
@@ -26,8 +27,8 @@ namespace NeeView
             _viewComponent = viewComponent;
             _presenter = PageFrameBoxPresenter.Current;
 
-            Config.Current.View.AddPropertyChanged(nameof(ViewConfig.MainViewMargin),
-                (s, e) => RaisePropertyChanged(nameof(MainViewMargin)));
+            Config.Current.View.SubscribePropertyChanged(nameof(ViewConfig.MainViewMargin),
+                (s, e) => OnPropertyChanged(nameof(MainViewMargin)));
 
             // context menu
             ContextMenuSource.Current.ContextMenuChanged +=
@@ -43,13 +44,13 @@ namespace NeeView
                 (s, e) => SetContextMenuDirty());
 
             // busy visibility
-            //_viewComponent.ContentRebuild.AddPropertyChanged(nameof(ContentRebuild.IsBusy),
+            //_viewComponent.ContentRebuild.SubscribePropertyChanged(nameof(ContentRebuild.IsBusy),
             //    (s, e) => UpdateBusyVisibility());
 
             _viewComponent.SubscribePropertyChanged(nameof(MainViewComponent.IsProcessing),
-                (s, e) => RaisePropertyChanged(nameof(IsProcessing)));
+                (s, e) => OnPropertyChanged(nameof(IsProcessing)));
 
-            BookOperation.Current.BookControl.AddPropertyChanged(nameof(IBookControl.IsBusy),
+            BookOperation.Current.BookControl.SubscribePropertyChanged(nameof(IBookControl.IsBusy),
                 (s, e) => UpdateBusyVisibility());
 
             _presenter.SubscribePropertyChanged(nameof(PageFrameBoxPresenter.IsLoading),
@@ -87,7 +88,7 @@ namespace NeeView
         public Visibility BusyVisibility
         {
             get { return _busyVisibility; }
-            set { if (_busyVisibility != value) { _busyVisibility = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _busyVisibility, value); }
         }
 
         // NOTE: 背景色をページに依存させる設定で使用される

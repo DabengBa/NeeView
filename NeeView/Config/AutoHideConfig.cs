@@ -1,5 +1,5 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Windows.Controls;
 using NeeView.Windows.Property;
 using System;
@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class AutoHideConfig : BindableBase
+    public partial class AutoHideConfig : ObservableObject
     {
         [DefaultEquality] private double _autoHideDelayTime = 1.0;
         [DefaultEquality] private double _autoHideDelayVisibleTime = 0.0;

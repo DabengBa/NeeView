@@ -1,4 +1,5 @@
-﻿using Generator.Equals;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeLaboratory.ComponentModel;
 using NeeView.Windows.Property;
 using System;
@@ -11,12 +12,12 @@ namespace NeeView
 {
     [JsonConverter(typeof(JsonDragActionParameterConverter))]
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class DragActionParameter : BindableBase, ICloneable
+    public partial class DragActionParameter : ObservableObject, ICloneable
     {
         public virtual object Clone()
         {
             var clone = (DragActionParameter)MemberwiseClone();
-            clone.ResetPropertyChanged();
+            clone.ClearObservableEvents();
             return clone;
         }
     }

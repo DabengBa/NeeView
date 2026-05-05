@@ -1,11 +1,11 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Windows.Property;
 
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class CommandConfig : BindableBase
+    public partial class CommandConfig : ObservableObject
     {
         [DefaultEquality] private bool _isAccessKeyEnabled = true;
         [DefaultEquality] private bool _isReversePageMove = true;

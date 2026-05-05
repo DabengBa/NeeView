@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -46,15 +47,15 @@ namespace NeeView
 
 
 
-    public class ProgressBoxViewModel : BindableBase
+    public class ProgressBoxViewModel : ObservableObject
     {
         private ProgressBoxModel _model;
 
         public ProgressBoxViewModel()
         {
             _model = new ProgressBoxModel();
-            _model.SubscribePropertyChanged(nameof(ProgressBoxModel.IsEnabled), (s, e) => RaisePropertyChanged(nameof(IsEnabled)));
-            _model.SubscribePropertyChanged(nameof(ProgressBoxModel.Message), (s, e) => RaisePropertyChanged(nameof(Message)));
+            _model.SubscribePropertyChanged(nameof(ProgressBoxModel.IsEnabled), (s, e) => OnPropertyChanged(nameof(IsEnabled)));
+            _model.SubscribePropertyChanged(nameof(ProgressBoxModel.Message), (s, e) => OnPropertyChanged(nameof(Message)));
         }
 
         public bool IsEnabled => _model.IsEnabled;
@@ -64,7 +65,7 @@ namespace NeeView
 
 
 
-    public class ProgressBoxModel : BindableBase
+    public class ProgressBoxModel : ObservableObject
     {
         private readonly Progress<ProgressContext> _progress;
         private string _message = "";
@@ -76,7 +77,7 @@ namespace NeeView
         {
             _progress = new Progress<ProgressContext>(Progress_Report);
             ProcessJobEngine.Current.Progress = _progress;
-            ProcessJobEngine.Current.SubscribePropertyChanged(nameof(ProcessJobEngine.IsBusy), (s, e) => RaisePropertyChanged(nameof(IsEnabled)));
+            ProcessJobEngine.Current.SubscribePropertyChanged(nameof(ProcessJobEngine.IsBusy), (s, e) => OnPropertyChanged(nameof(IsEnabled)));
         }
 
         public bool IsEnabled => ProcessJobEngine.Current.IsBusy;

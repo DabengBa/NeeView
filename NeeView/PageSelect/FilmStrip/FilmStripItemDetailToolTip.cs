@@ -1,10 +1,10 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.ComponentModel;
 
 namespace NeeView
 {
-    public class FilmStripItemDetailToolTip : BindableBase, IToolTipService, IDisposable
+    public class FilmStripItemDetailToolTip : ObservableObject, IToolTipService, IDisposable
     {
         static FilmStripItemDetailToolTip() => Current = new();
         public static FilmStripItemDetailToolTip Current { get; }
@@ -32,7 +32,7 @@ namespace NeeView
             {
                 if (SetProperty(ref _isToolTipEnabled, value))
                 {
-                    RaisePropertyChanged(nameof(IsEnabled));
+                    OnPropertyChanged(nameof(IsEnabled));
                 }
             }
         }
@@ -40,7 +40,7 @@ namespace NeeView
         {
             if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName == nameof(FilmStripConfig.IsDetailPopupEnabled))
             {
-                RaisePropertyChanged(nameof(IsEnabled));
+                OnPropertyChanged(nameof(IsEnabled));
             }
         }
 

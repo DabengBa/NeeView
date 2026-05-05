@@ -33,8 +33,8 @@ namespace NeeView
             {
                 if (SetProperty(ref _path, value))
                 {
-                    RaisePropertyChanged(nameof(Name));
-                    RaisePropertyChanged(nameof(Detail));
+                    OnPropertyChanged(nameof(Name));
+                    OnPropertyChanged(nameof(Detail));
                 }
             }
         }

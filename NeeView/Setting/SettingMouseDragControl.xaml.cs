@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Properties;
 using System;
 using System.Collections.ObjectModel;
@@ -25,7 +25,7 @@ namespace NeeView.Setting
         }
 
         // ドラッグ一覧専用パラメータ
-        public class DragActionParam : BindableBase
+        public class DragActionParam : ObservableObject
         {
             public DragActionParam(string key, DragAction dragAction)
             {

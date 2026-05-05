@@ -1,9 +1,8 @@
 ﻿using AnimatedImage.Wpf;
+using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory;
 using NeeLaboratory.ComponentModel;
-using NeeLaboratory.Generators;
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading;
 using System.Windows;
@@ -14,9 +13,7 @@ using System.Windows.Media.Imaging;
 
 namespace NeeView
 {
-
-    [NotifyPropertyChanged]
-    public partial class AnimatedMediaPlayer : IOpenableMediaPlayer, IDisposable
+    public partial class AnimatedMediaPlayer : ObservableObject, IOpenableMediaPlayer, IDisposable
     {
         private readonly Image _image;
         private ImageAnimationController? _player;
@@ -25,7 +22,6 @@ namespace NeeView
         private bool _isEnabled = true;
         private bool _isRepeat = true;
         private bool _isPlaying;
-
 
 
         public AnimatedMediaPlayer()
@@ -38,10 +34,6 @@ namespace NeeView
             ImageBehavior.AddAnimationLoadedHandler(_image, Image_Loaded);
             ImageBehavior.AddAnimationCompletedHandler(_image, Image_Completed);
         }
-
-
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
 
         public event EventHandler? MediaEnded;
@@ -233,7 +225,7 @@ namespace NeeView
             UpdateRepeat();
 
             MediaPlayed?.Invoke(this, EventArgs.Empty);
-            RaisePropertyChanged("");
+            OnPropertyChanged("");
         }
 
         private void Image_Completed(object sender, RoutedEventArgs e)
@@ -247,7 +239,7 @@ namespace NeeView
         {
             if (_disposedValue) return;
 
-            RaisePropertyChanged(nameof(Position));
+            OnPropertyChanged(nameof(Position));
         }
 
         public void Play()

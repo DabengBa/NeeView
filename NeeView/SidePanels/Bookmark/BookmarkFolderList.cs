@@ -24,7 +24,7 @@ namespace NeeView
 
             _disposables.Add(Config.Current.Bookmark.SubscribePropertyChanged(nameof(BookmarkConfig.IsSyncBookshelfEnabled), (s, e) =>
             {
-                RaisePropertyChanged(nameof(IsSyncBookshelfEnabled));
+                OnPropertyChanged(nameof(IsSyncBookshelfEnabled));
             }));
 
             _disposables.Add(Config.Current.Bookshelf.SubscribePropertyChanged(nameof(BookshelfConfig.FolderSortOrder), async (s, e) =>

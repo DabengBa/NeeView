@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NeeLaboratory.ComponentModel;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -66,7 +67,7 @@ namespace NeeView
             _vm = new NowLoadingViewModel(this.Source);
             _root.DataContext = _vm;
 
-            _vm.AddPropertyChanged(nameof(_vm.IsDisplayNowLoading),
+            _vm.SubscribePropertyChanged(nameof(_vm.IsDisplayNowLoading),
                 (s, e) => DisplayNowLoading(_vm.IsDisplayNowLoading));
         }
 

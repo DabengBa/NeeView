@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -8,12 +8,9 @@ namespace NeeView
     /// <summary>
     /// TinyInfoMessageView.xaml の相互作用ロジック
     /// </summary>
-    [NotifyPropertyChanged]
-    public partial class TinyInfoMessageView : UserControl, INotifyPropertyChanged
+    [INotifyPropertyChanged]
+    public partial class TinyInfoMessageView : UserControl
     {
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-
         public TinyInfoMessage Source
         {
             get { return (TinyInfoMessage)GetValue(SourceProperty); }
@@ -38,7 +35,7 @@ namespace NeeView
         public TinyInfoMessageViewModel? VM
         {
             get { return _vm; }
-            private set { if (_vm != value) { _vm = value; RaisePropertyChanged(); } }
+            private set { SetProperty(ref _vm, value); }
         }
 
         private TinyInfoMessageViewModel? _vm;

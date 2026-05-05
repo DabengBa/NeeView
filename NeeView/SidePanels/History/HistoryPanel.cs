@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Properties;
 using System;
 using System.Windows;
@@ -10,7 +10,7 @@ namespace NeeView
     /// 履歴パネル
     /// Type: ControlModel? ViewModelParts?
     /// </summary>
-    public class HistoryPanel : BindableBase, IPanel
+    public class HistoryPanel : ObservableObject, IPanel
     {
         private readonly LazyEx<HistoryListView> _view;
         private readonly HistoryListPresenter _presenter;

@@ -1,11 +1,11 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Windows.Property;
 
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class FolderListConfig : BindableBase, IHasPanelListItemStyle, IFolderTreeLayoutConfig
+    public partial class FolderListConfig : ObservableObject, IHasPanelListItemStyle, IFolderTreeLayoutConfig
     {
         [DefaultEquality] private FolderTreeLayout _folderTreeLayout = FolderTreeLayout.Left;
         [DefaultEquality] private bool _isFolderTreeVisible = false;
@@ -18,7 +18,7 @@ namespace NeeView
         public PanelListItemStyle PanelListItemStyle
         {
             get { return _panelListItemStyle; }
-            set { if (_panelListItemStyle != value) { _panelListItemStyle = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _panelListItemStyle, value); }
         }
 
         /// <summary>
@@ -48,14 +48,14 @@ namespace NeeView
         /// フォルダーツリーエリアの幅
         /// </summary>
         [PropertyMapIgnore]
-        [DefaultEquality] 
+        [DefaultEquality]
         public double FolderTreeAreaWidth { get; set { field = AppMath.Round(value); } } = 128.0;
 
         /// <summary>
         /// フォルダーツリーエリアの高さ
         /// </summary>
         [PropertyMapIgnore]
-        [DefaultEquality] 
+        [DefaultEquality]
         public double FolderTreeAreaHeight { get; set { field = AppMath.Round(value); } } = 72.0;
 
         #endregion

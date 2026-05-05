@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -6,7 +6,7 @@ using System.ComponentModel;
 
 namespace NeeView
 {
-    public class ContextMenuSource : BindableBase
+    public class ContextMenuSource : ObservableObject
     {
         static ContextMenuSource() => Current = new ContextMenuSource();
         public static ContextMenuSource Current { get; }
@@ -35,7 +35,7 @@ namespace NeeView
                     DetachSourceTree(_menuTree);
                     _menuTree = value;
                     AttachSourceTree(_menuTree);
-                    RaisePropertyChanged();
+                    OnPropertyChanged();
                 }
             }
         }

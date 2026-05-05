@@ -16,7 +16,7 @@ namespace NeeLaboratory.IO
             var ext = extension.ToLowerInvariant().Trim();
             if (_cache.TryGetValue(ext, out var fileTypeName))
             {
-                return fileTypeName; 
+                return fileTypeName;
             }
 
             fileTypeName = FileSystem.GetExtensionTypeName(ext);

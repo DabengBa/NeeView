@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.Generators;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -6,7 +6,7 @@ using System.ComponentModel;
 
 namespace NeeView.Collections.Generic
 {
-    public partial class TreeCollection<T> : BindableBase
+    public partial class TreeCollection<T> : ObservableObject
         where T : ITreeListNode
     {
         public TreeCollection(TreeListNode<T> root)

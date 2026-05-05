@@ -1,5 +1,6 @@
 ﻿//#define LOCAL_DEBUG
 
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Win32;
 using NeeLaboratory.ComponentModel;
 using NeeLaboratory.Generators;
@@ -20,7 +21,7 @@ namespace NeeView
 {
 
     [LocalDebug]
-    public partial class PlaylistHub : BindableBase
+    public partial class PlaylistHub : ObservableObject
     {
         static PlaylistHub() => Current = new PlaylistHub();
         public static PlaylistHub Current { get; }
@@ -109,19 +110,19 @@ namespace NeeView
                 AddAllPlaylistToFileResolver();
             }
 
-            Config.Current.Playlist.AddPropertyChanged(nameof(PlaylistConfig.PlaylistFolder),
+            Config.Current.Playlist.SubscribePropertyChanged(nameof(PlaylistConfig.PlaylistFolder),
                 PlaylistFolder_Changed);
 
-            Config.Current.Playlist.AddPropertyChanged(nameof(PlaylistConfig.CurrentPlaylist),
-                (s, e) => RaisePropertyChanged(nameof(SelectedItem)));
+            Config.Current.Playlist.SubscribePropertyChanged(nameof(PlaylistConfig.CurrentPlaylist),
+                (s, e) => OnPropertyChanged(nameof(SelectedItem)));
 
-            Config.Current.Playlist.AddPropertyChanged(nameof(PlaylistConfig.IsCurrentBookFilterEnabled),
-                (s, e) => RaisePropertyChanged(nameof(FilterMessage)));
+            Config.Current.Playlist.SubscribePropertyChanged(nameof(PlaylistConfig.IsCurrentBookFilterEnabled),
+                (s, e) => OnPropertyChanged(nameof(FilterMessage)));
 
             BookOperation.Current.BookChanged +=
-                (s, e) => RaisePropertyChanged(nameof(FilterMessage));
+                (s, e) => OnPropertyChanged(nameof(FilterMessage));
 
-            this.AddPropertyChanged(nameof(SelectedItem),
+            this.SubscribePropertyChanged(nameof(SelectedItem),
                 (s, e) => SelectedItemChanged());
 
             SetPlaylist(LoadPlaylist(this.SelectedItem));
@@ -136,7 +137,7 @@ namespace NeeView
             UpdatePlaylistCollection(keepSelectedItem: false);
 
             this.SelectedItem = DefaultPlaylist;
-            RaisePropertyChanged(nameof(SelectedItem));
+            OnPropertyChanged(nameof(SelectedItem));
 
             UpdatePlaylist();
         }
@@ -217,7 +218,7 @@ namespace NeeView
 
                 //this.PlaylistFiles = items;
                 _playlistCollection = items;
-                RaisePropertyChanged(nameof(PlaylistFiles));
+                OnPropertyChanged(nameof(PlaylistFiles));
             }
             finally
             {
@@ -316,7 +317,7 @@ namespace NeeView
             _playlist = value;
             AttachPlaylistEvents(_playlist);
 
-            RaisePropertyChanged(nameof(Playlist));
+            OnPropertyChanged(nameof(Playlist));
             PlaylistCollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 

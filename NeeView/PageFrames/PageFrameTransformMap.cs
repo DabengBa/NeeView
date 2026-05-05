@@ -1,7 +1,6 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows;
@@ -29,8 +28,7 @@ namespace NeeView.PageFrames
     }
 
     // TODO: Lock用Transform は専用のものでよいのでは？
-    [NotifyPropertyChanged]
-    public partial class PageFrameTransformMap : INotifyPropertyChanged, IDisposable
+    public partial class PageFrameTransformMap : ObservableObject, IDisposable
     {
         private readonly Dictionary<PageFrameTransformKey, PageFrameTransform> _map = new();
         private readonly PageFrameTransform _share = new();
@@ -40,9 +38,6 @@ namespace NeeView.PageFrames
         private bool _isScaleLocked;
         private bool _isAngleLocked;
         private bool _disposedValue;
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
 
         public PageFrameTransformMap(IShareTransformContext shareTransformContext)
         {

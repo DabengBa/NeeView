@@ -1,6 +1,6 @@
 ﻿//#define LOCAL_DEBUG
 
-using NeeLaboratory.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.Generators;
 using NeeLaboratory.Linq;
 using NeeView.Collections.ObjectModel;
@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 namespace NeeView
 {
     [LocalDebug]
-    public partial class BookHistoryCollection : BindableBase
+    public partial class BookHistoryCollection : ObservableObject
     {
         static BookHistoryCollection() => Current = new BookHistoryCollection();
         public static BookHistoryCollection Current { get; }
@@ -81,7 +81,7 @@ namespace NeeView
         private void BookHistoryCollection_HistoryChanged(object? sender, BookMementoCollectionChangedArgs e)
         {
             SerialNumber++;
-            RaisePropertyChanged(nameof(Count));
+            OnPropertyChanged(nameof(Count));
         }
 
         private void SearchHistoryChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -449,7 +449,7 @@ namespace NeeView
     /// </summary>
     [Memento]
     [LocalDebug]
-    public partial class BookHistoryCollectionMemento : BindableBase
+    public partial class BookHistoryCollectionMemento : ObservableObject
     {
         public static string FormatName => Environment.SolutionName + ".History";
 

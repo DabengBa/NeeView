@@ -1,4 +1,6 @@
-﻿namespace NeeView
+﻿using NeeLaboratory.ComponentModel;
+
+namespace NeeView
 {
     public class PageListPresenter
     {
@@ -15,7 +17,7 @@
 
             _listBoxViewModel = new PageListBoxViewModel(_pageList);
 
-            Config.Current.PageList.AddPropertyChanged(nameof(PageListConfig.PanelListItemStyle), (s, e) => UpdateListBoxContent());
+            Config.Current.PageList.SubscribePropertyChanged(nameof(PageListConfig.PanelListItemStyle), (s, e) => UpdateListBoxContent());
 
             _pageListView.Created += (s, e) => UpdateListBoxContent();
         }

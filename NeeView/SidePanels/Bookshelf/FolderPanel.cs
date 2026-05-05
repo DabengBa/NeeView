@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Properties;
 using System;
 using System.Diagnostics;
@@ -7,7 +7,7 @@ using System.Windows.Media;
 
 namespace NeeView
 {
-    public class FolderPanel : BindableBase, IPanel
+    public class FolderPanel : ObservableObject, IPanel
     {
         private static FolderPanel? _current;
         public static FolderPanel Current => _current ?? throw new InvalidOperationException();

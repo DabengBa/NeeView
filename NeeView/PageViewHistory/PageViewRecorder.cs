@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeView.Properties;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ using System.Text;
 
 namespace NeeView
 {
-    public class PageViewRecorder : BindableBase, IDisposable
+    public class PageViewRecorder : ObservableObject, IDisposable
     {
         private static PageViewRecorder? _current;
         public static PageViewRecorder Current => _current ?? throw new InvalidOperationException();

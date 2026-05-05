@@ -1,10 +1,10 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeLaboratory.Generators;
 using NeeLaboratory.Threading.Jobs;
 using NeeLaboratory.Threading.Tasks;
 using NeeView.Properties;
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
@@ -18,8 +18,7 @@ namespace NeeView
     /// 本の管理
     /// ロード、本の操作はここを通す
     /// </summary>
-    [NotifyPropertyChanged]
-    public partial class BookHub : IDisposable, INotifyPropertyChanged
+    public partial class BookHub : ObservableObject, IDisposable
     {
         // Singleton
         static BookHub() => Current = new BookHub();
@@ -66,10 +65,6 @@ namespace NeeView
             // アプリ終了前の開放予約
             ApplicationDisposer.Current.Add(this);
         }
-
-
-        [Subscribable]
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         // 本の変更開始通知
         [Subscribable]
@@ -755,7 +750,7 @@ namespace NeeView
                     this.HistoryListSync = null;
                     this.BookmarkChanged = null;
                     this.AddressChanged = null;
-                    this.PropertyChanged = null;
+                    this.ClearObservableEvents();
 
                     //SaveBookMemento();
 

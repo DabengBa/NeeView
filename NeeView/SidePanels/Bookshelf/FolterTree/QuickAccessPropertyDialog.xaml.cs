@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Windows;
 
 namespace NeeView
@@ -38,7 +38,7 @@ namespace NeeView
 
 
 
-    public class QuickAccessPropertyDialogViewModel : BindableBase
+    public class QuickAccessPropertyDialogViewModel : ObservableObject
     {
         private readonly QuickAccess _quickAccess;
 
@@ -57,7 +57,7 @@ namespace NeeView
                 if (_quickAccess.Name != value)
                 {
                     _quickAccess.Name = value;
-                    RaisePropertyChanged(nameof(Name));
+                    OnPropertyChanged(nameof(Name));
                 }
             }
         }
@@ -70,8 +70,8 @@ namespace NeeView
                 if (_quickAccess.Path != value)
                 {
                     _quickAccess.Path = value;
-                    RaisePropertyChanged(nameof(Path));
-                    RaisePropertyChanged(nameof(Name));
+                    OnPropertyChanged(nameof(Path));
+                    OnPropertyChanged(nameof(Name));
                 }
             }
         }

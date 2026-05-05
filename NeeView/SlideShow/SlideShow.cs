@@ -1,5 +1,6 @@
 ﻿//#define LOCAL_DEBUG
 
+using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.ComponentModel;
 using NeeLaboratory.Generators;
 using NeeView.Properties;
@@ -14,7 +15,7 @@ namespace NeeView
     /// スライドショー管理
     /// </summary>
     [LocalDebug]
-    public partial class SlideShow : BindableBase, IDisposable
+    public partial class SlideShow : ObservableObject, IDisposable
     {
         static SlideShow() => Current = new SlideShow();
         public static SlideShow Current { get; }
@@ -72,7 +73,7 @@ namespace NeeView
                     {
                         StopTimer();
                     }
-                    RaisePropertyChanged();
+                    OnPropertyChanged();
                 }
             }
         }

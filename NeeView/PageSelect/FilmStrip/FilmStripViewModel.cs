@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 
 namespace NeeView
@@ -6,7 +6,7 @@ namespace NeeView
     /// <summary>
     /// FilmStrip : ViewModel
     /// </summary>
-    public class FilmStripViewModel : BindableBase
+    public class FilmStripViewModel : ObservableObject
     {
         private FilmStrip _model;
 
@@ -36,7 +36,7 @@ namespace NeeView
         public FilmStrip Model
         {
             get { return _model; }
-            set { if (_model != value) { _model = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _model, value); }
         }
 
         public FilmStripItemDetailToolTip DetailToolTip { get; }

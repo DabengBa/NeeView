@@ -1,7 +1,7 @@
 ﻿//#define LOCAL_DEBUG
 
+using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.Collection;
-using NeeLaboratory.ComponentModel;
 using NeeLaboratory.Generators;
 using NeeLaboratory.IO;
 using NeeLaboratory.Linq;
@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 namespace NeeView
 {
     [LocalDebug]
-    public partial class Playlist : BindableBase
+    public partial class Playlist : ObservableObject
     {
         public static Playlist Dummy { get; } = new Playlist("") { ErrorMessage = "This is dummy." };
 
@@ -77,7 +77,7 @@ namespace NeeView
             {
                 if (SetProperty(ref _fileStamp, value))
                 {
-                    RaisePropertyChanged(nameof(Path));
+                    OnPropertyChanged(nameof(Path));
                 }
             }
         }
@@ -99,7 +99,7 @@ namespace NeeView
                     {
                         _isDirty = value;
                     }
-                    RaisePropertyChanged();
+                    OnPropertyChanged();
                 }
             }
         }
@@ -134,7 +134,7 @@ namespace NeeView
                         _itemsMap = new MultiMap<string, PlaylistItem>();
                     }
 
-                    RaisePropertyChanged();
+                    OnPropertyChanged();
                     CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
                 }
             }

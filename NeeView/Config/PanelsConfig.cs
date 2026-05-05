@@ -1,5 +1,5 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Runtime.LayoutPanel;
 using NeeView.Windows.Property;
 using System;
@@ -9,7 +9,7 @@ using System.Windows;
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class PanelsConfig : BindableBase
+    public partial class PanelsConfig : ObservableObject
     {
         [DefaultEquality] private bool _isHideLeftPanel;
         [DefaultEquality] private bool _isHideRightPanel;
@@ -142,7 +142,7 @@ namespace NeeView
             {
                 if (SetProperty(ref _mouseWheelSpeedRate, AppMath.Round(Math.Max(value, 0.1))))
                 {
-                    RaisePropertyChanged(nameof(MouseWheelDelta));
+                    OnPropertyChanged(nameof(MouseWheelDelta));
                 }
             }
         }

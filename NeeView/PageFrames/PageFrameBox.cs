@@ -1,5 +1,6 @@
 ﻿//#define LOCAL_DEBUG
 
+using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.ComponentModel;
 using NeeLaboratory.Generators;
 using NeeView.Collections.Generic;
@@ -24,8 +25,8 @@ namespace NeeView.PageFrames
     // TODO: ごちゃっとしてるので整備する
     // TODO: IsStaticFrame ON/OFF でのスクロール制御の違いが煩雑になっているので良くする
     [LocalDebug]
-    [NotifyPropertyChanged]
-    public partial class PageFrameBox : Grid, INotifyPropertyChanged, IDisposable, ICanvasToViewTranslator, IDragTransformContextFactory
+    [INotifyPropertyChanged]
+    public partial class PageFrameBox : Grid, IDisposable, ICanvasToViewTranslator, IDragTransformContextFactory
     {
         private readonly PageFrameContainerCollection _containers;
         private readonly PageFrameScrollViewer _scrollViewer;
@@ -88,7 +89,7 @@ namespace NeeView.PageFrames
             var elementScaleFactory = new PageFrameElementScaleFactory(_context, _transformMap, loupeContext);
             _loader = new BookPageLoader(_bookContext, frameFactory, _viewSourceMap, elementScaleFactory, _bookContext.BookMemoryService, _context.PerformanceConfig);
             _disposables.Add(_loader);
-            _disposables.Add(_loader.SubscribePropertyChanged(nameof(BookPageLoader.IsBusy), (s, e) => RaisePropertyChanged(nameof(IsBusy))));
+            _disposables.Add(_loader.SubscribePropertyChanged(nameof(BookPageLoader.IsBusy), (s, e) => OnPropertyChanged(nameof(IsBusy))));
 
             var baseScaleTransform = new BaseScaleTransform(_context);
             _disposables.Add(baseScaleTransform);
@@ -180,9 +181,6 @@ namespace NeeView.PageFrames
             IsStarted = true;
         }
 
-
-        [Subscribable]
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// ページ終端を超えて移動しようとした
@@ -541,11 +539,11 @@ namespace NeeView.PageFrames
             switch (e.PropertyName)
             {
                 case nameof(_bookContext.SelectedRange):
-                    RaisePropertyChanged(nameof(SelectedRange));
+                    OnPropertyChanged(nameof(SelectedRange));
                     return;
 
                 case nameof(_bookContext.Pages):
-                    RaisePropertyChanged(nameof(Pages));
+                    OnPropertyChanged(nameof(Pages));
                     return;
             }
         }
@@ -1658,7 +1656,7 @@ namespace NeeView.PageFrames
         public void RaisePageTerminatedEvent(object? sender, int direction, bool isMedia)
         {
             if (_disposedValue) return;
-                
+
             if (isMedia && !_bookContext.IsMedia) return;
 
             if (!AppState.Instance.IsProcessingBook)

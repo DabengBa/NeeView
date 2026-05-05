@@ -124,7 +124,7 @@ namespace NeeView
                 .Select(e => new ScriptCommand(e.Path, _sourceMap))
                 .ToList();
 
-            foreach(var command in commands)
+            foreach (var command in commands)
             {
                 command.CreateDefaultMemento();
             }

@@ -33,7 +33,5 @@ namespace NeeView
 
         void Play();
         void Pause();
-
-        IDisposable SubscribePropertyChanged(string propertyName, PropertyChangedEventHandler handler);
     }
 }

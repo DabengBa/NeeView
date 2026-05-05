@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using NeeLaboratory.ComponentModel;
 using NeeView.Properties;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace NeeView
     /// <summary>
     /// 
     /// </summary>
-    public partial class HistoryListViewModel : BindableBase
+    public partial class HistoryListViewModel : ObservableObject
     {
         private readonly HistoryList _model;
 
@@ -20,7 +21,7 @@ namespace NeeView
         public HistoryListViewModel(HistoryList model)
         {
             _model = model;
-            _model.AddPropertyChanged(nameof(HistoryList.FilterPath), (s, e) => RaisePropertyChanged(nameof(FilterPath)));
+            _model.SubscribePropertyChanged(nameof(HistoryList.FilterPath), (s, e) => OnPropertyChanged(nameof(FilterPath)));
 
             MoreMenuDescription = new HistoryListMoreMenuDescription(this);
         }

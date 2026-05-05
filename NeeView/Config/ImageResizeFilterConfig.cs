@@ -1,5 +1,5 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Windows.Property;
 using PhotoSauce.MagicScaler;
 using System;
@@ -10,7 +10,7 @@ namespace NeeView
     /// Resize filter (PhotoSauce.MagicScaler)
     /// </summary>
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class ImageResizeFilterConfig : BindableBase
+    public partial class ImageResizeFilterConfig : ObservableObject
     {
         [DefaultEquality] private bool _isResizeFilterEnabled = false;
         [DefaultEquality] private ResizeInterpolation _resizeInterpolation = ResizeInterpolation.Lanczos;
@@ -62,14 +62,14 @@ namespace NeeView
                     _unsharpMask.PropertyChanged -= UnsharpMask_PropertyChanged;
                     _unsharpMask = value;
                     _unsharpMask.PropertyChanged += UnsharpMask_PropertyChanged;
-                    RaisePropertyChanged(nameof(UnsharpMask));
+                    OnPropertyChanged(nameof(UnsharpMask));
                 }
             }
         }
-        
+
         private void UnsharpMask_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            RaisePropertyChanged(nameof(UnsharpMask));
+            OnPropertyChanged(nameof(UnsharpMask));
         }
 
         public int GetEnvironmentHashCode()

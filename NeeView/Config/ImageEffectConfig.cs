@@ -1,12 +1,12 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Effects;
 using NeeView.Windows.Property;
 
 namespace NeeView
 {
     [Equatable(Explicit = false, IgnoreInheritedMembers = true)]
-    public partial class ImageEffectConfig : BindableBase
+    public partial class ImageEffectConfig : ObservableObject
     {
         private bool _isEnabled;
         private EffectType _effectType = EffectType.Level;

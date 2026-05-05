@@ -1,5 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
-using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeView.Collections.Generic;
 using System;
 using System.ComponentModel;
@@ -11,8 +11,7 @@ using System.Windows.Media;
 
 namespace NeeView
 {
-    [NotifyPropertyChanged]
-    public partial class DefaultMediaPlayer : IDisposable, INotifyPropertyChanged, IOpenableMediaPlayer
+    public partial class DefaultMediaPlayer : ObservableObject, IDisposable, IOpenableMediaPlayer
     {
         private static readonly ObjectPool<MediaPlayer> _mediaPlayerPool = new();
 
@@ -47,8 +46,6 @@ namespace NeeView
                 IsRepeat_Changed));
         }
 
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         public event EventHandler? MediaPlayed;
 
@@ -128,7 +125,7 @@ namespace NeeView
                 if (_player.SpeedRatio != value)
                 {
                     _player.SpeedRatio = value;
-                    RaisePropertyChanged();
+                    OnPropertyChanged();
                 }
             }
         }
@@ -292,9 +289,9 @@ namespace NeeView
             UpdatePlayed();
             UpdateMuted();
 
-            RaisePropertyChanged(nameof(HasVideo));
-            RaisePropertyChanged(nameof(HasAudio));
-            RaisePropertyChanged(nameof(Duration));
+            OnPropertyChanged(nameof(HasVideo));
+            OnPropertyChanged(nameof(HasAudio));
+            OnPropertyChanged(nameof(Duration));
 
             MediaPlayed?.Invoke(this, EventArgs.Empty);
         }
@@ -303,9 +300,9 @@ namespace NeeView
         {
             if (_disposedValue) return;
 
-            RaisePropertyChanged(nameof(HasVideo));
-            RaisePropertyChanged(nameof(HasAudio));
-            RaisePropertyChanged(nameof(Duration));
+            OnPropertyChanged(nameof(HasVideo));
+            OnPropertyChanged(nameof(HasAudio));
+            OnPropertyChanged(nameof(Duration));
             DelayAction(OnStarted, _startDelay);
         }
 

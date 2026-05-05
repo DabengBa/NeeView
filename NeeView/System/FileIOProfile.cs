@@ -1,9 +1,9 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.IO;
 
 namespace NeeView
 {
-    public class FileIOProfile : BindableBase
+    public class FileIOProfile : ObservableObject
     {
         static FileIOProfile() => Current = new FileIOProfile();
         public static FileIOProfile Current { get; }

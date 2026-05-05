@@ -1,5 +1,5 @@
-﻿using NeeLaboratory;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory;
 using NeeLaboratory.IO.Search;
 using NeeView.PageFrames;
 using System;
@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace NeeView
 {
-    public class PageList : BindableBase
+    public class PageList : ObservableObject
     {
         static PageList() => Current = new PageList();
         public static PageList Current { get; }
@@ -115,7 +115,7 @@ namespace NeeView
             {
                 if (SetProperty(ref _pageSortModeClass, value))
                 {
-                    RaisePropertyChanged(nameof(PageSortModeList));
+                    OnPropertyChanged(nameof(PageSortModeList));
                 }
             }
         }
@@ -139,8 +139,8 @@ namespace NeeView
                     {
                         _items.CollectionChanged += Items_CollectionChanged;
                     }
-                    RaisePropertyChanged();
-                    RaisePropertyChanged(nameof(ValidCount));
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(ValidCount));
                     ValidateViewItems();
                 }
             }
@@ -255,11 +255,11 @@ namespace NeeView
             var pages = BookOperation.Current.Control.Pages;
             Items = new ObservableCollection<Page>(pages);
 
-            RaisePropertyChanged(nameof(PlaceDisplayString));
+            OnPropertyChanged(nameof(PlaceDisplayString));
 
             PageSortModeClass = _book != null ? _book.PageSortModeClass : PageSortModeClass.Full;
             PageSortMode = PageSortModeClass.ValidatePageSortMode(Config.Current.BookSetting.SortMode);
-            RaisePropertyChanged(nameof(PageSortMode));
+            OnPropertyChanged(nameof(PageSortMode));
 
             RefreshSelectedItem();
 

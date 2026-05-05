@@ -17,7 +17,7 @@ namespace NeeView.PageFrames
         {
             var mainView = MainViewComponent.Current.MainView;
             var dpi = mainView.DpiProvider.DpiScale;
-          
+
             var px = Math.Round(value.X * dpi.DpiScaleX) / dpi.DpiScaleX;
             var py = Math.Round(value.Y * dpi.DpiScaleY) / dpi.DpiScaleY;
             return new Point(px, py);

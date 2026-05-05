@@ -16,7 +16,7 @@ namespace NeeView.Setting
     /// SettingItemSusiePluginControl.xaml の相互作用ロジック
     /// </summary>
     [INotifyPropertyChanged]
-    public partial class SettingItemSusiePluginControl : UserControl 
+    public partial class SettingItemSusiePluginControl : UserControl
     {
         private readonly SusiePluginType _pluginType;
 
@@ -47,7 +47,7 @@ namespace NeeView.Setting
             return this.PluginList.SelectedItem is SusiePluginInfo;
         }
 
-        [RelayCommand(CanExecute =nameof(CanOpenConfigDialog))]
+        [RelayCommand(CanExecute = nameof(CanOpenConfigDialog))]
         private void OpenConfig()
         {
             if (this.PluginList.SelectedItem is not SusiePluginInfo item) return;

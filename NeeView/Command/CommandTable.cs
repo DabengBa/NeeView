@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.Generators;
 using NeeView.Properties;
 using System;
@@ -26,7 +26,7 @@ namespace NeeView
     /// <summary>
     /// コマンド設定テーブル
     /// </summary>
-    public partial class CommandTable : BindableBase, IReadOnlyDictionary<string, CommandElement>
+    public partial class CommandTable : ObservableObject, IReadOnlyDictionary<string, CommandElement>
     {
         static CommandTable() => Current = new CommandTable();
         public static CommandTable Current { get; }

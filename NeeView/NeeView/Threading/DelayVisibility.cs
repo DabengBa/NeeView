@@ -1,11 +1,11 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Windows.Data;
 using System;
 using System.Windows;
 
 namespace NeeView.Threading
 {
-    public class DelayVisibility : BindableBase
+    public class DelayVisibility : ObservableObject
     {
         private readonly DelayValue<Visibility> _visibility;
 
@@ -20,7 +20,7 @@ namespace NeeView.Threading
             _visibility.ValueChanged += (s, e) =>
             {
                 Changed?.Invoke(s, e);
-                RaisePropertyChanged(nameof(Visibility));
+                OnPropertyChanged(nameof(Visibility));
             };
         }
 

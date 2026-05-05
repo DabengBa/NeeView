@@ -1,11 +1,9 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
-using System.ComponentModel;
 
 namespace NeeView
 {
-    [NotifyPropertyChanged]
-    public partial class LoupeContext : INotifyPropertyChanged
+    public partial class LoupeContext : ObservableObject
     {
         private readonly MainViewComponent _mainViewComponent;
         private LoupeConfig _loupeConfig;
@@ -18,10 +16,6 @@ namespace NeeView
             _loupeConfig = loupeConfig;
             _scale = _loupeConfig.DefaultScale;
         }
-
-
-        [Subscribable]
-        public event PropertyChangedEventHandler? PropertyChanged;
 
 
         public bool IsEnabled

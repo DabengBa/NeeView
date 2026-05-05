@@ -1,5 +1,5 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Windows.Property;
 using System;
 using System.Diagnostics;
@@ -14,12 +14,12 @@ namespace NeeView
     /// </summary>
     [JsonConverter(typeof(JsonCommandParameterConverter))]
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public abstract partial class CommandParameter : BindableBase, ICloneable
+    public abstract partial class CommandParameter : ObservableObject, ICloneable
     {
         public object Clone()
         {
             var clone = (CommandParameter)MemberwiseClone();
-            clone.ResetPropertyChanged();
+            clone.OnPropertyChanged();
             return clone;
         }
     }

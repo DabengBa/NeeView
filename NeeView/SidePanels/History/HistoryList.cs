@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeLaboratory.Generators;
 using NeeLaboratory.IO.Search;
 using NeeView.Collections.ObjectModel;
@@ -13,7 +14,7 @@ using System.Windows.Data;
 
 namespace NeeView
 {
-    public partial class HistoryList : BindableBase
+    public partial class HistoryList : ObservableObject
     {
         static HistoryList() => Current = new HistoryList();
         public static HistoryList Current { get; }
@@ -40,10 +41,10 @@ namespace NeeView
 
             BookOperation.Current.BookChanged += BookOperation_BookChanged;
 
-            Config.Current.History.AddPropertyChanged(nameof(HistoryConfig.IsCurrentFolder),
+            Config.Current.History.SubscribePropertyChanged(nameof(HistoryConfig.IsCurrentFolder),
                 (s, e) => UpdateFilterPath());
 
-            Config.Current.History.AddPropertyChanged(nameof(HistoryConfig.IsGroupBy),
+            Config.Current.History.SubscribePropertyChanged(nameof(HistoryConfig.IsGroupBy),
                 (s, e) => UpdateGroupBy());
 
             BookHub.Current.HistoryListSync += BookHub_HistoryListSync;
@@ -74,7 +75,7 @@ namespace NeeView
         private void CollectionView_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             EnsureSelectedItem();
-            RaisePropertyChanged(nameof(ViewItemsCount));
+            OnPropertyChanged(nameof(ViewItemsCount));
         }
 
         private void EnsureSelectedItem()
@@ -205,7 +206,7 @@ namespace NeeView
                 _collectionViewSource.IsLiveGroupingRequested = false;
             }
 
-            RaisePropertyChanged(nameof(IsGroupBy));
+            OnPropertyChanged(nameof(IsGroupBy));
         }
 
         /// <summary>

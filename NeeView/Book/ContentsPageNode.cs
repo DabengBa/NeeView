@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace NeeView
 {
-    public class ContentsPageNode : BindableBase
+    public class ContentsPageNode : ObservableObject
     {
         public ContentsPageNode()
         {

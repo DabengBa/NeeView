@@ -1,5 +1,5 @@
-﻿using NeeLaboratory;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory;
 using NeeLaboratory.Generators;
 using NeeView.PageFrames;
 using System;
@@ -11,7 +11,7 @@ namespace NeeView
     /// <summary>
     /// スライダーやフィルムストリップと連動したページ選択の提供
     /// </summary>
-    public partial class PageSelector : BindableBase
+    public partial class PageSelector : ObservableObject
     {
         static PageSelector() => Current = new PageSelector();
         public static PageSelector Current { get; }
@@ -121,7 +121,7 @@ namespace NeeView
         private void UpdateCollection(object? sender)
         {
             CollectionChanged?.Invoke(this, EventArgs.Empty);
-            RaisePropertyChanged(nameof(MaxIndex));
+            OnPropertyChanged(nameof(MaxIndex));
             //RaiseViewContentsChanged(sender, BookOperation.Current.Book?.Viewer.ViewPageCollection, true);
             RaiseViewContentsChanged(sender, BookOperation.Current.Control.SelectedRange, true);
         }

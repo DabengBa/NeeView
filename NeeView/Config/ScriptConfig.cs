@@ -1,12 +1,12 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Windows.Property;
 using System.Text.Json.Serialization;
 
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class ScriptConfig : BindableBase
+    public partial class ScriptConfig : ObservableObject
     {
         [DefaultEquality] private bool _isScriptFolderEnabled;
         [DefaultEquality] private ScriptErrorLevel _errorLevel = ScriptErrorLevel.Error;

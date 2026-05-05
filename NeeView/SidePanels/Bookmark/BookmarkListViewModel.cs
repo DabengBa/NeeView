@@ -1,5 +1,5 @@
-﻿using CommunityToolkit.Mvvm.Input;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using NeeView.Properties;
 using NeeView.Windows;
 using System.Collections.Generic;
@@ -14,7 +14,7 @@ namespace NeeView
     /// <summary>
     /// BookmarkList : ViewModel
     /// </summary>
-    public partial class BookmarkListViewModel : BindableBase
+    public partial class BookmarkListViewModel : ObservableObject
     {
         private readonly DpiScaleProvider _dpiProvider = new();
         private readonly BookmarkFolderList _model;
@@ -31,12 +31,12 @@ namespace NeeView
             _model.CollectionChanged +=
                 (s, e) =>
                 {
-                    RaisePropertyChanged(nameof(FolderCollection));
-                    RaisePropertyChanged(nameof(FullPath));
+                    OnPropertyChanged(nameof(FolderCollection));
+                    OnPropertyChanged(nameof(FullPath));
                 };
 
             _dpiProvider.DpiChanged +=
-                (s, e) => RaisePropertyChanged(nameof(DpiScale));
+                (s, e) => OnPropertyChanged(nameof(DpiScale));
 
             MoreMenuDescription = new BookmarkListMoreMenu(this);
         }
@@ -67,7 +67,7 @@ namespace NeeView
         public ContextMenu? MoreMenu
         {
             get { return _moreMenu; }
-            set { if (_moreMenu != value) { _moreMenu = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _moreMenu, value); }
         }
 
         public DpiScale DpiScale => _dpiProvider.DpiScale;

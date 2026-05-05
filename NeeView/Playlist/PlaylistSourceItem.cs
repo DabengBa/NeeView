@@ -26,7 +26,7 @@ namespace NeeView
         }
 
 
-        public string Path 
+        public string Path
         {
             get { return _path; }
             set

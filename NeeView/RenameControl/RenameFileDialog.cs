@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -32,7 +32,7 @@ namespace NeeView
         }
 
 
-        private class RenameDialogComponent : BindableBase, IMessageDialogContentComponent
+        private class RenameDialogComponent : ObservableObject, IMessageDialogContentComponent
         {
             private readonly TextBox _textBox;
             private readonly RenameContext _context;

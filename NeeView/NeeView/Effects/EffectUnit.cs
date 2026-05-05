@@ -1,14 +1,14 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 
 namespace NeeView.Effects
 {
     [Equatable(IgnoreInheritedMembers = true)]
-    public partial class EffectUnit : BindableBase
+    public partial class EffectUnit : ObservableObject
     {
         public void RaisePropertyChangedAll()
         {
-            RaisePropertyChanged(null);
+            OnPropertyChanged("");
         }
     }
 }

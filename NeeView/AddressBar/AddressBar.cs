@@ -1,4 +1,5 @@
 ﻿
+using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.ComponentModel;
 using NeeView.IO;
 using NeeView.Properties;
@@ -8,7 +9,7 @@ namespace NeeView
     /// <summary>
     /// AddressBar : Model
     /// </summary>
-    public class AddressBar : BindableBase
+    public class AddressBar : ObservableObject
     {
         private string _address = "";
 
@@ -22,10 +23,10 @@ namespace NeeView
                 (s, e) => SetAddress(BookHub.Current.Address ?? "");
 
             BookHub.Current.BookmarkChanged +=
-                (s, e) => RaisePropertyChanged(nameof(IsBookmark));
+                (s, e) => OnPropertyChanged(nameof(IsBookmark));
 
             BookHub.Current.SubscribePropertyChanged(nameof(BookHub.IsBookLocked),
-                (s, e) => RaisePropertyChanged(nameof(IsBookLocked)));
+                (s, e) => OnPropertyChanged(nameof(IsBookLocked)));
         }
 
 
@@ -84,7 +85,7 @@ namespace NeeView
         private void SetAddress(string address)
         {
             _address = address;
-            RaisePropertyChanged(null);
+            OnPropertyChanged("");
         }
 
         // フォルダー読み込み

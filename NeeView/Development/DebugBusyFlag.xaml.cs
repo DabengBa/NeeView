@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.ComponentModel;
 using System.Globalization;
@@ -12,17 +12,14 @@ namespace NeeView
     /// <summary>
     /// DebugBusyFlag.xaml の相互作用ロジック
     /// </summary>
-    [NotifyPropertyChanged]
-    public partial class DebugBusyFlag : UserControl, INotifyPropertyChanged
+    [INotifyPropertyChanged]
+    public partial class DebugBusyFlag : UserControl
     {
         public DebugBusyFlag()
         {
             InitializeComponent();
             this.Root.DataContext = this;
         }
-
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
 
         public string Label

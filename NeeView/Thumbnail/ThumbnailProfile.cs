@@ -1,11 +1,11 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using PhotoSauce.MagicScaler;
 using System;
 using System.Windows;
 
 namespace NeeView
 {
-    public class ThumbnailProfile : BindableBase
+    public class ThumbnailProfile : ObservableObject
     {
         static ThumbnailProfile() => Current = new ThumbnailProfile();
         public static ThumbnailProfile Current { get; }

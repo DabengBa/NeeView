@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,7 +13,7 @@ namespace NeeView
     /// <summary>
     /// JobEngine
     /// </summary>
-    public class JobEngine : BindableBase, IDisposable
+    public class JobEngine : ObservableObject, IDisposable
     {
         static JobEngine() => Current = new JobEngine();
         public static JobEngine Current { get; }
@@ -101,7 +102,7 @@ namespace NeeView
             // イベント待ち解除
             _scheduler.RaiseQueueChanged();
 
-            RaisePropertyChanged(nameof(Workers));
+            OnPropertyChanged(nameof(Workers));
         }
 
         private void Worker_IsBusyChanged(object? sender, EventArgs e)

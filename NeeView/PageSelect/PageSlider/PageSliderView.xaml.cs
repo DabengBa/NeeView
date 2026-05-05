@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NeeLaboratory.ComponentModel;
+using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -69,7 +70,7 @@ namespace NeeView
             this.PageMarkersView.Source = this.Source.PageMarkers;
 
             // 
-            _vm.Model.AddPropertyChanged(nameof(PageSlider.IsSliderDirectionReversed), Model_IsSliderDirectionReversedChanged);
+            _vm.Model.SubscribePropertyChanged(nameof(PageSlider.IsSliderDirectionReversed), Model_IsSliderDirectionReversedChanged);
         }
 
 

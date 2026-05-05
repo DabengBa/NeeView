@@ -2,7 +2,6 @@
 using NeeLaboratory.Linq;
 using NeeView.IO;
 using System;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;

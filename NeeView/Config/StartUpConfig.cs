@@ -1,5 +1,5 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Windows.Property;
 using System;
 using System.Text.Json.Serialization;
@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class StartUpConfig : BindableBase
+    public partial class StartUpConfig : ObservableObject
     {
         [DefaultEquality] private string? _lastBookPath;
         [DefaultEquality] private string? _lastFolderPath;

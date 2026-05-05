@@ -150,7 +150,7 @@ namespace NeeView
                 list.Add($"{AutoRotateLabel}={AutoRotate}");
             }
 
-            if (BaseScale !=  1.0)
+            if (BaseScale != 1.0)
             {
                 list.Add(string.Create(CultureInfo.InvariantCulture, $"{BaseScaleLabel}={BaseScale}"));
             }

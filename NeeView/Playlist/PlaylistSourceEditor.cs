@@ -3,7 +3,6 @@
 using NeeLaboratory.Generators;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace NeeView
@@ -109,11 +108,11 @@ namespace NeeView
         /// <returns></returns>
         public string? Rename(PlaylistSourceItem item, string newName)
         {
-            if (item.Name == newName) return null; 
+            if (item.Name == newName) return null;
 
             var target = _playlist.Items.FirstOrDefault(e => e == item);
             if (target == null) return null;
-            
+
             target.Name = newName;
             _isDirty = true;
             return target.Name;

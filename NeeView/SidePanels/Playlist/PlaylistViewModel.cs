@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using NeeLaboratory.ComponentModel;
 using NeeView.Properties;
 using System;
@@ -10,7 +11,7 @@ using System.Windows.Data;
 
 namespace NeeView
 {
-    public partial class PlaylistViewModel : BindableBase
+    public partial class PlaylistViewModel : ObservableObject
     {
         private readonly PlaylistHub _model;
 
@@ -21,9 +22,9 @@ namespace NeeView
 
             MoreMenuDescription = new PlaylistMoreMenuDescription(this);
 
-            _model.AddPropertyChanged(nameof(_model.PlaylistFiles), Model_PlaylistFilesChanged);
-            _model.AddPropertyChanged(nameof(_model.SelectedItem), Model_SelectedItemChanged);
-            _model.AddPropertyChanged(nameof(_model.FilterMessage), (s, e) => RaisePropertyChanged(nameof(FilterMessage)));
+            _model.SubscribePropertyChanged(nameof(_model.PlaylistFiles), Model_PlaylistFilesChanged);
+            _model.SubscribePropertyChanged(nameof(_model.SelectedItem), Model_SelectedItemChanged);
+            _model.SubscribePropertyChanged(nameof(_model.FilterMessage), (s, e) => OnPropertyChanged(nameof(FilterMessage)));
         }
 
 
@@ -56,12 +57,12 @@ namespace NeeView
 
         private void Model_PlaylistFilesChanged(object? sender, PropertyChangedEventArgs e)
         {
-            RaisePropertyChanged(nameof(PlaylistFiles));
+            OnPropertyChanged(nameof(PlaylistFiles));
         }
 
         private void Model_SelectedItemChanged(object? sender, PropertyChangedEventArgs e)
         {
-            RaisePropertyChanged(nameof(SelectedItem));
+            OnPropertyChanged(nameof(SelectedItem));
             DeleteCommand.NotifyCanExecuteChanged();
             RenameCommand.NotifyCanExecuteChanged();
         }

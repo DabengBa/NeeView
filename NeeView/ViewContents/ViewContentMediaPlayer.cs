@@ -1,8 +1,7 @@
-﻿using NeeLaboratory.ComponentModel;
-using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeView.PageFrames;
 using System;
-using System.ComponentModel;
 using System.Windows;
 
 
@@ -11,8 +10,7 @@ namespace NeeView
     /// <summary>
     /// MediaContext に依存した MediaPlayer
     /// </summary>
-    [NotifyPropertyChanged]
-    public partial class ViewContentMediaPlayer : IMediaPlayer, INotifyPropertyChanged, IDisposable
+    public partial class ViewContentMediaPlayer : ObservableObject, IMediaPlayer, IDisposable
     {
         private readonly IMediaContext _mediaContext;
         private readonly IMediaPlayer _player;
@@ -34,43 +32,43 @@ namespace NeeView
             _elementIndex = elementIndex;
 
             _disposables.Add(_mediaContext.SubscribePropertyChanged(nameof(IMediaContext.Volume),
-                (s, e) => { RaisePropertyChanged(nameof(Volume)); Update(); }));
+                (s, e) => { OnPropertyChanged(nameof(Volume)); Update(); }));
 
             _disposables.Add(_mediaContext.SubscribePropertyChanged(nameof(IMediaContext.IsMuted),
-                (s, e) => { RaisePropertyChanged(nameof(IsMuted)); Update(); }));
+                (s, e) => { OnPropertyChanged(nameof(IsMuted)); Update(); }));
 
             _disposables.Add(_mediaContext.SubscribePropertyChanged(nameof(IMediaContext.IsRepeat),
-                (s, e) => { RaisePropertyChanged(nameof(IsRepeat)); Update(); }));
+                (s, e) => { OnPropertyChanged(nameof(IsRepeat)); Update(); }));
 
             _disposables.Add(_player.SubscribePropertyChanged(nameof(IMediaPlayer.IsEnabled),
-                (s, e) => RaisePropertyChanged(nameof(IsEnabled))));
+                (s, e) => OnPropertyChanged(nameof(IsEnabled))));
 
             _disposables.Add(_player.SubscribePropertyChanged(nameof(IMediaPlayer.HasAudio),
-                (s, e) => RaisePropertyChanged(nameof(HasAudio))));
+                (s, e) => OnPropertyChanged(nameof(HasAudio))));
 
             _disposables.Add(_player.SubscribePropertyChanged(nameof(IMediaPlayer.IsPlaying),
-                (s, e) => RaisePropertyChanged(nameof(IsPlaying))));
+                (s, e) => OnPropertyChanged(nameof(IsPlaying))));
 
             _disposables.Add(_player.SubscribePropertyChanged(nameof(IMediaPlayer.HasVideo),
-                (s, e) => RaisePropertyChanged(nameof(HasVideo))));
+                (s, e) => OnPropertyChanged(nameof(HasVideo))));
 
             _disposables.Add(_player.SubscribePropertyChanged(nameof(IMediaPlayer.ScrubbingEnabled),
-                (s, e) => RaisePropertyChanged(nameof(ScrubbingEnabled))));
+                (s, e) => OnPropertyChanged(nameof(ScrubbingEnabled))));
 
             _disposables.Add(_player.SubscribePropertyChanged(nameof(IMediaPlayer.Duration),
-                (s, e) => RaisePropertyChanged(nameof(Duration))));
+                (s, e) => OnPropertyChanged(nameof(Duration))));
 
             _disposables.Add(_player.SubscribePropertyChanged(nameof(IMediaPlayer.Position),
-                (s, e) => RaisePropertyChanged(nameof(Position))));
+                (s, e) => OnPropertyChanged(nameof(Position))));
 
             _disposables.Add(_player.SubscribePropertyChanged(nameof(IMediaPlayer.AudioTracks),
-                (s, e) => RaisePropertyChanged(nameof(AudioTracks))));
+                (s, e) => OnPropertyChanged(nameof(AudioTracks))));
 
             _disposables.Add(_player.SubscribePropertyChanged(nameof(IMediaPlayer.Subtitles),
-                (s, e) => RaisePropertyChanged(nameof(Subtitles))));
+                (s, e) => OnPropertyChanged(nameof(Subtitles))));
 
             _disposables.Add(_player.SubscribePropertyChanged(nameof(IMediaPlayer.Rate),
-                (s, e) => RaisePropertyChanged(nameof(Rate))));
+                (s, e) => OnPropertyChanged(nameof(Rate))));
 
             _disposables.Add(_activity.SubscribePropertyChanged(
                 (s, e) => Update()));
@@ -104,9 +102,6 @@ namespace NeeView
             add => _player.MediaPlayed += value;
             remove => _player.MediaPlayed += value;
         }
-
-        [Subscribable]
-        public event PropertyChangedEventHandler? PropertyChanged;
 
 
         public bool IsActive { get; set; }
@@ -173,7 +168,7 @@ namespace NeeView
                             ResetPauseFlag(MediaPlayerPauseBit.Scrubbing);
                         }
                     }
-                    RaisePropertyChanged();
+                    OnPropertyChanged();
                 }
             }
         }

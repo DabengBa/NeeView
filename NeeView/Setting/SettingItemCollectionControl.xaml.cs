@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Properties;
 using NeeView.Text;
 using NeeView.Windows.Property;
@@ -14,8 +14,8 @@ namespace NeeView.Setting
     /// <summary>
     /// SettingItemCollectionControl.xaml の相互作用ロジック
     /// </summary>
-    [NotifyPropertyChanged]
-    public partial class SettingItemCollectionControl : UserControl, INotifyPropertyChanged, IValueInitializable
+    [INotifyPropertyChanged]
+    public partial class SettingItemCollectionControl : UserControl, IValueInitializable
     {
         public SettingItemCollectionControl()
         {
@@ -30,7 +30,6 @@ namespace NeeView.Setting
         }
 
 
-        public event PropertyChangedEventHandler? PropertyChanged;
         public event EventHandler<CollectionChangeEventArgs>? CollectionChanged;
 
 
@@ -49,7 +48,7 @@ namespace NeeView.Setting
         {
             if (d is SettingItemCollectionControl control)
             {
-                control.RaisePropertyChanged(nameof(Items));
+                control.OnPropertyChanged(nameof(Items));
             }
         }
 
@@ -89,13 +88,13 @@ namespace NeeView.Setting
         }
 
         public static readonly DependencyProperty IsAlwaysResetEnabledProperty =
-            DependencyProperty.Register("IsAlwaysResetEnabled", typeof(bool), typeof(SettingItemCollectionControl), new PropertyMetadata(false, IsAlwaysRsetEnabledChanged));
+            DependencyProperty.Register("IsAlwaysResetEnabled", typeof(bool), typeof(SettingItemCollectionControl), new PropertyMetadata(false, IsAlwaysResetEnabledChanged));
 
-        private static void IsAlwaysRsetEnabledChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void IsAlwaysResetEnabledChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is SettingItemCollectionControl control)
             {
-                control.RaisePropertyChanged(nameof(IsResetEnabled));
+                control.OnPropertyChanged(nameof(IsResetEnabled));
             }
         }
 
@@ -129,7 +128,7 @@ namespace NeeView.Setting
 
         private void SettingItemCollectionControl_CollectionChanged(object? sender, CollectionChangeEventArgs e)
         {
-            RaisePropertyChanged(nameof(IsResetEnabled));
+            OnPropertyChanged(nameof(IsResetEnabled));
         }
 
         private void AddButton_Click(object? sender, RoutedEventArgs e)
@@ -197,7 +196,7 @@ namespace NeeView.Setting
 
             if (updateView)
             {
-                RaisePropertyChanged(nameof(Items));
+                OnPropertyChanged(nameof(Items));
                 this.CollectionListBox.Items.Refresh();
             }
 
@@ -219,7 +218,7 @@ namespace NeeView.Setting
 
             if (updateView)
             {
-                RaisePropertyChanged(nameof(Items));
+                OnPropertyChanged(nameof(Items));
                 this.CollectionListBox.Items.Refresh();
             }
 
@@ -247,7 +246,7 @@ namespace NeeView.Setting
             if (Collection == null || defaultCollection == null) return;
 
             Collection.Restore(defaultCollection.Items);
-            RaisePropertyChanged(nameof(Items));
+            OnPropertyChanged(nameof(Items));
             this.CollectionListBox.Items.Refresh();
 
             CollectionChanged?.Invoke(this, new CollectionChangeEventArgs(CollectionChangeAction.Refresh, null));

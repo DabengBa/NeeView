@@ -1,11 +1,11 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Collections.Generic;
 using System;
 using System.Windows;
 
 namespace NeeView
 {
-    public class FolderTreeViewModel : BindableBase
+    public class FolderTreeViewModel : ObservableObject
     {
         private bool _isFirstVisible;
 
@@ -34,7 +34,7 @@ namespace NeeView
                     {
                         _model.SelectedItemChanged += Model_SelectedItemChanged;
                     }
-                    RaisePropertyChanged();
+                    OnPropertyChanged();
                 }
             }
         }

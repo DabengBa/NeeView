@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeView.Properties;
 using NeeView.Windows.Property;
 using System;
@@ -13,7 +14,7 @@ using System.Windows.Data;
 
 namespace NeeView
 {
-    public class ExportBookDialogViewModel : BindableBase, IDisposable
+    public class ExportBookDialogViewModel : ObservableObject, IDisposable
     {
         private readonly ExportBookParameter _parameter;
         private readonly ExportImagePreview _preview;
@@ -89,19 +90,19 @@ namespace NeeView
             this.ExportBookTypeDocument.AddProperty(_parameter, nameof(_parameter.BookType));
 
             _disposables.Add(_parameter.SubscribePropertyChanged(nameof(_parameter.BookType),
-                (s, e) => RaisePropertyChanged(nameof(BookType))));
+                (s, e) => OnPropertyChanged(nameof(BookType))));
 
             _disposables.Add(_preview.SubscribePropertyChanged(nameof(_preview.Preview),
-                (s, e) => RaisePropertyChanged(nameof(Preview))));
+                (s, e) => OnPropertyChanged(nameof(Preview))));
 
             _disposables.Add(_preview.SubscribePropertyChanged(nameof(_preview.PreviewWidth),
-                (s, e) => RaisePropertyChanged(nameof(PreviewWidth))));
+                (s, e) => OnPropertyChanged(nameof(PreviewWidth))));
 
             _disposables.Add(_preview.SubscribePropertyChanged(nameof(_preview.PreviewHeight),
-                (s, e) => RaisePropertyChanged(nameof(PreviewHeight))));
+                (s, e) => OnPropertyChanged(nameof(PreviewHeight))));
 
             _disposables.Add(_preview.SubscribePropertyChanged(nameof(_preview.ImageFormatNote),
-                (s, e) => RaisePropertyChanged(nameof(ImageFormatNote))));
+                (s, e) => OnPropertyChanged(nameof(ImageFormatNote))));
 
             UpdateDestinationFolderList();
         }

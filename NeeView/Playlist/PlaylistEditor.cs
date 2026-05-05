@@ -30,7 +30,7 @@ namespace NeeView
 
             var target = GetPlaylistItem(item);
             if (target is null) return null;
-            
+
             var result = _playlist.Rename(target, newName);
             return target.Name;
         }

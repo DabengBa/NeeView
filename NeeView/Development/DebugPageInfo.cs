@@ -1,12 +1,10 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
-using System.ComponentModel;
 using System.Linq;
 
 namespace NeeView
 {
-    [NotifyPropertyChanged]
-    public partial class DebugPageInfo : INotifyPropertyChanged, IDisposable
+    public partial class DebugPageInfo : ObservableObject, IDisposable
     {
         private readonly ViewSourceMap _viewSourceMap;
         private ViewSource? _viewSourceAll;
@@ -23,8 +21,6 @@ namespace NeeView
             UpdateViewSource(viewSourceMap);
         }
 
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         public Page Page { get; }
 

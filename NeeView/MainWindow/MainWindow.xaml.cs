@@ -133,22 +133,22 @@ namespace NeeView
 
             _vm.MenuAutoHideDescription.SetMenuBar(this.MenuBar.Source);
 
-            Config.Current.MenuBar.AddPropertyChanged(nameof(MenuBarConfig.IsHideMenu),
+            Config.Current.MenuBar.SubscribePropertyChanged(nameof(MenuBarConfig.IsHideMenu),
                 (s, e) => DirtyMenuAreaLayout());
 
-            MainWindowModel.Current.AddPropertyChanged(nameof(MainWindowModel.CanHideMenu),
+            MainWindowModel.Current.SubscribePropertyChanged(nameof(MainWindowModel.CanHideMenu),
                 (s, e) => DirtyMenuAreaLayout());
 
-            MainWindowModel.Current.AddPropertyChanged(nameof(MainWindowModel.CanHidePageSlider),
+            MainWindowModel.Current.SubscribePropertyChanged(nameof(MainWindowModel.CanHidePageSlider),
                 (s, e) => DirtyPageSliderLayout());
 
-            Config.Current.Slider.AddPropertyChanged(nameof(SliderConfig.IsEnabled),
+            Config.Current.Slider.SubscribePropertyChanged(nameof(SliderConfig.IsEnabled),
                 (s, e) => DirtyPageSliderLayout());
 
-            Config.Current.FilmStrip.AddPropertyChanged(nameof(FilmStripConfig.IsEnabled),
+            Config.Current.FilmStrip.SubscribePropertyChanged(nameof(FilmStripConfig.IsEnabled),
                 (s, e) => DirtyFilmStripLayout());
 
-            Config.Current.FilmStrip.AddPropertyChanged(nameof(FilmStripConfig.IsHideFilmStrip),
+            Config.Current.FilmStrip.SubscribePropertyChanged(nameof(FilmStripConfig.IsHideFilmStrip),
                 (s, e) => DirtyFilmStripLayout());
 
             _viewComponent.PageFrameBoxPresenter.SubscribePageFrameBoxChanged(
@@ -241,7 +241,7 @@ namespace NeeView
         public WindowController WindowController => _windowController;
 
         public bool IsFilmStripVisible { get; private set; }
-        
+
         public bool IsPageSliderVisible { get; private set; }
 
         public bool IsAddressBarVisible { get; private set; }
@@ -899,7 +899,7 @@ namespace NeeView
             this.FilmStripArea.IsVisibleChanged +=
                 (s, e) => UpdatePageCaptionVisibility((bool)e.NewValue);
 
-            _vm.PageTitle.AddPropertyChanged(nameof(_vm.PageTitle.Title),
+            _vm.PageTitle.SubscribePropertyChanged(nameof(_vm.PageTitle.Title),
                 (s, e) => UpdatePageCaptionVisibility());
 
             ContextMenuWatcher.ContextMenuClosing +=

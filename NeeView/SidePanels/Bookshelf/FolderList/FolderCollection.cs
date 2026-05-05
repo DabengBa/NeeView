@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.Generators;
 using System;
 using System.Collections;
@@ -27,7 +27,7 @@ namespace NeeView
     /// <summary>
     /// FolderItemコレクション
     /// </summary>
-    public abstract partial class FolderCollection : BindableBase, IDisposable, IEnumerable<FolderItem>
+    public abstract partial class FolderCollection : ObservableObject, IDisposable, IEnumerable<FolderItem>
     {
         private static readonly ObservableCollection<FolderItem> _itemsEmpty = new();
         private ObservableCollection<FolderItem> _items = _itemsEmpty;
@@ -105,7 +105,7 @@ namespace NeeView
                     {
                         _items.CollectionChanged += Items_CollectionChanged;
                     }
-                    RaisePropertyChanged();
+                    OnPropertyChanged();
                 }
             }
         }
@@ -156,7 +156,7 @@ namespace NeeView
         {
             NVDebug.AssertSTA();
 
-            RaisePropertyChanged(nameof(ValidCount));
+            OnPropertyChanged(nameof(ValidCount));
         }
 
 

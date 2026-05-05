@@ -1,5 +1,6 @@
 ﻿//#define LOCAL_DEBUG
 
+using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.ComponentModel;
 using NeeLaboratory.Generators;
 using System;
@@ -28,7 +29,7 @@ namespace NeeView
     /// MouseInputManager
     /// </summary>
     [LocalDebug]
-    public partial class MouseInput : BindableBase
+    public partial class MouseInput : ObservableObject
     {
         /// <summary>
         /// マウスクリックによるコマンド発動を抑制する
@@ -206,7 +207,7 @@ namespace NeeView
             {
                 if (SetProperty(ref _state, value))
                 {
-                    RaisePropertyChanged(nameof(IsAutoScrollMode));
+                    OnPropertyChanged(nameof(IsAutoScrollMode));
                 }
             }
         }
@@ -221,7 +222,7 @@ namespace NeeView
             {
                 if (SetProperty(ref _subState, value))
                 {
-                    RaisePropertyChanged(nameof(IsAutoScrollMode));
+                    OnPropertyChanged(nameof(IsAutoScrollMode));
                 }
             }
         }
@@ -234,7 +235,7 @@ namespace NeeView
             get
             {
                 return State == MouseInputState.AutoScroll || (State != MouseInputState.Normal && SubState == MouseInputState.AutoScroll);
-            } 
+            }
             set
             {
                 if (value)

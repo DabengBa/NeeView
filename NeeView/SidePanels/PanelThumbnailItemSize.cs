@@ -1,6 +1,6 @@
 ﻿//#define LOCAL_DEBUG
 
-using NeeLaboratory.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.Generators;
 using System;
 using System.ComponentModel;
@@ -22,7 +22,7 @@ namespace NeeView
     /// | Text   |
     /// +--------+
     [LocalDebug]
-    public partial class PanelThumbnailItemSize : BindableBase, IDisposable
+    public partial class PanelThumbnailItemSize : ObservableObject, IDisposable
     {
         private readonly PanelListItemProfile _profile;
         private double _margin;

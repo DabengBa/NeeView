@@ -1,11 +1,11 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Diagnostics;
 using System.Text.Json.Serialization;
 
 namespace NeeView
 {
-    public class Config : BindableBase
+    public class Config : ObservableObject
     {
         private static Config? _current;
         public static Config Current

@@ -1,10 +1,10 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace NeeView
 {
-    public class PageSortModePaletteModel : BindableBase
+    public class PageSortModePaletteModel : ObservableObject
     {
         public PageSortModePaletteModel()
         {

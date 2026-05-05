@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeView.Windows;
 using System;
 using System.ComponentModel;
@@ -9,7 +10,7 @@ namespace NeeView
     /// <summary>
     /// SidePanelFrame ViewModel
     /// </summary>
-    public class SidePanelFrameViewModel : BindableBase
+    public class SidePanelFrameViewModel : ObservableObject
     {
         private SidePanelFrame _model;
 
@@ -27,24 +28,24 @@ namespace NeeView
             Right = right;
             Right.PropertyChanged += Right_PropertyChanged;
 
-            MainWindowModel.Current.AddPropertyChanged(nameof(MainWindowModel.CanHideLeftPanel),
-                (s, e) => RaisePropertyChanged(nameof(LeftPanelOpacity)));
+            MainWindowModel.Current.SubscribePropertyChanged(nameof(MainWindowModel.CanHideLeftPanel),
+                (s, e) => OnPropertyChanged(nameof(LeftPanelOpacity)));
 
-            MainWindowModel.Current.AddPropertyChanged(nameof(MainWindowModel.CanHideRightPanel),
-                (s, e) => RaisePropertyChanged(nameof(RightPanelOpacity)));
+            MainWindowModel.Current.SubscribePropertyChanged(nameof(MainWindowModel.CanHideRightPanel),
+                (s, e) => OnPropertyChanged(nameof(RightPanelOpacity)));
 
-            Config.Current.Panels.AddPropertyChanged(nameof(PanelsConfig.Opacity),
+            Config.Current.Panels.SubscribePropertyChanged(nameof(PanelsConfig.Opacity),
                 (s, e) =>
                 {
-                    RaisePropertyChanged(nameof(LeftPanelOpacity));
-                    RaisePropertyChanged(nameof(RightPanelOpacity));
+                    OnPropertyChanged(nameof(LeftPanelOpacity));
+                    OnPropertyChanged(nameof(RightPanelOpacity));
                 });
 
-            Config.Current.Panels.AddPropertyChanged(nameof(PanelsConfig.IsSideBarEnabled),
-                (s, e) => RaisePropertyChanged(nameof(IsSideBarVisible)));
+            Config.Current.Panels.SubscribePropertyChanged(nameof(PanelsConfig.IsSideBarEnabled),
+                (s, e) => OnPropertyChanged(nameof(IsSideBarVisible)));
 
-            Config.Current.Panels.AddPropertyChanged(nameof(PanelsConfig.IsLimitPanelWidth),
-                (s, e) => RaisePropertyChanged(nameof(IsLimitPanelWidth)));
+            Config.Current.Panels.SubscribePropertyChanged(nameof(PanelsConfig.IsLimitPanelWidth),
+                (s, e) => OnPropertyChanged(nameof(IsLimitPanelWidth)));
 
             MainLayoutPanelManager.DragBegin +=
                 (s, e) => DragBegin(this, EventArgs.Empty);
@@ -139,7 +140,7 @@ namespace NeeView
         public SidePanelFrame Model
         {
             get { return _model; }
-            set { if (_model != value) { _model = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _model, value); }
         }
 
         public SidePanelViewModel Left { get; private set; }
@@ -181,7 +182,7 @@ namespace NeeView
             switch (e.PropertyName)
             {
                 case nameof(Right.Width):
-                    RaisePropertyChanged(nameof(RightPanelWidth));
+                    OnPropertyChanged(nameof(RightPanelWidth));
                     break;
                 case nameof(Right.PanelVisibility):
                     PanelVisibilityChanged?.Invoke(this, EventArgs.Empty);
@@ -190,7 +191,7 @@ namespace NeeView
                     PanelVisibilityChanged?.Invoke(this, EventArgs.Empty);
                     break;
                 case nameof(Right.IsPanelActive):
-                    RaisePropertyChanged(nameof(IsRightPanelActive));
+                    OnPropertyChanged(nameof(IsRightPanelActive));
                     break;
             }
         }
@@ -203,7 +204,7 @@ namespace NeeView
             switch (e.PropertyName)
             {
                 case nameof(Left.Width):
-                    RaisePropertyChanged(nameof(LeftPanelWidth));
+                    OnPropertyChanged(nameof(LeftPanelWidth));
                     break;
                 case nameof(Left.PanelVisibility):
                     PanelVisibilityChanged?.Invoke(this, EventArgs.Empty);
@@ -212,7 +213,7 @@ namespace NeeView
                     PanelVisibilityChanged?.Invoke(this, EventArgs.Empty);
                     break;
                 case nameof(Left.IsPanelActive):
-                    RaisePropertyChanged(nameof(IsLeftPanelActive));
+                    OnPropertyChanged(nameof(IsLeftPanelActive));
                     break;
             }
         }

@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.Generators;
 using NeeView.Collections.ObjectModel;
 using System;
@@ -19,7 +19,7 @@ namespace NeeView.Collections.Generic
     {
     }
 
-    public partial class TreeListNode<T> : BindableBase, IHasValue<T>, ITreeViewNode, IRenameable, IList<TreeListNode<T>>
+    public partial class TreeListNode<T> : ObservableObject, IHasValue<T>, ITreeViewNode, IRenameable, IList<TreeListNode<T>>
         where T : ITreeListNode
     {
         private TreeListNode<T>? _parent;
@@ -142,7 +142,7 @@ namespace NeeView.Collections.Generic
                 if (!EqualityComparer<T>.Default.Equals(_value, value))
                 {
                     SetValue(value);
-                    RaisePropertyChanged();
+                    OnPropertyChanged();
                 }
             }
         }

@@ -1,10 +1,8 @@
-﻿using NeeLaboratory.Generators;
-using System.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace NeeView
 {
-    [NotifyPropertyChanged]
-    public partial class PageLoading : INotifyPropertyChanged
+    public partial class PageLoading : ObservableObject
     {
         private Locker _locker;
         private bool _isActive;
@@ -15,9 +13,6 @@ namespace NeeView
             _locker = new Locker();
             _locker.LockCountChanged += Locker_LockCountChanged;
         }
-
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
 
         public bool IsActive

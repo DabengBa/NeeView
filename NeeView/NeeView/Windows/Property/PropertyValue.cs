@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.Collection;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.Collection;
 using NeeLaboratory.ComponentModel;
 using NeeView.Windows.Controls;
 using System;
@@ -11,7 +12,7 @@ using System.Windows.Media;
 
 namespace NeeView.Windows.Property
 {
-    public abstract class PropertyValue : BindableBase
+    public abstract class PropertyValue : ObservableObject
     {
         public virtual string GetValueString()
         {
@@ -47,8 +48,8 @@ namespace NeeView.Windows.Property
             Setter.ValueChanged += (s, e) =>
             {
                 OnValueChanged();
-                RaisePropertyChanged(nameof(Value));
-                RaisePropertyChanged(nameof(RawValue));
+                OnPropertyChanged(nameof(Value));
+                OnPropertyChanged(nameof(RawValue));
             };
         }
 
@@ -183,7 +184,7 @@ namespace NeeView.Windows.Property
 
             Setter.ValueChanged += (s, e) =>
             {
-                RaisePropertyChanged(nameof(SelectedValue));
+                OnPropertyChanged(nameof(SelectedValue));
             };
         }
 
@@ -255,7 +256,7 @@ namespace NeeView.Windows.Property
 
             Setter.ValueChanged += (s, e) =>
             {
-                RaisePropertyChanged(nameof(SelectedValue));
+                OnPropertyChanged(nameof(SelectedValue));
             };
         }
 
@@ -511,7 +512,7 @@ namespace NeeView.Windows.Property
         public PropertyValue_PropertyValueWithNote(PropertyValue propertyValue, Type converterType)
         {
             _propertyValue = propertyValue;
-            _propertyValue.SubscribePropertyChanged(nameof(_propertyValue.RawValue), (s, e) => RaisePropertyChanged(nameof(Note)));
+            _propertyValue.SubscribePropertyChanged(nameof(_propertyValue.RawValue), (s, e) => OnPropertyChanged(nameof(Note)));
             _converter = Activator.CreateInstance(converterType) as IValueConverter ?? throw new ArgumentException($"{nameof(converterType)} is not IValueConverter.");
         }
 

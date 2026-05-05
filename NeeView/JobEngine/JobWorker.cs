@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.Generators;
 using System;
 using System.Diagnostics;
@@ -9,7 +9,7 @@ namespace NeeView
     /// <summary>
     /// ジョブワーカー
     /// </summary>
-    public partial class JobWorker : BindableBase, IDisposable
+    public partial class JobWorker : ObservableObject, IDisposable
     {
         #region 開発用
 
@@ -20,7 +20,7 @@ namespace NeeView
         {
             DebugLog = DebugLog ?? new DebugSimpleLog();
             DebugLog.WriteLine(Thread.CurrentThread.Priority + ": " + $"{_jobPriorityMin}-{_jobPriorityMax}: " + message);
-            RaisePropertyChanged(nameof(DebugLog));
+            OnPropertyChanged(nameof(DebugLog));
         }
 
         #endregion

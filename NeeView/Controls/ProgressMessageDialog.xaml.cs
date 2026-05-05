@@ -1,11 +1,11 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.ComponentModel;
 using System.Windows;
 
 namespace NeeView
 {
-    [NotifyPropertyChanged]
-    public partial class ProgressMessageDialog : Window, INotifyPropertyChanged
+    [INotifyPropertyChanged]
+    public partial class ProgressMessageDialog : Window
     {
         private bool _closeable = true;
         private ICancelableObject? _cancellableObject;
@@ -15,9 +15,6 @@ namespace NeeView
             InitializeComponent();
             this.DataContext = this;
         }
-
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
 
         public string Message => _cancellableObject?.Name ?? "";
@@ -30,9 +27,9 @@ namespace NeeView
         public void SetCancellableObject(ICancelableObject? item)
         {
             _cancellableObject = item;
-            RaisePropertyChanged(nameof(Message));
-            RaisePropertyChanged(nameof(CanCancel));
-            RaisePropertyChanged(nameof(IsCanceled));
+            OnPropertyChanged(nameof(Message));
+            OnPropertyChanged(nameof(CanCancel));
+            OnPropertyChanged(nameof(IsCanceled));
         }
 
         protected override void OnClosing(CancelEventArgs e)
@@ -58,7 +55,7 @@ namespace NeeView
             if (_cancellableObject.IsCanceled) return;
 
             _cancellableObject.IsCanceled = true;
-            RaisePropertyChanged(nameof(IsCanceled));
+            OnPropertyChanged(nameof(IsCanceled));
             _cancellableObject.Cancel();
         }
 

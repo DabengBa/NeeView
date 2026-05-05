@@ -1,4 +1,5 @@
-﻿using NeeLaboratory;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory;
 using NeeLaboratory.ComponentModel;
 using NeeView.Properties;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Windows.Data;
 
 namespace NeeView
 {
-    public class FileInformationViewModel : BindableBase
+    public class FileInformationViewModel : ObservableObject
     {
         private readonly FileInformation _model;
         private FileInformationSource? _selectedItem;
@@ -18,7 +19,7 @@ namespace NeeView
         {
             _model = model;
 
-            _model.AddPropertyChanged(nameof(_model.FileInformationCollection),
+            _model.SubscribePropertyChanged(nameof(_model.FileInformationCollection),
                 Model_FileInformationCollectionChanged);
 
             SelectedItem = _model.GetMainFileInformation();
@@ -65,7 +66,7 @@ namespace NeeView
 
         private void Model_FileInformationCollectionChanged(object? sender, PropertyChangedEventArgs e)
         {
-            RaisePropertyChanged(nameof(FileInformationCollection));
+            OnPropertyChanged(nameof(FileInformationCollection));
 
             if (SelectedItem is null)
             {

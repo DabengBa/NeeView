@@ -1,5 +1,5 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Windows;
 using NeeView.Windows.Property;
 using System;
@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class WindowConfig : BindableBase
+    public partial class WindowConfig : ObservableObject
     {
         [DefaultEquality] private bool _isTopmost = false;
         [IgnoreEquality] private WindowStateEx _state;

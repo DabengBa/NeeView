@@ -1,11 +1,9 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.Generic;
-using System.ComponentModel;
 
 namespace NeeView
 {
-    [NotifyPropertyChanged]
-    public partial class TrackCollection : INotifyPropertyChanged
+    public partial class TrackCollection : ObservableObject
     {
         public List<TrackItem> _items;
         private TrackItem? _selected;
@@ -14,8 +12,6 @@ namespace NeeView
         {
             _items = new List<TrackItem>(items);
         }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         public List<TrackItem> Tracks => _items;
 

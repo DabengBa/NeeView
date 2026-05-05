@@ -1,8 +1,9 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 
 namespace NeeView
 {
-    public class ViewAutoScrollControl : BindableBase, IViewAutoScrollControl
+    public class ViewAutoScrollControl : ObservableObject, IViewAutoScrollControl
     {
         private readonly MainViewComponent _viewComponent;
 
@@ -11,7 +12,7 @@ namespace NeeView
             _viewComponent = viewComponent;
 
             _viewComponent.MouseInput.SubscribePropertyChanged(nameof(MouseInput.IsAutoScrollMode),
-                (s, e) => RaisePropertyChanged(nameof(IsAutoScrollMode)));
+                (s, e) => OnPropertyChanged(nameof(IsAutoScrollMode)));
         }
 
         public bool IsAutoScrollMode

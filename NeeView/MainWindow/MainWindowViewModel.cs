@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeView.Effects;
 using NeeView.Windows;
 using System;
@@ -13,7 +14,7 @@ namespace NeeView
     /// <summary>
     /// MainWindow : ViewModel
     /// </summary>
-    public class MainWindowViewModel : BindableBase
+    public class MainWindowViewModel : ObservableObject
     {
         private bool _initialized;
         private MainWindowModel _model;
@@ -46,28 +47,28 @@ namespace NeeView
             // main window model
             _model = model;
 
-            _model.AddPropertyChanged(nameof(_model.CanHideMenu),
+            _model.SubscribePropertyChanged(nameof(_model.CanHideMenu),
                 (s, e) => UpdateSidePanelMargin());
 
-            _model.AddPropertyChanged(nameof(_model.CanHidePageSlider),
+            _model.SubscribePropertyChanged(nameof(_model.CanHidePageSlider),
                 (s, e) => UpdateSidePanelMargin());
 
-            Config.Current.Panels.AddPropertyChanged(nameof(PanelsConfig.ConflictTopMargin),
+            Config.Current.Panels.SubscribePropertyChanged(nameof(PanelsConfig.ConflictTopMargin),
                 (s, e) => UpdateSidePanelMargin());
 
-            Config.Current.Panels.AddPropertyChanged(nameof(PanelsConfig.ConflictBottomMargin),
+            Config.Current.Panels.SubscribePropertyChanged(nameof(PanelsConfig.ConflictBottomMargin),
                 (s, e) => UpdateSidePanelMargin());
 
             _model.FocusMainViewCall += Model_FocusMainViewCall;
 
             MainWindow.Current.Activated +=
-                (s, e) => RaisePropertyChanged(nameof(IsMenuBarActive));
+                (s, e) => OnPropertyChanged(nameof(IsMenuBarActive));
 
             MainWindow.Current.Deactivated +=
-                (s, e) => RaisePropertyChanged(nameof(IsMenuBarActive));
+                (s, e) => OnPropertyChanged(nameof(IsMenuBarActive));
 
-            Config.Current.Window.AddPropertyChanged(nameof(WindowConfig.IsTopmost),
-                (s, e) => RaisePropertyChanged(nameof(IsTopmost)));
+            Config.Current.Window.SubscribePropertyChanged(nameof(WindowConfig.IsTopmost),
+                (s, e) => OnPropertyChanged(nameof(IsTopmost)));
 
             BookHub.Current.BookChanged +=
                 (s, e) => CommandManager.InvalidateRequerySuggested();
@@ -80,7 +81,7 @@ namespace NeeView
                 };
 
             PageTitle.Current.SubscribePropertyChanged(nameof(PageTitle.Title),
-                (s, e) => AppDispatcher.Invoke(() => RaisePropertyChanged(nameof(Title))));
+                (s, e) => AppDispatcher.Invoke(() => OnPropertyChanged(nameof(Title))));
 
             // TODO: アプリの初期化処理で行うべき
             // ダウンロードフォルダー生成

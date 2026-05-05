@@ -1,11 +1,11 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Windows.Property;
 
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class WindowTitleConfig : BindableBase
+    public partial class WindowTitleConfig : ObservableObject
     {
         private const string WindowTitleFormat1Default = "{Book} ({Page}{Part: (#)} / {PageMax}) - {EntryPath:/ > }";
         private const string WindowTitleFormat2Default = "{Book} ({Page}{Part: (#)} / {PageMax}) - {EntryPathL:/ > } | {NameR}";

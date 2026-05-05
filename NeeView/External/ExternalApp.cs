@@ -1,5 +1,5 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Properties;
 using System;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class ExternalApp : BindableBase, ICloneable, IExternalApp
+    public partial class ExternalApp : ObservableObject, ICloneable, IExternalApp
     {
         [DefaultEquality] private string? _name;
         [DefaultEquality] private string? _command;
@@ -27,14 +27,14 @@ namespace NeeView
         public string? Name
         {
             get { return _name; }
-            set { if (SetProperty(ref _name, string.IsNullOrWhiteSpace(value) ? null : value.Trim())) RaisePropertyChanged(nameof(DisplayName)); }
+            set { if (SetProperty(ref _name, string.IsNullOrWhiteSpace(value) ? null : value.Trim())) OnPropertyChanged(nameof(DisplayName)); }
         }
 
         // コマンド
         public string? Command
         {
             get { return _command; }
-            set { if (SetProperty(ref _command, string.IsNullOrWhiteSpace(value) ? null : value.Trim())) RaisePropertyChanged(nameof(DisplayName)); }
+            set { if (SetProperty(ref _command, string.IsNullOrWhiteSpace(value) ? null : value.Trim())) OnPropertyChanged(nameof(DisplayName)); }
         }
 
         // コマンドパラメータ

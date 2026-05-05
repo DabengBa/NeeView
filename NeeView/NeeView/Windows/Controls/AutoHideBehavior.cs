@@ -2,7 +2,6 @@
 using NeeView.Windows.Data;
 using NeeView.Windows.Media;
 using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;

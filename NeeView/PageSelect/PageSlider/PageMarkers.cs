@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -20,9 +20,9 @@ namespace NeeView
     }
 
     /// <summary>
-    /// Pagemarkers : Model
+    /// PageMarkers : Model
     /// </summary>
-    public class PageMarkers : BindableBase
+    public class PageMarkers : ObservableObject
     {
         private readonly BookOperation _bookOperation;
         private PageMarkerCollection? _markerCollection;
@@ -48,7 +48,7 @@ namespace NeeView
         public PageMarkerCollection? MarkerCollection
         {
             get { return _markerCollection; }
-            set { if (_markerCollection != value) { _markerCollection = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _markerCollection, value); }
         }
 
         /// <summary>
@@ -57,9 +57,8 @@ namespace NeeView
         public bool IsSliderDirectionReversed
         {
             get { return _isSliderDirectionReversed; }
-            set { if (_isSliderDirectionReversed != value) { _isSliderDirectionReversed = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _isSliderDirectionReversed, value); }
         }
-
 
 
         /// <summary>

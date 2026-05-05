@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.Generators;
 using NeeLaboratory.Linq;
 using NeeView.Collections.Generic;
@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace NeeView
 {
-    public partial class BookmarkCollection : BindableBase
+    public partial class BookmarkCollection : ObservableObject
     {
         static BookmarkCollection() => Current = new BookmarkCollection();
         public static BookmarkCollection Current { get; }

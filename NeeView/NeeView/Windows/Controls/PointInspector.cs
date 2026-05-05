@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.ComponentModel;
 using System.Windows;
@@ -6,8 +6,8 @@ using System.Windows.Controls;
 
 namespace NeeView.Windows.Controls
 {
-    [NotifyPropertyChanged]
-    public partial class PointInspector : Control, INotifyPropertyChanged
+    [INotifyPropertyChanged]
+    public partial class PointInspector : Control
     {
         static PointInspector()
         {
@@ -24,9 +24,6 @@ namespace NeeView.Windows.Controls
         }
 
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-
         public Point Point
         {
             get { return (Point)GetValue(PointProperty); }
@@ -40,13 +37,13 @@ namespace NeeView.Windows.Controls
         public double X
         {
             get { return Point.X; }
-            set { if (Point.X != value) { Point = new Point(value, Point.Y); RaisePropertyChanged(); } }
+            set { if (Point.X != value) { Point = new Point(value, Point.Y); OnPropertyChanged(); } }
         }
 
         public double Y
         {
             get { return Point.Y; }
-            set { if (Point.Y != value) { Point = new Point(Point.X, value); RaisePropertyChanged(); } }
+            set { if (Point.Y != value) { Point = new Point(Point.X, value); OnPropertyChanged(); } }
         }
     }
 }

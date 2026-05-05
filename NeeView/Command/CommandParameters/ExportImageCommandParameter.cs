@@ -123,7 +123,7 @@ namespace NeeView
                     return;
                 }
                 else if (value == ExportImageFileNameMode.BookPageNumber)
-                { 
+                {
                     FileNameFormat0 = "{Book}_{Page:000}";
                     FileNameFormat1 = "{Book}_{Page:000}";
                     FileNameFormat2 = "{Book}_{Page1:000}-{Page2:000}";
@@ -144,7 +144,7 @@ namespace NeeView
     public enum ExportImageOverwriteMode
     {
         Confirm,
-        
+
         AddNumber,
 
         Disallow,

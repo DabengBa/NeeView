@@ -1,5 +1,5 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Windows.Controls;
 using NeeView.Windows.Property;
 using System.Text.Json.Serialization;
@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class PlaylistConfig : BindableBase, IHasPanelListItemStyle
+    public partial class PlaylistConfig : ObservableObject, IHasPanelListItemStyle
     {
         [DefaultEquality] private PanelListItemStyle _panelListItemStyle;
         [DefaultEquality] private bool _isGroupBy;

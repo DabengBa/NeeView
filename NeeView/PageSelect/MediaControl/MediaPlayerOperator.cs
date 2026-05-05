@@ -1,4 +1,5 @@
-﻿using NeeLaboratory;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory;
 using NeeLaboratory.ComponentModel;
 using NeeView.Threading;
 using System;
@@ -12,7 +13,7 @@ namespace NeeView
     /// <summary>
     /// MediaPlayer操作
     /// </summary>
-    public class MediaPlayerOperator : BindableBase, IDisposable
+    public class MediaPlayerOperator : ObservableObject, IDisposable
     {
         // TODO: ブックとページの MediaPlayerOperator インスタンスアクセス方法が特殊すぎるので整備せよ
 
@@ -70,34 +71,34 @@ namespace NeeView
                 (s, e) => Duration = _player.Duration));
 
             _disposables.Add(_player.SubscribePropertyChanged(nameof(_player.HasAudio),
-                (s, e) => RaisePropertyChanged(nameof(HasAudio))));
+                (s, e) => OnPropertyChanged(nameof(HasAudio))));
 
             _disposables.Add(_player.SubscribePropertyChanged(nameof(_player.HasVideo),
-                (s, e) => RaisePropertyChanged(nameof(HasVideo))));
+                (s, e) => OnPropertyChanged(nameof(HasVideo))));
 
             _disposables.Add(_player.SubscribePropertyChanged(nameof(_player.IsPlaying),
-                (s, e) => RaisePropertyChanged(nameof(IsPlaying))));
+                (s, e) => OnPropertyChanged(nameof(IsPlaying))));
 
             _disposables.Add(_player.SubscribePropertyChanged(nameof(_player.IsMuted),
-                (s, e) => RaisePropertyChanged(nameof(IsMuted))));
+                (s, e) => OnPropertyChanged(nameof(IsMuted))));
 
             _disposables.Add(_player.SubscribePropertyChanged(nameof(_player.Volume),
-                (s, e) => RaisePropertyChanged(nameof(Volume))));
+                (s, e) => OnPropertyChanged(nameof(Volume))));
 
             _disposables.Add(_player.SubscribePropertyChanged(nameof(_player.IsRepeat),
-                (s, e) => RaisePropertyChanged(nameof(IsRepeat))));
+                (s, e) => OnPropertyChanged(nameof(IsRepeat))));
 
             _disposables.Add(_player.SubscribePropertyChanged(nameof(_player.ScrubbingEnabled),
-                (s, e) => RaisePropertyChanged(nameof(ScrubbingEnabled))));
+                (s, e) => OnPropertyChanged(nameof(ScrubbingEnabled))));
 
             _disposables.Add(_player.SubscribePropertyChanged(nameof(_player.AudioTracks),
-                (s, e) => RaisePropertyChanged(nameof(AudioTracks))));
+                (s, e) => OnPropertyChanged(nameof(AudioTracks))));
 
             _disposables.Add(_player.SubscribePropertyChanged(nameof(_player.Subtitles),
-                (s, e) => RaisePropertyChanged(nameof(SubtitleTracks))));
+                (s, e) => OnPropertyChanged(nameof(SubtitleTracks))));
 
             _disposables.Add(_player.SubscribePropertyChanged(nameof(_player.Rate),
-                (s, e) => RaisePropertyChanged(nameof(Rate))));
+                (s, e) => OnPropertyChanged(nameof(Rate))));
 
             _oldTickCount = System.Environment.TickCount;
 
@@ -139,8 +140,8 @@ namespace NeeView
                 {
                     _duration = value;
                     _durationTimeSpan = MathUtility.Max(_duration.HasTimeSpan ? _duration.TimeSpan : TimeSpan.Zero, TimeSpan.FromMilliseconds(1.0));
-                    RaisePropertyChanged();
-                    RaisePropertyChanged(nameof(DurationHasTimeSpan));
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(DurationHasTimeSpan));
                 }
             }
         }
@@ -194,8 +195,8 @@ namespace NeeView
                 if (_isTimeLeftDisplay != value)
                 {
                     _isTimeLeftDisplay = value;
-                    RaisePropertyChanged();
-                    RaisePropertyChanged(nameof(DisplayTime));
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(DisplayTime));
                 }
             }
         }
@@ -340,8 +341,8 @@ namespace NeeView
                 //Debug.WriteLine($"{System.Environment.TickCount}: Position={pos:f3}");
                 _player.Position = pos;
                 _requestPosition = double.NaN;
-                RaisePropertyChanged(nameof(Position));
-                RaisePropertyChanged(nameof(DisplayTime));
+                OnPropertyChanged(nameof(Position));
+                OnPropertyChanged(nameof(DisplayTime));
             });
 
             // interval 
@@ -354,8 +355,8 @@ namespace NeeView
             {
                 _position = _player.Position;
             }
-            RaisePropertyChanged(nameof(Position));
-            RaisePropertyChanged(nameof(DisplayTime));
+            OnPropertyChanged(nameof(Position));
+            OnPropertyChanged(nameof(DisplayTime));
         }
 
         private void Player_MediaFailed(object? sender, ExceptionEventArgs e)

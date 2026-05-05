@@ -1,10 +1,10 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.PageFrames;
 using System.Windows;
 
 namespace NeeView
 {
-    public class MouseInputContext : BindableBase
+    public class MouseInputContext : ObservableObject
     {
         public MouseInputContext(FrameworkElement sender, ICursorSetter? cursorSetter, MouseGestureCommandCollection? gestureCommandCollection, INotifyPageFrameBoxChanged? notifyPageFrameBoxChanged, IDragTransformContextFactory? dragTransformContextFactory, IDragTransformControl? dragTransformControl, LoupeContext? loupe, ViewScrollContext? viewScrollContext)
         {

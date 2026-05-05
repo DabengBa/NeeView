@@ -1,11 +1,11 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 
 namespace NeeView
 {
 
 
-    public class MediaControl : BindableBase
+    public class MediaControl : ObservableObject
     {
         public MediaControl()
         {

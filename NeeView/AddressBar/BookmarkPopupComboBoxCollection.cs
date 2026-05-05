@@ -1,11 +1,11 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace NeeView
 {
-    public class BookmarkPopupComboBoxCollection : BindableBase
+    public class BookmarkPopupComboBoxCollection : ObservableObject
     {
         const int _maxItemCount = 8;
 

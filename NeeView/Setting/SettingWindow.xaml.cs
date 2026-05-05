@@ -1,4 +1,5 @@
-﻿using NeeView.Native;
+﻿using NeeLaboratory.ComponentModel;
+using NeeView.Native;
 using NeeView.Windows;
 using System;
 using System.ComponentModel;
@@ -42,7 +43,7 @@ namespace NeeView.Setting
             _vm = new SettingWindowViewModel(model);
             this.DataContext = _vm;
 
-            _vm.AddPropertyChanged(nameof(SettingWindowViewModel.CurrentPage), UpdateIndexTreeSelected);
+            _vm.SubscribePropertyChanged(nameof(SettingWindowViewModel.CurrentPage), UpdateIndexTreeSelected);
 
             // cancel rename triggers
             this.MouseLeftButtonDown += (s, e) => this.RenameManager.CloseAll();

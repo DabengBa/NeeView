@@ -1,10 +1,10 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace NeeView
 {
-    public class SelectableArchiverList : BindableBase
+    public class SelectableArchiverList : ObservableObject
     {
         static SelectableArchiverList() => Current = new SelectableArchiverList();
         public static SelectableArchiverList Current { get; }
@@ -28,7 +28,7 @@ namespace NeeView
             {
                 if (SetProperty(ref _archivers, value))
                 {
-                    RaisePropertyChanged(nameof(IsEnabled));
+                    OnPropertyChanged(nameof(IsEnabled));
                 }
             }
         }

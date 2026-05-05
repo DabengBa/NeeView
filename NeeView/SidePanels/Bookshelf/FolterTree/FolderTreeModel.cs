@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Collections.Generic;
 using NeeView.Properties;
 using System;
@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace NeeView
 {
-    public class FolderTreeModel : BindableBase
+    public class FolderTreeModel : ObservableObject
     {
         private readonly FolderList _folderList;
         private readonly ITreeViewNode? _rootQuickAccess;

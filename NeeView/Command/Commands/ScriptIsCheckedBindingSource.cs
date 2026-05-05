@@ -1,6 +1,5 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
-using System.ComponentModel;
 
 namespace NeeView
 {
@@ -10,8 +9,7 @@ namespace NeeView
     /// <remarks>
     /// パラメーターオブジェクトそのものの変更に対応するためにコマンドインスタンスレベルのイベントを監視している。
     /// </remarks>
-    [NotifyPropertyChanged]
-    public partial class ScriptIsCheckedBindingSource : INotifyPropertyChanged, IDisposable
+    public partial class ScriptIsCheckedBindingSource : ObservableObject, IDisposable
     {
         private bool _disposedValue;
         private readonly ScriptCommand _command;
@@ -26,11 +24,9 @@ namespace NeeView
         {
             if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName == nameof(ScriptCommandParameter.IsChecked))
             {
-                RaisePropertyChanged(nameof(IsChecked));
+                OnPropertyChanged(nameof(IsChecked));
             }
         }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
 
         public bool IsChecked

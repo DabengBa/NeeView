@@ -102,7 +102,7 @@ namespace NeeLaboratory.IO
         public static BitmapSource? GetTypeIconSource(string path, IconSize iconSize)
         {
             var shinfo = new SHFILEINFOW();
-            var result= PInvoke.SHGetFileInfo(path, 0, ref shinfo, (SHGFI_FLAGS.SHGFI_ICON | (iconSize == IconSize.Small ? SHGFI_FLAGS.SHGFI_SMALLICON : SHGFI_FLAGS.SHGFI_LARGEICON)));
+            var result = PInvoke.SHGetFileInfo(path, 0, ref shinfo, (SHGFI_FLAGS.SHGFI_ICON | (iconSize == IconSize.Small ? SHGFI_FLAGS.SHGFI_SMALLICON : SHGFI_FLAGS.SHGFI_LARGEICON)));
             if (result != 0)
             {
                 BitmapSource bitmapSource = System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(shinfo.hIcon, System.Windows.Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());

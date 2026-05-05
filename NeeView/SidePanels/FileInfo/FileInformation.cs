@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.Linq;
 using NeeView.PageFrames;
 using NeeView.Windows.Data;
@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace NeeView
 {
-    public class FileInformation : BindableBase
+    public class FileInformation : ObservableObject
     {
         public static FileInformation Current { get; }
         static FileInformation() => Current = new FileInformation();

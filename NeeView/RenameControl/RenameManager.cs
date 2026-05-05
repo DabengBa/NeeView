@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -11,16 +11,13 @@ namespace NeeView
     /// <summary>
     /// RenameManager.xaml の相互作用ロジック
     /// </summary>
-    [NotifyPropertyChanged]
-    public partial class RenameManager : Canvas, INotifyPropertyChanged
+    [INotifyPropertyChanged]
+    public partial class RenameManager : Canvas
     {
         public RenameManager()
         {
             Loaded += RenameManager_Loaded;
         }
-
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
 
         public bool IsRenaming =>
@@ -71,7 +68,7 @@ namespace NeeView
 
             rename.SetTargetVisibility(Visibility.Hidden);
 
-            RaisePropertyChanged(nameof(IsRenaming));
+            OnPropertyChanged(nameof(IsRenaming));
         }
 
 
@@ -88,7 +85,7 @@ namespace NeeView
             AppDispatcher.BeginInvoke(() =>
             {
                 this.Children.Remove(rename);
-                RaisePropertyChanged(nameof(IsRenaming));
+                OnPropertyChanged(nameof(IsRenaming));
             });
         }
 

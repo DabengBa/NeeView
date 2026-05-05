@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeLaboratory.Generators;
 using NeeLaboratory.Linq;
 using NeeLaboratory.Threading;
@@ -21,7 +22,7 @@ namespace NeeView
     /// <summary>
     /// FolderList Model
     /// </summary>
-    public abstract partial class FolderList : BindableBase, IDisposable
+    public abstract partial class FolderList : ObservableObject, IDisposable
     {
         #region IsMoving (static)
 
@@ -140,7 +141,7 @@ namespace NeeView
 
             _disposables.Add(_folderListConfig.SubscribePropertyChanged(nameof(FolderListConfig.PanelListItemStyle), (s, e) =>
             {
-                RaisePropertyChanged(nameof(PanelListItemStyle));
+                OnPropertyChanged(nameof(PanelListItemStyle));
             }));
         }
 
@@ -340,12 +341,12 @@ namespace NeeView
             if (_disposedValue) return;
 
             CollectionChanged?.Invoke(this, EventArgs.Empty);
-            RaisePropertyChanged(nameof(FolderCollection));
-            RaisePropertyChanged(nameof(Place));
-            RaisePropertyChanged(nameof(IsPlaceValid));
-            RaisePropertyChanged(nameof(FolderOrder));
-            RaisePropertyChanged(nameof(IsFolderOrderEnabled));
-            RaisePropertyChanged(nameof(IsFolderSearchEnabled));
+            OnPropertyChanged(nameof(FolderCollection));
+            OnPropertyChanged(nameof(Place));
+            OnPropertyChanged(nameof(IsPlaceValid));
+            OnPropertyChanged(nameof(FolderOrder));
+            OnPropertyChanged(nameof(IsFolderOrderEnabled));
+            OnPropertyChanged(nameof(IsFolderSearchEnabled));
         }
 
         public virtual void IsVisibleChanged(bool isVisible)
@@ -1418,7 +1419,7 @@ namespace NeeView
             if (!FolderCollection.FolderOrderClass.GetFolderOrderMap().ContainsKey(folderOrder)) return;
 
             this.FolderCollection.FolderParameter.FolderOrder = folderOrder;
-            RaisePropertyChanged(nameof(FolderOrder));
+            OnPropertyChanged(nameof(FolderOrder));
         }
 
         /// <summary>
@@ -1439,7 +1440,7 @@ namespace NeeView
 
             if (this.FolderCollection == null) return;
             SetFolderOrder(GetNextFolderOrder());
-            RaisePropertyChanged(nameof(FolderOrder));
+            OnPropertyChanged(nameof(FolderOrder));
         }
 
         public FolderOrder GetNextFolderOrder()

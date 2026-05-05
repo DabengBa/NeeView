@@ -6,7 +6,7 @@ namespace NeeView.Windows
     {
         [AliasName("VerticalAlignment.Top")]
         Top,
-        
+
         [AliasName("VerticalAlignment.Center")]
         Center,
 

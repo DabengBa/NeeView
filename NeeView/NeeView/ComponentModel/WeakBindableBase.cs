@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.ComponentModel;
 using System.Windows;
@@ -12,7 +12,7 @@ namespace NeeView.ComponentModel
     /// from: https://blog.okazuki.jp/entry/20110227/1298817065
     /// </remarks>
     /// <typeparam name="TModel">購読するModel</typeparam>
-    public class WeakBindableBase<TModel> : BindableBase
+    public class WeakBindableBase<TModel> : ObservableObject
         where TModel : INotifyPropertyChanged
     {
         // NOTE: GCの対象になるまで破棄されないように保持する
@@ -23,7 +23,7 @@ namespace NeeView.ComponentModel
         {
             Model = model;
 
-            _propertyChangedListener = new PropertyChangedWeakEventListener(base.RaisePropertyChanged);
+            _propertyChangedListener = new PropertyChangedWeakEventListener(base.OnPropertyChanged);
             PropertyChangedEventManager.AddListener(Model, _propertyChangedListener, "");
         }
 

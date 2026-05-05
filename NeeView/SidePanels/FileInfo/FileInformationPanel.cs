@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Properties;
 using System;
 using System.Windows;
@@ -6,7 +6,7 @@ using System.Windows.Media;
 
 namespace NeeView
 {
-    public class FileInformationPanel : BindableBase, IPanel
+    public class FileInformationPanel : ObservableObject, IPanel
     {
         private readonly Lazy<FileInformationView> _view;
         private readonly FileInformation _model;

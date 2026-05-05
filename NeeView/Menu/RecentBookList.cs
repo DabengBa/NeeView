@@ -1,9 +1,10 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using System.Collections.Generic;
 
 namespace NeeView
 {
-    public class RecentBookList : BindableBase
+    public class RecentBookList : ObservableObject
     {
         static RecentBookList() => Current = new RecentBookList();
         public static RecentBookList Current { get; }
@@ -42,7 +43,7 @@ namespace NeeView
             {
                 if (SetProperty(ref _books, value))
                 {
-                    RaisePropertyChanged(nameof(IsEnabled));
+                    OnPropertyChanged(nameof(IsEnabled));
                 }
             }
         }

@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.Generators;
 using NeeView.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -6,7 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace NeeView
 {
     [LocalDebug]
-    public partial class BookmarkPopupEdit : BindableBase
+    public partial class BookmarkPopupEdit : ObservableObject
     {
         private string _name;
 

@@ -1,14 +1,13 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.Generators;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 
 namespace NeeView.PageFrames
 {
-    [NotifyPropertyChanged]
-    public partial class SelectedContainer : INotifyPropertyChanged, IDisposable
+    public partial class SelectedContainer : ObservableObject, IDisposable
     {
         private readonly PageFrameContainerCollection _containers;
         private readonly Func<LinkedListNode<PageFrameContainer>> _selectFunc;
@@ -26,8 +25,6 @@ namespace NeeView.PageFrames
             _node = _containers.CollectNode().First();
         }
 
-        [Subscribable]
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         [Subscribable]
         public event EventHandler<FrameViewContentChangedEventArgs>? ViewContentChanged;
@@ -80,9 +77,9 @@ namespace NeeView.PageFrames
 
             Detach();
             _node = node;
-            RaisePropertyChanged(nameof(Node));
-            RaisePropertyChanged(nameof(Page));
-            RaisePropertyChanged(nameof(PageRange));
+            OnPropertyChanged(nameof(Node));
+            OnPropertyChanged(nameof(Page));
+            OnPropertyChanged(nameof(PageRange));
             Attach();
         }
 
@@ -119,8 +116,8 @@ namespace NeeView.PageFrames
 
         private void Container_ContentChanged(object? sender, EventArgs e)
         {
-            RaisePropertyChanged(nameof(Page));
-            RaisePropertyChanged(nameof(PageRange));
+            OnPropertyChanged(nameof(Page));
+            OnPropertyChanged(nameof(PageRange));
         }
 
         private void Container_ViewContentChanged(object? sender, FrameViewContentChangedEventArgs e)

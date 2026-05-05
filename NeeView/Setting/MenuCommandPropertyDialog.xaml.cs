@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -41,7 +41,7 @@ namespace NeeView
 
 
 
-    public class MenuCommandPropertyDialogViewModel : BindableBase
+    public class MenuCommandPropertyDialogViewModel : ObservableObject
     {
         private readonly MenuElement _menuElement;
 
@@ -63,7 +63,7 @@ namespace NeeView
                 if (_menuElement.Label != value)
                 {
                     _menuElement.Label = value;
-                    RaisePropertyChanged(nameof(Name));
+                    OnPropertyChanged(nameof(Name));
                 }
             }
         }
@@ -76,8 +76,8 @@ namespace NeeView
                 if (_menuElement.CommandName != value)
                 {
                     _menuElement.CommandName = value;
-                    RaisePropertyChanged(nameof(CommandName));
-                    RaisePropertyChanged(nameof(Name));
+                    OnPropertyChanged(nameof(CommandName));
+                    OnPropertyChanged(nameof(Name));
                 }
             }
         }

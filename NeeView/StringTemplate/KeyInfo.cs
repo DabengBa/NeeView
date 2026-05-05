@@ -3,7 +3,7 @@
     public class KeyInfo<TSource>
     {
         public delegate string KeyFormatter(TSource source, string format, string suffix);
-        
+
         public KeyInfo(KeyFormatter formatter) : this(formatter, StringFormatChangedAction.None)
         {
         }

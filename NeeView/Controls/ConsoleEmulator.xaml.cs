@@ -1,5 +1,5 @@
 ﻿// from https://stackoverflow.com/questions/14948171/how-to-emulate-a-console-in-wpf
-using NeeLaboratory.Generators;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -12,8 +12,8 @@ using System.Windows.Input;
 
 namespace NeeView
 {
-    [NotifyPropertyChanged]
-    public partial class ConsoleEmulator : UserControl, INotifyPropertyChanged, IDisposable
+    [INotifyPropertyChanged]
+    public partial class ConsoleEmulator : UserControl, IDisposable
     {
         public readonly static RoutedCommand ClearScreenCommand = new("ClearScreen", typeof(ConsoleEmulator), new InputGestureCollection(new List<InputGesture>() { new KeyGesture(Key.L, ModifierKeys.Control) }));
 
@@ -40,9 +40,6 @@ namespace NeeView
 
             this.CommandBindings.Add(new CommandBinding(ClearScreenCommand, ClearScreen, (s, e) => e.CanExecute = true));
         }
-
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
 
         public IConsoleHost ConsoleHost

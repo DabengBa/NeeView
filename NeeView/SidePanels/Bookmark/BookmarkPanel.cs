@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Properties;
 using System;
 using System.Diagnostics;
@@ -7,7 +7,7 @@ using System.Windows.Media;
 
 namespace NeeView
 {
-    public class BookmarkPanel : BindableBase, IPanel
+    public class BookmarkPanel : ObservableObject, IPanel
     {
         private static BookmarkPanel? _current;
         public static BookmarkPanel Current => _current ?? throw new InvalidOperationException();

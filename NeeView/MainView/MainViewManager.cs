@@ -1,4 +1,5 @@
-﻿using NeeView.Windows;
+﻿using NeeLaboratory.ComponentModel;
+using NeeView.Windows;
 using System;
 using System.Diagnostics;
 using System.Windows;
@@ -44,7 +45,7 @@ namespace NeeView
             BookOperation.Current.BookChanging += BookOperation_BookChanging;
             BookOperation.Current.BookChanged += BookOperation_BookChanged;
 
-            Config.Current.MainView.AddPropertyChanged(nameof(MainViewConfig.IsFloating), (s, e) => Update(true));
+            Config.Current.MainView.SubscribePropertyChanged(nameof(MainViewConfig.IsFloating), (s, e) => Update(true));
 
             Config.Current.MainView.SubscribePropertyChanged(nameof(MainViewConfig.AlternativeContent), (s, e) => UpdateAlternativeContent());
 

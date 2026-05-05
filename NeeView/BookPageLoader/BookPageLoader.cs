@@ -1,12 +1,12 @@
 ﻿//#define LOCAL_DEBUG
 
+using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.ComponentModel;
 using NeeLaboratory.Generators;
 using NeeLaboratory.Linq;
 using NeeView.PageFrames;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -16,8 +16,7 @@ namespace NeeView
 {
     // TODO: BookMemoryService: RawSourceとViewSource を同列に管理。ページ単位で増減させる方向で。
     [LocalDebug]
-    [NotifyPropertyChanged]
-    public partial class BookPageLoader : IDisposable, INotifyPropertyChanged
+    public partial class BookPageLoader : ObservableObject, IDisposable
     {
         private readonly BookContext _bookContext;
         private readonly PageFrameFactory _frameFactory;
@@ -62,9 +61,6 @@ namespace NeeView
             _disposables.Add(_jobAheadClient);
         }
 
-
-        [Subscribable]
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         public bool IsBusy
         {

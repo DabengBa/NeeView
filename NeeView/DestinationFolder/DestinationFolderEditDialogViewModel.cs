@@ -1,8 +1,8 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace NeeView
 {
-    public class DestinationFolderEditDialogViewModel : BindableBase
+    public class DestinationFolderEditDialogViewModel : ObservableObject
     {
         private readonly DestinationFolder _model;
 
@@ -25,7 +25,7 @@ namespace NeeView
             set
             {
                 _model.Path = value;
-                RaisePropertyChanged(nameof(Name));
+                OnPropertyChanged(nameof(Name));
             }
         }
 

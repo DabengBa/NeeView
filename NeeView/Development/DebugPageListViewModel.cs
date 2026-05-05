@@ -1,14 +1,12 @@
-﻿using NeeLaboratory.ComponentModel;
-using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using System;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
 
 namespace NeeView
 {
-    [NotifyPropertyChanged]
-    public partial class DebugPageListViewModel : INotifyPropertyChanged, IDisposable
+    public partial class DebugPageListViewModel : ObservableObject, IDisposable
     {
         private readonly PageFrameBoxPresenter _presenter;
 
@@ -24,10 +22,6 @@ namespace NeeView
 
             UpdateItems();
         }
-
-
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
 
         public Book? Book => _presenter.Book;
@@ -61,7 +55,7 @@ namespace NeeView
 
         private void Presenter_PageFrameBoxChanged(object? sender, PageFrameBoxChangedEventArgs e)
         {
-            RaisePropertyChanged(nameof(Book));
+            OnPropertyChanged(nameof(Book));
         }
 
         private void Presenter_PagesChanged(object? sender, EventArgs e)

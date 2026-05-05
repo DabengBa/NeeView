@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.Generators;
 using System;
 using System.ComponentModel;
 using System.Windows;
@@ -11,8 +12,8 @@ namespace NeeView
     /// <summary>
     /// PageSortModePalette.xaml の相互作用ロジック
     /// </summary>
-    [NotifyPropertyChanged]
-    public partial class PageSortModePalette : UserControl, INotifyPropertyChanged
+    [INotifyPropertyChanged]
+    public partial class PageSortModePalette : UserControl
     {
         private readonly PageSortModePaletteViewModel _vm;
 
@@ -25,9 +26,6 @@ namespace NeeView
 
             this.Loaded += (s, e) => this.Items.Focus();
         }
-
-        [Subscribable]
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         [Subscribable]
         public event EventHandler? SelfClosed;

@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeView.Windows.Media;
 using System;
 using System.Diagnostics;
@@ -7,7 +8,7 @@ using System.Windows.Media;
 
 namespace NeeView
 {
-    public class CanvasBackgroundSource : BindableBase, IDisposable
+    public class CanvasBackgroundSource : ObservableObject, IDisposable
     {
         private readonly IContentCanvasBrushSource _contentCanvas;
         private SolidColorBrush _foregroundBrush = Brushes.White;

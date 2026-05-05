@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Windows.Media;
 
 namespace NeeView
@@ -6,7 +6,7 @@ namespace NeeView
     /// <summary>
     /// ドライブサムネイル
     /// </summary>
-    public class DriveThumbnail : BindableBase, IThumbnail
+    public class DriveThumbnail : ObservableObject, IThumbnail
     {
         private readonly string _path;
         private ImageSource? _bitmapSource;
@@ -35,7 +35,7 @@ namespace NeeView
                     {
                         _bitmapSource = image.GetBitmapSource(256.0);
                         DriveIconUtility.SetDriveIconCache(_path, _bitmapSource);
-                        RaisePropertyChanged("");
+                        OnPropertyChanged("");
                     });
             }
 

@@ -1,6 +1,6 @@
-﻿using Generator.Equals;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeLaboratory;
-using NeeLaboratory.ComponentModel;
 using NeeView.Windows.Property;
 using System;
 using System.Text.Json.Serialization;
@@ -9,7 +9,7 @@ using System.Windows;
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class PerformanceConfig : BindableBase
+    public partial class PerformanceConfig : ObservableObject
     {
         [DefaultEquality] private int _cacheMemorySize = 200;
         [DefaultEquality] private int _jobWorkerSize = 4;

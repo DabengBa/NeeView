@@ -1,10 +1,10 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Windows.Property;
 using System;
 
 namespace NeeView.Setting
 {
-    public class DragActionParameterViewModel : BindableBase
+    public class DragActionParameterViewModel : ObservableObject
     {
         private readonly DragActionParameter? _defaultParameter;
         private PropertyDocument? _propertyDocument;
@@ -27,7 +27,7 @@ namespace NeeView.Setting
         public PropertyDocument? PropertyDocument
         {
             get { return _propertyDocument; }
-            set { if (_propertyDocument != value) { _propertyDocument = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _propertyDocument, value); }
         }
 
         public string? Note { get; private set; }
@@ -39,7 +39,7 @@ namespace NeeView.Setting
             if (_defaultParameter is null) return;
 
             _propertyDocument.Set(_defaultParameter);
-            RaisePropertyChanged(nameof(PropertyDocument));
+            OnPropertyChanged(nameof(PropertyDocument));
         }
     }
 }

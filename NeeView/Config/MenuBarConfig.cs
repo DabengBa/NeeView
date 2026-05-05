@@ -1,12 +1,12 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Windows.Property;
 using System.Text.Json.Serialization;
 
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class MenuBarConfig : BindableBase
+    public partial class MenuBarConfig : ObservableObject
     {
         [IgnoreEquality] private bool _isVisible;
         [DefaultEquality] private bool _isHideMenu;

@@ -1,10 +1,10 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace NeeView
 {
-    public abstract class QuickAccessEntry : BindableBase, ITreeListNode, IRenameable
+    public abstract class QuickAccessEntry : ObservableObject, ITreeListNode, IRenameable
     {
         public abstract string? RawName { get; }
         public abstract string? Name { get; set; }

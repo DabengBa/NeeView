@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
@@ -21,8 +21,8 @@ namespace NeeView.Setting
     /// <summary>
     /// RenameWindow.xaml の相互作用ロジック
     /// </summary>
-    [NotifyPropertyChanged]
-    public partial class RenameWindow : Window, INotifyPropertyChanged
+    [INotifyPropertyChanged]
+    public partial class RenameWindow : Window
     {
         private readonly RenameWindowParam _param;
         private string _text;
@@ -41,13 +41,10 @@ namespace NeeView.Setting
         }
 
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-
         public string Text
         {
             get { return _text; }
-            set { _text = value; RaisePropertyChanged(); }
+            set { _text = value; OnPropertyChanged(); }
         }
 
 

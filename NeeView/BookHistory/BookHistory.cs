@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.IO.Search;
 using NeeView.Collections;
 using System;
@@ -14,7 +14,7 @@ namespace NeeView
         DateTime LastAccessTime { get; set; }
     }
 
-    public class BookHistory : BindableBase, IHasPage, IHasName, IHasKey<string>, ISearchItem, IBookHistory
+    public class BookHistory : ObservableObject, IHasPage, IHasName, IHasKey<string>, ISearchItem, IBookHistory
     {
         private string _path;
         private BookMementoUnit? _unit;
@@ -46,7 +46,7 @@ namespace NeeView
                 if (SetProperty(ref _path, value))
                 {
                     _unit = null;
-                    RaisePropertyChanged(null);
+                    OnPropertyChanged("");
                 }
             }
         }

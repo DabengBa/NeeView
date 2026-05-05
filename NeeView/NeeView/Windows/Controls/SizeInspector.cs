@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.ComponentModel;
 using System.Windows;
@@ -6,8 +6,8 @@ using System.Windows.Controls;
 
 namespace NeeView.Windows.Controls
 {
-    [NotifyPropertyChanged]
-    public partial class SizeInspector : Control, INotifyPropertyChanged
+    [INotifyPropertyChanged]
+    public partial class SizeInspector : Control
     {
         static SizeInspector()
         {
@@ -24,9 +24,6 @@ namespace NeeView.Windows.Controls
         }
 
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-
         public Size Size
         {
             get { return (Size)GetValue(SizeProperty); }
@@ -38,20 +35,20 @@ namespace NeeView.Windows.Controls
 
         private static void SizePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            (d as SizeInspector)?.RaisePropertyChanged(null);
+            (d as SizeInspector)?.OnPropertyChanged("");
         }
 
 
         public double X
         {
             get { return Size.Width; }
-            set { if (Size.Width != value) { Size = new Size(value, Size.Height); RaisePropertyChanged(); } }
+            set { if (Size.Width != value) { Size = new Size(value, Size.Height); OnPropertyChanged(); } }
         }
 
         public double Y
         {
             get { return Size.Height; }
-            set { if (Size.Height != value) { Size = new Size(Size.Width, value); RaisePropertyChanged(); } }
+            set { if (Size.Height != value) { Size = new Size(Size.Width, value); OnPropertyChanged(); } }
         }
     }
 }

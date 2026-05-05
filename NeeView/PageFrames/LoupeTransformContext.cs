@@ -1,8 +1,8 @@
 ﻿//#define LOCAL_DEBUG
 
+using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.Generators;
 using System;
-using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -10,8 +10,7 @@ using System.Windows.Media.Animation;
 namespace NeeView.PageFrames
 {
     [LocalDebug]
-    [NotifyPropertyChanged]
-    public partial class LoupeTransformContext : IPointControl, IScaleControl, INotifyPropertyChanged, INotifyTransformChanged
+    public partial class LoupeTransformContext : ObservableObject, IPointControl, IScaleControl, INotifyTransformChanged
     {
         private PageFrameContext _context;
         private LoupeTransform _transform = new LoupeTransform();
@@ -21,9 +20,6 @@ namespace NeeView.PageFrames
         {
             _context = context;
         }
-
-        [Subscribable]
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         [Subscribable]
         public event TransformChangedEventHandler? TransformChanged;
@@ -61,7 +57,7 @@ namespace NeeView.PageFrames
             {
                 LocalDebug.WriteLine($"$$ {{{Point:f0}}} to {{{value:f0}}} ({span.TotalMilliseconds})");
                 _transform.SetPoint(value);
-                RaisePropertyChanged(nameof(Point));
+                OnPropertyChanged(nameof(Point));
                 TransformChanged?.Invoke(this, new TransformChangedEventArgs(this, TransformCategory.Loupe, TransformAction.Point));
             }
         }
@@ -82,7 +78,7 @@ namespace NeeView.PageFrames
             if (_transform.Scale != value)
             {
                 _transform.SetScale(value);
-                RaisePropertyChanged(nameof(Scale));
+                OnPropertyChanged(nameof(Scale));
                 TransformChanged?.Invoke(this, new TransformChangedEventArgs(this, TransformCategory.Loupe, TransformAction.Scale, trigger));
             }
         }

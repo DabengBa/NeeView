@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeView.Windows.Property;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Windows;
 
 namespace NeeView
 {
-    public class PictureProfile : BindableBase
+    public class PictureProfile : ObservableObject
     {
         private static readonly Lazy<PictureProfile> _current = new();
         public static PictureProfile Current => _current.Value;

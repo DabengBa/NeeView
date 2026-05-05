@@ -1,4 +1,5 @@
-﻿using NeeView.Runtime.LayoutPanel;
+﻿using NeeLaboratory.ComponentModel;
+using NeeView.Runtime.LayoutPanel;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,7 +17,7 @@ namespace NeeView
             _vm = vm;
             _dock = dock;
 
-            _dock.AddPropertyChanged(nameof(_dock.SelectedItem),
+            _dock.SubscribePropertyChanged(nameof(_dock.SelectedItem),
                 (s, e) => SelectedPanelChanged?.Invoke(this, EventArgs.Empty));
         }
 

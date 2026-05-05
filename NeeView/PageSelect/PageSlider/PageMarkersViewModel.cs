@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -9,7 +10,7 @@ namespace NeeView
     /// <summary>
     /// PageMakers : ViewModel
     /// </summary>
-    public class PageMarkersViewModel : BindableBase
+    public class PageMarkersViewModel : ObservableObject
     {
         /// <summary>
         /// コンストラクタ
@@ -22,13 +23,13 @@ namespace NeeView
             _canvas = canvas;
             _canvas.SizeChanged += Canvas_SizeChanged;
 
-            _model.AddPropertyChanged(nameof(_model.MarkerCollection),
+            _model.SubscribePropertyChanged(nameof(_model.MarkerCollection),
                 (s, e) => UpdateInvoke());
 
-            _model.AddPropertyChanged(nameof(_model.IsSliderDirectionReversed),
+            _model.SubscribePropertyChanged(nameof(_model.IsSliderDirectionReversed),
                 (s, e) => UpdateInvoke());
 
-            Config.Current.Slider.AddPropertyChanged(nameof(SliderConfig.Thickness),
+            Config.Current.Slider.SubscribePropertyChanged(nameof(SliderConfig.Thickness),
                 (s, e) => UpdateInvoke());
         }
 
@@ -39,7 +40,7 @@ namespace NeeView
         public PageMarkers Model
         {
             get { return _model; }
-            set { if (_model != value) { _model = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _model, value); }
         }
 
         private PageMarkers _model;

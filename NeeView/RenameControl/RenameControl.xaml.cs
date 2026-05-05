@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -12,8 +12,8 @@ namespace NeeView
     /// <summary>
     /// RenameControl.xaml の相互作用ロジック
     /// </summary>
-    [NotifyPropertyChanged]
-    public partial class RenameControl : UserControl, INotifyPropertyChanged
+    [INotifyPropertyChanged]
+    public partial class RenameControl : UserControl
     {
         private readonly RenameManager _manager;
         private readonly RenameContext _context;
@@ -40,8 +40,6 @@ namespace NeeView
             this.RenameTextBox.DataContext = this;
         }
 
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// 終了時イベント

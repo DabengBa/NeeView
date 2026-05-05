@@ -1,5 +1,6 @@
 ﻿//#define LOCAL_DEBUG
 
+using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.ComponentModel;
 using NeeLaboratory.Generators;
 using NeeView.ComponentModel;
@@ -14,8 +15,7 @@ namespace NeeView.PageFrames
     /// PageFrameBox 状態情報
     /// </summary>
     [LocalDebug]
-    [NotifyPropertyChanged]
-    public partial class PageFrameContext : INotifyPropertyChanged, IStaticFrame, IDisposable, IContentSizeCalculatorProfile
+    public partial class PageFrameContext : ObservableObject, IStaticFrame, IDisposable, IContentSizeCalculatorProfile
     {
         private readonly BookShareContext _shareContext;
         private readonly Config _config;
@@ -49,17 +49,14 @@ namespace NeeView.PageFrames
             _disposables.Add(_config.System.SubscribePropertyChanged(SystemConfig_PropertyChanged));
             _disposables.Add(_bookSetting.SubscribePropertyChanged((s, e) => AppDispatcher.BeginInvoke(() => BookSetting_PropertyChanged(s, e))));
             _disposables.Add(_frameProfile.SubscribePropertyChanged(FrameProfile_PropertyChanged));
-            _disposables.Add(ImageResizeFilterConfig.SubscribePropertyChanged((s, e) => RaisePropertyChanged(nameof(ImageResizeFilterConfig))));
-            _disposables.Add(ImageCustomSizeConfig.SubscribePropertyChanged((s, e) => RaisePropertyChanged(nameof(ImageCustomSizeConfig))));
-            _disposables.Add(ImageTrimConfig.SubscribePropertyChanged((s, e) => RaisePropertyChanged(nameof(ImageTrimConfig))));
-            _disposables.Add(ImageDotKeepConfig.SubscribePropertyChanged((s, e) => RaisePropertyChanged(nameof(ImageDotKeepConfig))));
-            _disposables.Add(_config.Image.Standard.SubscribePropertyChanged(nameof(ImageStandardConfig.IsAspectRatioEnabled), (s, e) => RaisePropertyChanged(nameof(IsAspectRatioEnabled))));
+            _disposables.Add(ImageResizeFilterConfig.SubscribePropertyChanged((s, e) => OnPropertyChanged(nameof(ImageResizeFilterConfig))));
+            _disposables.Add(ImageCustomSizeConfig.SubscribePropertyChanged((s, e) => OnPropertyChanged(nameof(ImageCustomSizeConfig))));
+            _disposables.Add(ImageTrimConfig.SubscribePropertyChanged((s, e) => OnPropertyChanged(nameof(ImageTrimConfig))));
+            _disposables.Add(ImageDotKeepConfig.SubscribePropertyChanged((s, e) => OnPropertyChanged(nameof(ImageDotKeepConfig))));
+            _disposables.Add(_config.Image.Standard.SubscribePropertyChanged(nameof(ImageStandardConfig.IsAspectRatioEnabled), (s, e) => OnPropertyChanged(nameof(IsAspectRatioEnabled))));
             _disposables.Add(() => _viewScrollContext.Clear());
         }
 
-
-        [Subscribable]
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         [Subscribable]
         public event EventHandler<SizeChangedEventArgs>? SizeChanging;
@@ -173,56 +170,56 @@ namespace NeeView.PageFrames
             switch (e.PropertyName)
             {
                 case nameof(BookConfig.IsPanorama):
-                    RaisePropertyChanged(nameof(IsPanorama));
-                    RaisePropertyChanged(nameof(StretchMode));
-                    RaisePropertyChanged(nameof(IsReadyToPageMove));
+                    OnPropertyChanged(nameof(IsPanorama));
+                    OnPropertyChanged(nameof(StretchMode));
+                    OnPropertyChanged(nameof(IsReadyToPageMove));
                     break;
 
                 case nameof(BookConfig.Orientation):
-                    RaisePropertyChanged(nameof(FrameOrientation));
-                    RaisePropertyChanged(nameof(StretchMode));
+                    OnPropertyChanged(nameof(FrameOrientation));
+                    OnPropertyChanged(nameof(StretchMode));
                     break;
 
                 case nameof(BookConfig.FrameSpace):
-                    RaisePropertyChanged(nameof(FrameMargin));
+                    OnPropertyChanged(nameof(FrameMargin));
                     break;
 
                 case nameof(BookConfig.ContentsSpace):
-                    RaisePropertyChanged(nameof(ContentsSpace));
+                    OnPropertyChanged(nameof(ContentsSpace));
                     break;
 
                 case nameof(BookConfig.DividePageRate):
-                    RaisePropertyChanged(nameof(DividePageRate));
+                    OnPropertyChanged(nameof(DividePageRate));
                     break;
 
                 case nameof(BookConfig.IsInsertDummyPage):
-                    RaisePropertyChanged(nameof(IsInsertDummyPage));
-                    RaisePropertyChanged(nameof(IsInsertDummyFirstPage));
-                    RaisePropertyChanged(nameof(IsInsertDummyLastPage));
+                    OnPropertyChanged(nameof(IsInsertDummyPage));
+                    OnPropertyChanged(nameof(IsInsertDummyFirstPage));
+                    OnPropertyChanged(nameof(IsInsertDummyLastPage));
                     break;
 
                 case nameof(BookConfig.IsInsertDummyFirstPage):
-                    RaisePropertyChanged(nameof(IsInsertDummyFirstPage));
+                    OnPropertyChanged(nameof(IsInsertDummyFirstPage));
                     break;
 
                 case nameof(BookConfig.IsInsertDummyLastPage):
-                    RaisePropertyChanged(nameof(IsInsertDummyLastPage));
+                    OnPropertyChanged(nameof(IsInsertDummyLastPage));
                     break;
 
                 case nameof(BookConfig.PageEndAction):
-                    RaisePropertyChanged(nameof(IsLoopPage));
+                    OnPropertyChanged(nameof(IsLoopPage));
                     break;
 
                 case nameof(BookConfig.IsReadyToPageMove):
-                    RaisePropertyChanged(nameof(IsReadyToPageMove));
+                    OnPropertyChanged(nameof(IsReadyToPageMove));
                     break;
 
                 case nameof(BookConfig.WidePageStretch):
-                    RaisePropertyChanged(nameof(WidePageStretch));
+                    OnPropertyChanged(nameof(WidePageStretch));
                     break;
 
                 case nameof(BookConfig.WidePageVerticalAlignment):
-                    RaisePropertyChanged(nameof(WidePageVerticalAlignment));
+                    OnPropertyChanged(nameof(WidePageVerticalAlignment));
                     break;
             }
         }
@@ -233,47 +230,47 @@ namespace NeeView.PageFrames
             {
                 case nameof(ViewConfig.StretchMode):
                     _frameProfile.ResetReferenceSize();
-                    RaisePropertyChanged(nameof(StretchMode));
+                    OnPropertyChanged(nameof(StretchMode));
                     break;
 
                 case nameof(ViewConfig.AllowFileContentAutoRotate):
                     _frameProfile.ResetReferenceSize();
-                    RaisePropertyChanged(nameof(AllowFileContentAutoRotate));
+                    OnPropertyChanged(nameof(AllowFileContentAutoRotate));
                     break;
 
                 case nameof(ViewConfig.AllowStretchScaleUp):
                     _frameProfile.ResetReferenceSize();
-                    RaisePropertyChanged(nameof(AllowEnlarge));
+                    OnPropertyChanged(nameof(AllowEnlarge));
                     break;
 
                 case nameof(ViewConfig.AllowStretchScaleDown):
                     _frameProfile.ResetReferenceSize();
-                    RaisePropertyChanged(nameof(AllowReduce));
+                    OnPropertyChanged(nameof(AllowReduce));
                     break;
 
                 case nameof(ViewConfig.IsKeepFlip):
-                    RaisePropertyChanged(nameof(IsFlipLocked));
+                    OnPropertyChanged(nameof(IsFlipLocked));
                     break;
 
                 case nameof(ViewConfig.IsScaleStretchTracking):
-                    RaisePropertyChanged(nameof(IsScaleStretchTracking));
+                    OnPropertyChanged(nameof(IsScaleStretchTracking));
                     break;
 
                 case nameof(ViewConfig.IsKeepScale):
-                    RaisePropertyChanged(nameof(IsScaleLocked));
-                    RaisePropertyChanged(nameof(IsScaleStretchTracking));
+                    OnPropertyChanged(nameof(IsScaleLocked));
+                    OnPropertyChanged(nameof(IsScaleStretchTracking));
                     break;
 
                 case nameof(ViewConfig.IsKeepAngle):
-                    RaisePropertyChanged(nameof(IsAngleLocked));
+                    OnPropertyChanged(nameof(IsAngleLocked));
                     break;
 
                 case nameof(ViewConfig.AutoRotatePolicy):
-                    RaisePropertyChanged(nameof(AutoRotatePolicy));
+                    OnPropertyChanged(nameof(AutoRotatePolicy));
                     break;
             }
 
-            RaisePropertyChanged(nameof(ViewConfig));
+            OnPropertyChanged(nameof(ViewConfig));
         }
 
         private void SystemConfig_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -281,7 +278,7 @@ namespace NeeView.PageFrames
             switch (e.PropertyName)
             {
                 case nameof(SystemConfig.IsIgnoreImageDpi):
-                    RaisePropertyChanged(nameof(IsIgnoreImageDpi));
+                    OnPropertyChanged(nameof(IsIgnoreImageDpi));
                     break;
             }
         }
@@ -291,10 +288,10 @@ namespace NeeView.PageFrames
             switch (e.PropertyName)
             {
                 case nameof(BookSettingConfig.PageMode):
-                    RaisePropertyChanged(nameof(PageMode));
-                    RaisePropertyChanged(nameof(StretchMode));
-                    RaisePropertyChanged(nameof(ContentsSpace));
-                    RaisePropertyChanged(nameof(FramePageSize));
+                    OnPropertyChanged(nameof(PageMode));
+                    OnPropertyChanged(nameof(StretchMode));
+                    OnPropertyChanged(nameof(ContentsSpace));
+                    OnPropertyChanged(nameof(FramePageSize));
                     //RaisePropertyChanged(nameof(IsSupportedDividePage));
                     //RaisePropertyChanged(nameof(IsSupportedWidePage));
                     //RaisePropertyChanged(nameof(IsSupportedSingleFirstPage));
@@ -302,23 +299,23 @@ namespace NeeView.PageFrames
                     break;
 
                 case nameof(BookSettingConfig.BookReadOrder):
-                    RaisePropertyChanged(nameof(ReadOrder));
+                    OnPropertyChanged(nameof(ReadOrder));
                     break;
 
                 case nameof(BookSettingConfig.IsSupportedDividePage):
-                    RaisePropertyChanged(nameof(IsSupportedDividePage));
+                    OnPropertyChanged(nameof(IsSupportedDividePage));
                     break;
 
                 case nameof(BookSettingConfig.IsSupportedWidePage):
-                    RaisePropertyChanged(nameof(IsSupportedWidePage));
+                    OnPropertyChanged(nameof(IsSupportedWidePage));
                     break;
 
                 case nameof(BookSettingConfig.IsSupportedSingleFirstPage):
-                    RaisePropertyChanged(nameof(IsSupportedSingleFirstPage));
+                    OnPropertyChanged(nameof(IsSupportedSingleFirstPage));
                     break;
 
                 case nameof(BookSettingConfig.IsSupportedSingleLastPage):
-                    RaisePropertyChanged(nameof(IsSupportedSingleLastPage));
+                    OnPropertyChanged(nameof(IsSupportedSingleLastPage));
                     break;
 
                 //case nameof(BookSettingConfig.SortMode):
@@ -326,16 +323,16 @@ namespace NeeView.PageFrames
                 //    break;
 
                 case nameof(BookSettingConfig.IsRecursiveFolder):
-                    RaisePropertyChanged(nameof(IsRecursiveFolder));
+                    OnPropertyChanged(nameof(IsRecursiveFolder));
                     break;
 
                 case nameof(BookSettingConfig.AutoRotate):
                     _frameProfile.ResetReferenceSize();
-                    RaisePropertyChanged(nameof(AutoRotate));
+                    OnPropertyChanged(nameof(AutoRotate));
                     break;
 
                 case nameof(BookSettingConfig.BaseScale):
-                    RaisePropertyChanged(nameof(BaseScale));
+                    OnPropertyChanged(nameof(BaseScale));
                     break;
             }
         }
@@ -352,15 +349,15 @@ namespace NeeView.PageFrames
                 //    break;
 
                 case nameof(PageFrameProfile.CanvasSize):
-                    RaisePropertyChanged(nameof(CanvasSize));
+                    OnPropertyChanged(nameof(CanvasSize));
                     break;
 
                 case nameof(PageFrameProfile.ReferenceSize):
-                    RaisePropertyChanged(nameof(ReferenceSize));
+                    OnPropertyChanged(nameof(ReferenceSize));
                     break;
 
                 case nameof(PageFrameProfile.DpiScale):
-                    RaisePropertyChanged(nameof(DpiScale));
+                    OnPropertyChanged(nameof(DpiScale));
                     break;
             }
         }

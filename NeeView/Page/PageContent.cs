@@ -1,8 +1,7 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.Threading;
 using NeeView.ComponentModel;
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,8 +10,7 @@ using System.Windows.Media;
 
 namespace NeeView
 {
-    [NotifyPropertyChanged]
-    public abstract partial class PageContent : IDataSource, IMemoryOwner, IMemoryElement, INotifyPropertyChanged, IDisposable
+    public abstract partial class PageContent : ObservableObject, IDataSource, IMemoryOwner, IMemoryElement, IDisposable
     {
         public static Size DefaultSize { get; } = new(480, 640);
 
@@ -39,8 +37,6 @@ namespace NeeView
             _bookMemoryService = bookMemoryService;
         }
 
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         public event EventHandler? ContentChanged;
 
@@ -101,16 +97,16 @@ namespace NeeView
                 if (SetProperty(ref _pageDataSource, value))
                 {
                     Debug.Assert(_pageDataSource is not null);
-                    RaisePropertyChanged(nameof(Data));
-                    RaisePropertyChanged(nameof(DataSize));
-                    RaisePropertyChanged(nameof(ErrorMessage));
+                    OnPropertyChanged(nameof(Data));
+                    OnPropertyChanged(nameof(DataSize));
+                    OnPropertyChanged(nameof(ErrorMessage));
                     if (oldDataSource?.PictureInfo != _pageDataSource.PictureInfo)
                     {
-                        RaisePropertyChanged(nameof(PictureInfo));
+                        OnPropertyChanged(nameof(PictureInfo));
                     }
                     if (oldDataSource?.Size != _pageDataSource.Size || oldDataSource?.AspectSize != _pageDataSource.AspectSize)
                     {
-                        RaisePropertyChanged(nameof(Size));
+                        OnPropertyChanged(nameof(Size));
                         SizeChanged?.Invoke(this, EventArgs.Empty);
                     }
                 }

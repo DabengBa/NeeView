@@ -1,13 +1,11 @@
-﻿using CommunityToolkit.Mvvm.Input;
-using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using NeeView.Windows;
-using System.ComponentModel;
 using System.Windows.Media.Imaging;
 
 namespace NeeView
 {
-    [NotifyPropertyChanged]
-    public partial class FileAssociationAccessor : INotifyPropertyChanged, IFileAssociation
+    public partial class FileAssociationAccessor : ObservableObject, IFileAssociation
     {
         private readonly FileAssociation _source;
         private readonly FileAssociationIconBitmapCache _cache;
@@ -24,9 +22,6 @@ namespace NeeView
             _icon = _source.Icon;
             _window = window;
         }
-
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
 
         public bool IsEnabled
@@ -53,7 +48,7 @@ namespace NeeView
             {
                 if (SetProperty(ref _icon, value))
                 {
-                    RaisePropertyChanged(nameof(BitmapSource));
+                    OnPropertyChanged(nameof(BitmapSource));
                 }
             }
         }

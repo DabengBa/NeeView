@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.Generators;
 using NeeView.PageFrames;
 using System;
@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace NeeView
 {
-    public partial class BookPlaylistControl : BindableBase, IDisposable, IBookPlaylistControl
+    public partial class BookPlaylistControl : ObservableObject, IDisposable, IBookPlaylistControl
     {
         private readonly PageFrameBox _box;
         private readonly Book _book;
@@ -81,19 +81,19 @@ namespace NeeView
                 var bookPlaylist = new BookPlaylist(_book, PlaylistHub.Current.Playlist);
                 bookPlaylist.Remove(e.Pages);
 
-                RaisePropertyChanged(nameof(IsMarked));
+                OnPropertyChanged(nameof(IsMarked));
             });
         }
 
         private void Book_PagesSorted(object? sender, EventArgs e)
         {
-            AppDispatcher.Invoke(() => RaisePropertyChanged(nameof(IsMarked)));
+            AppDispatcher.Invoke(() => OnPropertyChanged(nameof(IsMarked)));
         }
 
         private void Box_ViewContentChanged(object? sender, PageFrames.FrameViewContentChangedEventArgs e)
         {
             if (e.Action < PageFrames.ViewContentChangedAction.Selection) return;
-            AppDispatcher.Invoke(() => RaisePropertyChanged(nameof(IsMarked)));
+            AppDispatcher.Invoke(() => OnPropertyChanged(nameof(IsMarked)));
         }
 
         private void Playlist_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -211,7 +211,7 @@ namespace NeeView
 
             // 表示更新
             MarkersChanged?.Invoke(this, EventArgs.Empty);
-            RaisePropertyChanged(nameof(IsMarked));
+            OnPropertyChanged(nameof(IsMarked));
         }
 
         public bool CanPrevMarkInPlace(MovePlaylistItemInBookCommandParameter param)

@@ -7,11 +7,10 @@
 // プレイヤー単位のオーディオOFFをミュートで管理する
 #define VLC_AUDIOENABLE_MUTE
 
+using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.ComponentModel;
-using NeeLaboratory.Generators;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -23,8 +22,7 @@ using Vlc.DotNet.Wpf;
 
 namespace NeeView
 {
-    [NotifyPropertyChanged]
-    public partial class VlcMediaPlayer : IOpenableMediaPlayer, IDisposable
+    public partial class VlcMediaPlayer : ObservableObject, IOpenableMediaPlayer, IDisposable
     {
         private readonly VlcVideoSourceProvider _source;
         private readonly Vlc.DotNet.Core.VlcMediaPlayer _player;
@@ -117,10 +115,6 @@ namespace NeeView
 #endif
         }
 
-
-
-        [Subscribable]
-        public event PropertyChangedEventHandler? PropertyChanged;
 
 #pragma warning disable CS0067
         public event EventHandler? MediaOpened;
@@ -312,7 +306,7 @@ namespace NeeView
                     Task.Run(() =>
                     {
                         _player.Rate = newRate;
-                        RaisePropertyChanged();
+                        OnPropertyChanged();
                     });
                 }
             }
@@ -472,7 +466,7 @@ namespace NeeView
         {
             if (_disposedValue) return;
 
-            RaisePropertyChanged(nameof(Position));
+            OnPropertyChanged(nameof(Position));
             AppDispatcher.BeginInvoke(() => MediaEnded?.Invoke(this, e));
         }
 
@@ -498,14 +492,14 @@ namespace NeeView
         {
             if (_disposedValue) return;
 
-            RaisePropertyChanged(nameof(Volume));
+            OnPropertyChanged(nameof(Volume));
         }
 
         private void Player_SeekableChanged(object? sender, VlcMediaPlayerSeekableChangedEventArgs e)
         {
             if (_disposedValue) return;
 
-            RaisePropertyChanged(nameof(ScrubbingEnabled));
+            OnPropertyChanged(nameof(ScrubbingEnabled));
         }
 
 

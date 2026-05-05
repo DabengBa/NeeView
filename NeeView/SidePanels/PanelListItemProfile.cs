@@ -1,8 +1,7 @@
-﻿using NeeLaboratory.ComponentModel;
-using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeView.Windows.Property;
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Text.Json.Serialization;
 using System.Windows;
@@ -29,8 +28,7 @@ namespace NeeView
     /// <summary>
     /// リスト項目の表示形式
     /// </summary>
-    [NotifyPropertyChanged]
-    public partial record class PanelListItemProfile : INotifyPropertyChanged
+    public partial class PanelListItemProfile : ObservableObject
     {
         private static Rect _rectDefault = new(0, 0, 1, 1);
         private static Rect _rectBanner = new(0, 0, 1, 0.6);
@@ -50,16 +48,11 @@ namespace NeeView
         {
         }
 
-
-        [Subscribable]
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-
-        public PanelListItemProfile(PanelListItemImageShape imageShape, int imageWidth, bool isDetailPopupEnalbed, bool isImagePopupEnabled, bool isTextVisible, bool isTextWrapped)
+        public PanelListItemProfile(PanelListItemImageShape imageShape, int imageWidth, bool isDetailPopupEnabled, bool isImagePopupEnabled, bool isTextVisible, bool isTextWrapped)
         {
             _imageShape = imageShape;
             _imageWidth = imageWidth;
-            _isDetailPopupEnabled = isDetailPopupEnalbed;
+            _isDetailPopupEnabled = isDetailPopupEnabled;
             _isImagePopupEnabled = isImagePopupEnabled;
             _isTextVisible = isTextVisible;
             _isTextWrapped = isTextWrapped;
@@ -79,7 +72,7 @@ namespace NeeView
                 if (_imageShape != value)
                 {
                     _imageShape = value;
-                    RaisePropertyChanged(null);
+                    OnPropertyChanged("");
                 }
             }
         }
@@ -92,8 +85,8 @@ namespace NeeView
             {
                 if (SetProperty(ref _imageWidth, Math.Max(0, value)))
                 {
-                    RaisePropertyChanged(nameof(ShapeWidth));
-                    RaisePropertyChanged(nameof(ShapeHeight));
+                    OnPropertyChanged(nameof(ShapeWidth));
+                    OnPropertyChanged(nameof(ShapeHeight));
                 }
             }
         }
@@ -153,15 +146,15 @@ namespace NeeView
 
         public override int GetHashCode()
         {
-            HashCode hashcode = new();
-            hashcode.Add(this.ImageShape.GetHashCode());
-            hashcode.Add(this.ImageWidth.GetHashCode());
-            hashcode.Add(this.IsDetailPopupEnabled.GetHashCode());
-            hashcode.Add(this.IsImagePopupEnabled.GetHashCode());
-            hashcode.Add(this.IsTextVisible.GetHashCode());
-            hashcode.Add(this.IsTextWrapped.GetHashCode());
+            HashCode hashCode = new();
+            hashCode.Add(this.ImageShape.GetHashCode());
+            hashCode.Add(this.ImageWidth.GetHashCode());
+            hashCode.Add(this.IsDetailPopupEnabled.GetHashCode());
+            hashCode.Add(this.IsImagePopupEnabled.GetHashCode());
+            hashCode.Add(this.IsTextVisible.GetHashCode());
+            hashCode.Add(this.IsTextWrapped.GetHashCode());
 
-            return hashcode.ToHashCode();
+            return hashCode.ToHashCode();
         }
 
         #endregion Equals
@@ -297,8 +290,8 @@ namespace NeeView
         public void UpdateTextHeight()
         {
             _isTextHeightDirty = true;
-            RaisePropertyChanged(nameof(TextHeight));
-            RaisePropertyChanged(nameof(LayoutedTextHeight));
+            OnPropertyChanged(nameof(TextHeight));
+            OnPropertyChanged(nameof(LayoutedTextHeight));
         }
 
         // calc textbox height
@@ -325,28 +318,28 @@ namespace NeeView
         }
     }
 
-    public record class NormalItemProfile : PanelListItemProfile
+    public class NormalItemProfile : PanelListItemProfile
     {
         public NormalItemProfile() : base(PanelListItemImageShape.Square, 0, true, false, true, false)
         {
         }
     }
 
-    public record class ContentItemProfile : PanelListItemProfile
+    public class ContentItemProfile : PanelListItemProfile
     {
         public ContentItemProfile() : base(PanelListItemImageShape.Square, 64, true, true, true, false)
         {
         }
     }
 
-    public record class BannerItemProfile : PanelListItemProfile
+    public class BannerItemProfile : PanelListItemProfile
     {
         public BannerItemProfile() : base(PanelListItemImageShape.Banner, 200, true, false, true, false)
         {
         }
     }
 
-    public record class ThumbnailItemProfile : PanelListItemProfile
+    public class ThumbnailItemProfile : PanelListItemProfile
     {
         public ThumbnailItemProfile() : base(PanelListItemImageShape.Original, 128, true, false, true, true)
         {

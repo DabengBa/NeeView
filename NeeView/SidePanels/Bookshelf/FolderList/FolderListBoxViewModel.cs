@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using NeeLaboratory.ComponentModel;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Windows;
 
 namespace NeeView
 {
-    public partial class FolderListBoxViewModel : BindableBase
+    public partial class FolderListBoxViewModel : ObservableObject
     {
         private readonly FolderList _model;
         private readonly PanelThumbnailItemSize _thumbnailItemSize;
@@ -31,7 +32,7 @@ namespace NeeView
                 (s, e) => AppDispatcher.Invoke(() => Model_SelectedChanged(s, e));
 
             _thumbnailItemSize = new PanelThumbnailItemSize(Config.Current.Panels.ThumbnailItemProfile, 5.0 + 1.0, 4.0 + 1.0, new Size(18.0, 18.0));
-            _thumbnailItemSize.SubscribePropertyChanged(nameof(_thumbnailItemSize.ItemSize), (s, e) => RaisePropertyChanged(nameof(ThumbnailItemSize)));
+            _thumbnailItemSize.SubscribePropertyChanged(nameof(_thumbnailItemSize.ItemSize), (s, e) => OnPropertyChanged(nameof(ThumbnailItemSize)));
 
             DetailToolTip = new PanelListItemDetailToolTip(folderList.FolderListConfig);
         }
@@ -82,16 +83,16 @@ namespace NeeView
             {
                 case null:
                 case "":
-                    RaisePropertyChanged(null);
+                    OnPropertyChanged("");
                     break;
 
                 case nameof(FolderList.FolderCollection):
-                    RaisePropertyChanged(nameof(FolderCollection));
-                    RaisePropertyChanged(nameof(FolderOrder));
+                    OnPropertyChanged(nameof(FolderCollection));
+                    OnPropertyChanged(nameof(FolderOrder));
                     break;
 
                 case nameof(FolderList.IsFocusAtOnce):
-                    RaisePropertyChanged(nameof(IsFocusAtOnce));
+                    OnPropertyChanged(nameof(IsFocusAtOnce));
                     break;
             }
         }

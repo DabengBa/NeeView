@@ -1,9 +1,9 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.Generic;
 
 namespace NeeView
 {
-    public class ExternalAppEditDialogViewModel : BindableBase
+    public class ExternalAppEditDialogViewModel : ObservableObject
     {
         private ExternalApp _model;
 
@@ -28,7 +28,7 @@ namespace NeeView
                 if (_model.Name != value)
                 {
                     _model.Name = value;
-                    RaisePropertyChanged();
+                    OnPropertyChanged();
                 }
             }
         }
@@ -41,12 +41,12 @@ namespace NeeView
                 if (_model.Command != value)
                 {
                     _model.Command = value;
-                    RaisePropertyChanged();
+                    OnPropertyChanged();
 
                     if (_model.Name == null)
                     {
                         _model.Name = _model.DisplayName;
-                        RaisePropertyChanged(nameof(Name));
+                        OnPropertyChanged(nameof(Name));
                     }
                 }
             }

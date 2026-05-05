@@ -13,7 +13,7 @@ namespace NeeView
         {
             if (value is T obj)
             {
-                return Condition(obj) ? Visibility.Visible : Visibility.Collapsed;   
+                return Condition(obj) ? Visibility.Visible : Visibility.Collapsed;
             }
             return Visibility.Collapsed;
         }

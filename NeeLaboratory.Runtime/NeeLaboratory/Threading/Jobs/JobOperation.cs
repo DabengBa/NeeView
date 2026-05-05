@@ -1,5 +1,6 @@
 ﻿//#define LOCAL_DEBUG
 
+using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.ComponentModel;
 using System;
 using System.Diagnostics;
@@ -19,7 +20,7 @@ namespace NeeLaboratory.Threading.Jobs
     /// Job Operation for Task-Based Job Engine
     /// </summary>
     /// <typeparam name="T">Return type of the job</typeparam>
-    public class JobOperation<T> : BindableBase, IJobOperation
+    public class JobOperation<T> : ObservableObject, IJobOperation
     {
         private readonly Func<CancellationToken, Task<T>> _job;
         private JobState _state;

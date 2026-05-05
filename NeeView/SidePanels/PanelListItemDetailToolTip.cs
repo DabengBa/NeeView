@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.ComponentModel;
 
@@ -11,7 +11,7 @@ namespace NeeView
     /// パネルの種類と詳細表示設定、名前変更処理から有効状態を取得します。
     /// IsEnabled プロパティが最終的なポップアップの有効状態です。
     /// </remarks>
-    public class PanelListItemDetailToolTip : BindableBase, IToolTipService, IDisposable
+    public class PanelListItemDetailToolTip : ObservableObject, IToolTipService, IDisposable
     {
         private readonly IHasPanelListItemStyle _panelListItemSource;
         private PanelListItemProfile? _profile;
@@ -60,8 +60,8 @@ namespace NeeView
             {
                 if (SetProperty(ref _isToolTipEnabled, value))
                 {
-                    RaisePropertyChanged(nameof(IsEnabled));
-                    RaisePropertyChanged(nameof(IsPanelEnabled));
+                    OnPropertyChanged(nameof(IsEnabled));
+                    OnPropertyChanged(nameof(IsPanelEnabled));
                 }
             }
         }
@@ -84,7 +84,7 @@ namespace NeeView
                 _profile.PropertyChanged += Profile_PropertyChanged;
             }
 
-            RaisePropertyChanged(nameof(IsEnabled));
+            OnPropertyChanged(nameof(IsEnabled));
         }
 
         private void DetachProfile()
@@ -102,11 +102,11 @@ namespace NeeView
 
             if (isEnabledChanged)
             {
-                RaisePropertyChanged(nameof(IsEnabled));
+                OnPropertyChanged(nameof(IsEnabled));
             }
             if (isEnabledChanged || e.PropertyName == nameof(PanelListItemProfile.IsTextVisible) || e.PropertyName == nameof(PanelListItemProfile.IsImagePopupEnabled))
             {
-                RaisePropertyChanged(nameof(IsPanelEnabled));
+                OnPropertyChanged(nameof(IsPanelEnabled));
             }
         }
 

@@ -1,12 +1,12 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Windows.Controls;
 using NeeView.Windows.Property;
 
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class PageViewRecorderConfig : BindableBase
+    public partial class PageViewRecorderConfig : ObservableObject
     {
         [DefaultEquality] private bool _isSavePageViewRecord;
         [DefaultEquality] private string? _pageViewRecordFilePath;

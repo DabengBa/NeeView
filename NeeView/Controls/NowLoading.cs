@@ -1,14 +1,16 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace NeeView
 {
     /// <summary>
     /// NowLoading : Model
     /// </summary>
-    public class NowLoading : BindableBase
+    public class NowLoading : ObservableObject
     {
         static NowLoading() => Current = new NowLoading();
         public static NowLoading Current { get; }
+
+        private bool _isDisplayNowLoading;
 
         private NowLoading()
         {
@@ -21,11 +23,9 @@ namespace NeeView
         /// </summary>
         public bool IsDisplayNowLoading
         {
-            get { return _IsDisplayNowLoading; }
-            set { if (_IsDisplayNowLoading != value) { _IsDisplayNowLoading = value; RaisePropertyChanged(); } }
+            get { return _isDisplayNowLoading; }
+            set { SetProperty(ref _isDisplayNowLoading, value); }
         }
-
-        private bool _IsDisplayNowLoading;
 
         public void SetLoading(string message)
         {

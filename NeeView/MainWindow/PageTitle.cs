@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeView.PageFrames;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,7 +10,7 @@ namespace NeeView
     /// <summary>
     /// ページタイトル
     /// </summary>
-    public class PageTitle : BindableBase
+    public class PageTitle : ObservableObject
     {
         static PageTitle() => Current = new PageTitle();
         public static PageTitle Current { get; }
@@ -29,7 +30,7 @@ namespace NeeView
             _presenter = MainViewComponent.Current.PageFrameBoxPresenter;
 
             _titleString = new TitleString();
-            _titleString.AddPropertyChanged(nameof(TitleString.Title), TitleString_TitleChanged);
+            _titleString.SubscribePropertyChanged(nameof(TitleString.Title), TitleString_TitleChanged);
 
             _presenter.ViewContentChanged += (s, e) =>
             {

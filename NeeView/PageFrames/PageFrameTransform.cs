@@ -1,8 +1,8 @@
 ﻿//#define LOCAL_DEBUG
 
+using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.Generators;
 using System;
-using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -10,8 +10,7 @@ using System.Windows.Media.Animation;
 namespace NeeView.PageFrames
 {
     [LocalDebug]
-    [NotifyPropertyChanged]
-    public partial class PageFrameTransform : IPageFrameTransform, INotifyPropertyChanged, INotifyTransformChanged
+    public partial class PageFrameTransform : ObservableObject, IPageFrameTransform, INotifyTransformChanged
     {
         private double _angle;
         private double _scale = 1.0;
@@ -27,7 +26,6 @@ namespace NeeView.PageFrames
         }
 
 
-        public event PropertyChangedEventHandler? PropertyChanged;
         public event TransformChangedEventHandler? TransformChanged;
 
 

@@ -1,12 +1,12 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Windows.Controls;
 using NeeView.Windows.Property;
 
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class SusieConfig : BindableBaseFull
+    public partial class SusieConfig : ObservableObject
     {
         [DefaultEquality] private bool _isEnabled;
         [DefaultEquality] private bool _isFirstOrderSusieImage;

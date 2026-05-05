@@ -44,7 +44,7 @@ namespace NeeView
         private static string CreateOutputPath(ExportImageService service, IExportOverwritePolicy overwritePolicy, string? filename)
         {
             var parameter = service.Parameter;
-            filename = filename ??service.CreateFileName();
+            filename = filename ?? service.CreateFileName();
 
             // 出力フォルダー指定がなければ、ダイアログで出力ファイル名を確定する
             if (string.IsNullOrWhiteSpace(parameter.ExportFolder))

@@ -1,10 +1,10 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Windows.Media;
 
 namespace NeeView
 {
-    public class FontParameters : BindableBase
+    public class FontParameters : ObservableObject
     {
         static FontParameters() => Current = new FontParameters();
         public static FontParameters Current { get; }

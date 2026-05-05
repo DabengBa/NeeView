@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeView.Runtime.LayoutPanel;
 using NeeView.Windows;
 using NeeView.Windows.Controls;
@@ -13,7 +14,7 @@ namespace NeeView
     /// SidePanel ViewModel.
     /// パネル単位のVM. SidePanelFrameViewModelの子
     /// </summary>
-    public class SidePanelViewModel : BindableBase
+    public class SidePanelViewModel : ObservableObject
     {
         public static readonly string DragDropFormat = $"{Environment.ProcessId}.PanelContent";
 
@@ -38,16 +39,16 @@ namespace NeeView
                 Visibility = e.Visibility;
             };
 
-            Config.Current.Panels.AddPropertyChanged(nameof(PanelsConfig.IsSideBarEnabled),
-                (s, e) => RaisePropertyChanged(nameof(SideBarVisibility)));
+            Config.Current.Panels.SubscribePropertyChanged(nameof(PanelsConfig.IsSideBarEnabled),
+                (s, e) => OnPropertyChanged(nameof(SideBarVisibility)));
 
-            _dock.AddPropertyChanged(nameof(_dock.LeaderPanels),
-                (s, e) => RaisePropertyChanged(nameof(SideBarVisibility)));
+            _dock.SubscribePropertyChanged(nameof(_dock.LeaderPanels),
+                (s, e) => OnPropertyChanged(nameof(SideBarVisibility)));
 
-            _dock.AddPropertyChanged(nameof(_dock.SelectedItem), (s, e) =>
+            _dock.SubscribePropertyChanged(nameof(_dock.SelectedItem), (s, e) =>
                 {
-                    RaisePropertyChanged(nameof(PanelVisibility));
-                    RaisePropertyChanged(nameof(SelectedItem));
+                    OnPropertyChanged(nameof(PanelVisibility));
+                    OnPropertyChanged(nameof(SelectedItem));
                     if (_dock.SelectedItem != null)
                     {
                         AutoHideDescription.VisibleOnce(StateRequest.Enable);
@@ -82,8 +83,8 @@ namespace NeeView
             {
                 if (SetProperty(ref _isDragged, value))
                 {
-                    RaisePropertyChanged(nameof(IsVisibleLocked));
-                    RaisePropertyChanged(nameof(SideBarVisibility));
+                    OnPropertyChanged(nameof(IsVisibleLocked));
+                    OnPropertyChanged(nameof(SideBarVisibility));
                 }
             }
         }
@@ -91,7 +92,7 @@ namespace NeeView
         public bool IsAutoHide
         {
             get { return _isAutoHide; }
-            set { if (_isAutoHide != value) { _isAutoHide = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _isAutoHide, value); }
         }
 
         // VisibleLock 条件
@@ -123,8 +124,8 @@ namespace NeeView
             {
                 if (SetProperty(ref _visibility, value))
                 {
-                    RaisePropertyChanged(nameof(PanelVisibility));
-                    RaisePropertyChanged(nameof(SideBarVisibility));
+                    OnPropertyChanged(nameof(PanelVisibility));
+                    OnPropertyChanged(nameof(SideBarVisibility));
                 }
 
                 //// TODO: これは??
@@ -276,7 +277,7 @@ namespace NeeView
     {
         public LeftPanelViewModel(ItemsControl itemsControl, LayoutDockPanelContent dock, Func<DependencyObject, bool> elementContainsFunc) : base(itemsControl, dock, elementContainsFunc)
         {
-            Config.Current.Panels.AddPropertyChanged(nameof(PanelsConfig.LeftPanelWidth), (s, e) => RaisePropertyChanged(nameof(Width)));
+            Config.Current.Panels.SubscribePropertyChanged(nameof(PanelsConfig.LeftPanelWidth), (s, e) => OnPropertyChanged(nameof(Width)));
         }
 
         public override double Width
@@ -293,7 +294,7 @@ namespace NeeView
     {
         public RightPanelViewModel(ItemsControl itemsControl, LayoutDockPanelContent dock, Func<DependencyObject, bool> elementContainsFunc) : base(itemsControl, dock, elementContainsFunc)
         {
-            Config.Current.Panels.AddPropertyChanged(nameof(PanelsConfig.RightPanelWidth), (s, e) => RaisePropertyChanged(nameof(Width)));
+            Config.Current.Panels.SubscribePropertyChanged(nameof(PanelsConfig.RightPanelWidth), (s, e) => OnPropertyChanged(nameof(Width)));
         }
 
         public override double Width

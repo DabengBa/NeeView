@@ -103,7 +103,7 @@ namespace NeeLaboratory.IO
                 stream.ReadExactly(buffer);
                 return buffer.AsMemory();
             }
-            catch 
+            catch
             {
                 throw;
             }

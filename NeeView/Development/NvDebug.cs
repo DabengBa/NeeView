@@ -97,7 +97,7 @@ namespace NeeView
         public static void CheckHasEqualsMethod(Type type)
         {
             Debug.Assert(type.IsClass, $"Type {type.FullName} is not a class.");
-            
+
             // ターゲットの型自身が object.Equals(object) をオーバーライドしているかを確認する。
             // DeclaredOnly を使って継承元のメソッドは除外する（継承されたオーバーライドを誤検出しないようにする）。
             var equalsMethod = type.GetMethod(

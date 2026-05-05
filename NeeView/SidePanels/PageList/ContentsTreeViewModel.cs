@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.Threading.Tasks;
 using System.Collections.Generic;
 using System.Threading;
@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NeeView
 {
-    public class ContentsTreeViewModel : BindableBase
+    public class ContentsTreeViewModel : ObservableObject
     {
         public ContentsTreeViewModel()
         {

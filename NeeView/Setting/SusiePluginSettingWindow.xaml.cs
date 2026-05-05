@@ -1,5 +1,5 @@
-﻿using NeeLaboratory.Collections.Specialized;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.Collections.Specialized;
 using NeeView.Susie;
 using System;
 using System.Diagnostics;
@@ -66,7 +66,7 @@ namespace NeeView.Setting
     /// <summary>
     /// SusiePluginSettingWindow ViewModel
     /// </summary>
-    public class SusiePluginSettingWindowViewModel : BindableBase
+    public class SusiePluginSettingWindowViewModel : ObservableObject
     {
         private readonly SusiePluginInfo _spi;
 

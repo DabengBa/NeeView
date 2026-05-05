@@ -1,8 +1,8 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.Generators;
 using NeeLaboratory.IO.Search;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
 using System.Threading;
@@ -12,8 +12,7 @@ using System.Windows.Media;
 
 namespace NeeView
 {
-    [NotifyPropertyChanged]
-    public partial class Page : IDisposable, INotifyPropertyChanged, IPageContentLoader, IPageThumbnailLoader, IHasPage, IRenameable, ISearchItem, IPendingItem, IPageNameSource
+    public partial class Page : ObservableObject, IDisposable, IPageContentLoader, IPageThumbnailLoader, IHasPage, IRenameable, ISearchItem, IPendingItem, IPageNameSource
     {
         private int _index;
         private readonly ArchiveEntryNode _entryNode;
@@ -43,14 +42,10 @@ namespace NeeView
 
 
         [Subscribable]
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        [Subscribable]
         public event EventHandler? ContentChanged;
 
         [Subscribable]
         public event EventHandler? SizeChanged;
-
 
 
         public bool IsLoaded => _content.IsLoaded;
@@ -257,8 +252,8 @@ namespace NeeView
         {
             if (_disposedValue) return;
 
-            RaisePropertyChanged(nameof(Content));
-            RaisePropertyChanged(nameof(Color));
+            OnPropertyChanged(nameof(Content));
+            OnPropertyChanged(nameof(Color));
             ContentChanged?.Invoke(this, EventArgs.Empty);
         }
 
@@ -266,7 +261,7 @@ namespace NeeView
         {
             if (_disposedValue) return;
 
-            RaisePropertyChanged(nameof(Size));
+            OnPropertyChanged(nameof(Size));
             SizeChanged?.Invoke(this, EventArgs.Empty);
         }
 
@@ -433,12 +428,12 @@ namespace NeeView
         {
             if (_disposedValue) return;
 
-            RaisePropertyChanged(nameof(EntryName));
-            RaisePropertyChanged(nameof(EntryLastName));
-            RaisePropertyChanged(nameof(EntrySmartName));
-            RaisePropertyChanged(nameof(EntryFullName));
-            RaisePropertyChanged(nameof(TargetPath));
-            RaisePropertyChanged(nameof(Detail));
+            OnPropertyChanged(nameof(EntryName));
+            OnPropertyChanged(nameof(EntryLastName));
+            OnPropertyChanged(nameof(EntrySmartName));
+            OnPropertyChanged(nameof(EntryFullName));
+            OnPropertyChanged(nameof(TargetPath));
+            OnPropertyChanged(nameof(Detail));
         }
 
         public string GetMetaValue(string key, CancellationToken token)
@@ -455,14 +450,14 @@ namespace NeeView
         {
             Interlocked.Increment(ref _pendingCount);
             ArchiveEntry.Archive.StartWatch();
-            RaisePropertyChanged(nameof(PendingCount));
+            OnPropertyChanged(nameof(PendingCount));
         }
 
         public void DecrementPendingCount()
         {
             Interlocked.Decrement(ref _pendingCount);
             ArchiveEntry.Archive.StopWatch();
-            RaisePropertyChanged(nameof(PendingCount));
+            OnPropertyChanged(nameof(PendingCount));
         }
 
         #endregion

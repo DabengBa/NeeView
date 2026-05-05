@@ -1,8 +1,8 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,7 +12,7 @@ namespace NeeView
     /// <summary>
     /// アーカイバーマネージャ
     /// </summary>
-    public class ArchiveManager : BindableBase, IDisposable
+    public class ArchiveManager : ObservableObject, IDisposable
     {
         static ArchiveManager() => Current = new ArchiveManager();
         public static ArchiveManager Current { get; }

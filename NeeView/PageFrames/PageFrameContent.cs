@@ -87,7 +87,7 @@ namespace NeeView.PageFrames
         {
             _canvas = new Canvas();
             _canvas.Name = "PageFrameContent_Canvas";
-        
+
             _canvas.RenderTransform = _viewTransform;
 
             _contentCanvas = new Canvas();

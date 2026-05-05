@@ -433,7 +433,7 @@ namespace NeeView
     {
         // name (2).ext
         NumberSuffix,
-        
+
         // name_2.ext
         UnderscoreNumberSuffix,
     }

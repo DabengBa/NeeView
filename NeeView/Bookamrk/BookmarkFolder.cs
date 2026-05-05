@@ -1,10 +1,10 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.ComponentModel;
 
 namespace NeeView
 {
-    public class BookmarkFolder : BindableBase, IBookmarkEntry, ICloneable
+    public class BookmarkFolder : ObservableObject, IBookmarkEntry, ICloneable
     {
         private string? _name;
 

@@ -1,5 +1,5 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Windows.Property;
 using System;
 using System.Windows;
@@ -7,7 +7,7 @@ using System.Windows;
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class PdfArchiveConfig : BindableBase
+    public partial class PdfArchiveConfig : ObservableObject
     {
         public static bool IsPdfArchiveSupported => GetPdfRenderer() == PdfRenderer.Pdfium || Windows10Tools.IsWindows10_OrGreater(10240);
 
@@ -22,7 +22,7 @@ namespace NeeView
         public bool IsEnabled
         {
             get { return _isEnabled && IsPdfArchiveSupported; }
-            set { if (_isEnabled != value) { _isEnabled = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _isEnabled, value); }
         }
 
         [PropertyMember]

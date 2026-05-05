@@ -1,6 +1,6 @@
-﻿using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using NeeLaboratory;
-using NeeLaboratory.ComponentModel;
 using NeeView.Properties;
 using System;
 using System.Collections.Generic;
@@ -13,7 +13,7 @@ namespace NeeView
     /// <summary>
     /// Navigate : ViewModel
     /// </summary>
-    public partial class NavigateViewModel : BindableBase
+    public partial class NavigateViewModel : ObservableObject
     {
         private readonly NavigateModel _model;
 
@@ -234,42 +234,42 @@ namespace NeeView
             {
                 case null:
                 case "":
-                    RaisePropertyChanged("");
+                    OnPropertyChanged("");
                     break;
                 case nameof(DragTransform.Angle):
-                    RaisePropertyChanged(nameof(Angle));
-                    RaisePropertyChanged(nameof(SliderAngle));
+                    OnPropertyChanged(nameof(Angle));
+                    OnPropertyChanged(nameof(SliderAngle));
                     break;
                 case nameof(DragTransform.Scale):
-                    RaisePropertyChanged(nameof(Scale));
-                    RaisePropertyChanged(nameof(ScaleLog));
+                    OnPropertyChanged(nameof(Scale));
+                    OnPropertyChanged(nameof(ScaleLog));
                     break;
                 case nameof(DragTransform.IsFlipHorizontal):
-                    RaisePropertyChanged(nameof(IsFlipHorizontal));
+                    OnPropertyChanged(nameof(IsFlipHorizontal));
                     break;
                 case nameof(DragTransform.IsFlipVertical):
-                    RaisePropertyChanged(nameof(IsFlipVertical));
+                    OnPropertyChanged(nameof(IsFlipVertical));
                     break;
                 case nameof(NavigateModel.IsRotateStretchEnabled):
-                    RaisePropertyChanged(nameof(IsRotateStretchEnabled));
+                    OnPropertyChanged(nameof(IsRotateStretchEnabled));
                     break;
                 case nameof(NavigateModel.IsKeepAngle):
-                    RaisePropertyChanged(nameof(IsKeepAngle));
+                    OnPropertyChanged(nameof(IsKeepAngle));
                     break;
                 case nameof(NavigateModel.IsKeepAngleBooks):
-                    RaisePropertyChanged(nameof(IsKeepAngleBooks));
+                    OnPropertyChanged(nameof(IsKeepAngleBooks));
                     break;
                 case nameof(NavigateModel.IsKeepScale):
-                    RaisePropertyChanged(nameof(IsKeepScale));
+                    OnPropertyChanged(nameof(IsKeepScale));
                     break;
                 case nameof(NavigateModel.IsKeepScaleBooks):
-                    RaisePropertyChanged(nameof(IsKeepScaleBooks));
+                    OnPropertyChanged(nameof(IsKeepScaleBooks));
                     break;
                 case nameof(NavigateModel.IsKeepFlip):
-                    RaisePropertyChanged(nameof(IsKeepFlip));
+                    OnPropertyChanged(nameof(IsKeepFlip));
                     break;
                 case nameof(NavigateModel.IsKeepFlipBooks):
-                    RaisePropertyChanged(nameof(IsKeepFlipBooks));
+                    OnPropertyChanged(nameof(IsKeepFlipBooks));
                     break;
             }
         }
@@ -280,16 +280,16 @@ namespace NeeView
             {
                 case null:
                 case "":
-                    RaisePropertyChanged("");
+                    OnPropertyChanged("");
                     break;
 
                 case nameof(BookSettingConfig.AutoRotate):
-                    RaisePropertyChanged(nameof(AutoRotate));
+                    OnPropertyChanged(nameof(AutoRotate));
                     break;
 
                 case nameof(BookSettingConfig.BaseScale):
-                    RaisePropertyChanged(nameof(BaseScale));
-                    RaisePropertyChanged(nameof(SliderBaseScale));
+                    OnPropertyChanged(nameof(BaseScale));
+                    OnPropertyChanged(nameof(SliderBaseScale));
                     break;
             }
         }
@@ -300,27 +300,27 @@ namespace NeeView
             {
                 case null:
                 case "":
-                    RaisePropertyChanged("");
+                    OnPropertyChanged("");
                     break;
 
                 case nameof(ViewConfig.AllowFileContentAutoRotate):
-                    RaisePropertyChanged(nameof(AllowFileContentAutoRotate));
+                    OnPropertyChanged(nameof(AllowFileContentAutoRotate));
                     break;
 
                 case nameof(ViewConfig.StretchMode):
-                    RaisePropertyChanged(nameof(StretchMode));
+                    OnPropertyChanged(nameof(StretchMode));
                     break;
 
                 case nameof(ViewConfig.AllowStretchScaleUp):
-                    RaisePropertyChanged(nameof(AllowStretchScaleUp));
+                    OnPropertyChanged(nameof(AllowStretchScaleUp));
                     break;
 
                 case nameof(ViewConfig.AllowStretchScaleDown):
-                    RaisePropertyChanged(nameof(AllowStretchScaleDown));
+                    OnPropertyChanged(nameof(AllowStretchScaleDown));
                     break;
 
                 case nameof(ViewConfig.IsBaseScaleEnabled):
-                    RaisePropertyChanged(nameof(IsBaseScaleEnabled));
+                    OnPropertyChanged(nameof(IsBaseScaleEnabled));
                     break;
             }
         }
@@ -331,19 +331,19 @@ namespace NeeView
             {
                 case null:
                 case "":
-                    RaisePropertyChanged("");
+                    OnPropertyChanged("");
                     break;
 
                 case nameof(NavigatorConfig.IsVisibleThumbnail):
-                    RaisePropertyChanged(nameof(IsVisibleThumbnail));
+                    OnPropertyChanged(nameof(IsVisibleThumbnail));
                     break;
 
                 case nameof(NavigatorConfig.ThumbnailHeight):
-                    RaisePropertyChanged(nameof(ThumbnailHeight));
+                    OnPropertyChanged(nameof(ThumbnailHeight));
                     break;
 
                 case nameof(NavigatorConfig.IsVisibleControlBar):
-                    RaisePropertyChanged(nameof(IsVisibleControlBar));
+                    OnPropertyChanged(nameof(IsVisibleControlBar));
                     break;
             }
         }

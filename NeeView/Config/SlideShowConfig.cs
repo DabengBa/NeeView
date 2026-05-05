@@ -1,12 +1,12 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Windows.Property;
 using System;
 
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class SlideShowConfig : BindableBase
+    public partial class SlideShowConfig : ObservableObject
     {
         [DefaultEquality] private double _slideShowInterval = 5.0;
         [DefaultEquality] private bool _isCancelSlideByMouseMove = true;

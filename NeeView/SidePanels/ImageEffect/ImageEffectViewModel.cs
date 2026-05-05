@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Effects;
 using NeeView.Windows.Property;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ namespace NeeView
     /// <summary>
     /// ImageEffect : ViewModel
     /// </summary>
-    public class ImageEffectViewModel : BindableBase
+    public class ImageEffectViewModel : ObservableObject
     {
         public ImageEffectViewModel(ImageEffect model)
         {
@@ -35,7 +35,7 @@ namespace NeeView
         public ImageEffect Model
         {
             get { return _model; }
-            set { if (_model != value) { _model = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _model, value); }
         }
 
         // PictureProfile

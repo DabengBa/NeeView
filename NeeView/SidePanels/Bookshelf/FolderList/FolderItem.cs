@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.IO.Search;
 using NeeView.Collections;
 using NeeView.Properties;
@@ -76,7 +76,7 @@ namespace NeeView
     /// フォルダー情報
     /// フォルダーリストの１項目の情報 
     /// </summary>
-    public abstract class FolderItem : BindableBase, IHasPage, IHasName, IRenameable, ISearchItem, IPendingItem
+    public abstract class FolderItem : ObservableObject, IHasPage, IHasName, IRenameable, ISearchItem, IPendingItem
     {
         private readonly bool _isOverlayEnabled;
 
@@ -130,8 +130,8 @@ namespace NeeView
             {
                 if (SetProperty(ref _name, value))
                 {
-                    RaisePropertyChanged(nameof(DisplayName));
-                    RaisePropertyChanged(nameof(Detail));
+                    OnPropertyChanged(nameof(DisplayName));
+                    OnPropertyChanged(nameof(Detail));
                 }
             }
         }
@@ -156,7 +156,7 @@ namespace NeeView
                 {
                     _targetPath = value;
                     _entityPath = _targetPath.ResolvePath();
-                    RaisePropertyChanged();
+                    OnPropertyChanged();
                 }
             }
         }
@@ -194,7 +194,7 @@ namespace NeeView
                 if (SetProperty(ref _isReady, value))
                 {
                     UpdateOverlay();
-                    RaisePropertyChanged(nameof(IconOverlay));
+                    OnPropertyChanged(nameof(IconOverlay));
                 }
             }
         }
@@ -206,7 +206,7 @@ namespace NeeView
         public bool IsRecursive
         {
             get { return _isRecursive; }
-            set { if (_isRecursive != value) { _isRecursive = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _isRecursive, value); }
         }
 
 
@@ -365,7 +365,7 @@ namespace NeeView
         public void NotifyIconOverlayChanged()
         {
             UpdateOverlay();
-            RaisePropertyChanged(nameof(IconOverlay));
+            OnPropertyChanged(nameof(IconOverlay));
         }
 
         /// <summary>
@@ -442,13 +442,13 @@ namespace NeeView
         public void IncrementPendingCount()
         {
             Interlocked.Increment(ref _pendingCount);
-            RaisePropertyChanged(nameof(PendingCount));
+            OnPropertyChanged(nameof(PendingCount));
         }
 
         public void DecrementPendingCount()
         {
             Interlocked.Decrement(ref _pendingCount);
-            RaisePropertyChanged(nameof(PendingCount));
+            OnPropertyChanged(nameof(PendingCount));
         }
 
         public virtual void ClearThumbnailCache()
@@ -556,7 +556,7 @@ namespace NeeView
                 _archivePage = CreateArchivePage(TargetPath.SimplePath);
                 _archivePage?.Thumbnail.Initialize(oldArchivePage.Thumbnail);
                 DisposeArchivePage(oldArchivePage);
-                RaisePropertyChanged(nameof(Thumbnail));
+                OnPropertyChanged(nameof(Thumbnail));
             }
         }
 

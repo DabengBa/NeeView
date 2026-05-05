@@ -1,14 +1,11 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Windows.Controls;
 using System;
-using System.ComponentModel;
 using System.Windows;
 
 namespace NeeView.Windows
 {
-
-    [NotifyPropertyChanged]
-    public partial class WindowStateManager : INotifyPropertyChanged
+    public partial class WindowStateManager : ObservableObject
     {
         private readonly Window _window;
         private WindowStateEx _previousState;
@@ -27,7 +24,6 @@ namespace NeeView.Windows
         }
 
 
-        public event PropertyChangedEventHandler? PropertyChanged;
         public event EventHandler<WindowStateExChangedEventArgs>? StateChanged;
         public event EventHandler<WindowStateExChangedEventArgs>? StateEditing;
         public event EventHandler<WindowStateExChangedEventArgs>? StateEdited;

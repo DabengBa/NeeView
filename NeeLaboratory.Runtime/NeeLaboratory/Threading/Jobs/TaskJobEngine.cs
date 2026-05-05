@@ -1,5 +1,6 @@
 ﻿//#define LOCAL_DEBUG
 
+using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.ComponentModel;
 using NeeLaboratory.Generators;
 using System;
@@ -14,7 +15,7 @@ namespace NeeLaboratory.Threading.Jobs
     /// Task-based Job Engine
     /// </summary>
     [LocalDebug]
-    public partial class TaskJobEngine : BindableBase, IDisposable
+    public partial class TaskJobEngine : ObservableObject, IDisposable
     {
         private readonly Channel<IJobOperation> _jobQueue;
         private readonly CancellationTokenSource _cts = new();

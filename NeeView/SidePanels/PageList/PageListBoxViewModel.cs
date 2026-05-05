@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeLaboratory.IO;
 using NeeView.Properties;
 using System;
@@ -9,7 +10,7 @@ using System.Windows.Data;
 
 namespace NeeView
 {
-    public class PageListBoxViewModel : BindableBase
+    public class PageListBoxViewModel : ObservableObject
     {
         private readonly PageList _model;
         private readonly PanelThumbnailItemSize _thumbnailItemSize;
@@ -23,9 +24,9 @@ namespace NeeView
             _model.CollectionChanged += Model_CollectionChanged;
 
             _thumbnailItemSize = new PanelThumbnailItemSize(Config.Current.Panels.ThumbnailItemProfile, 5.0 + 1.0, 4.0 + 2.0, new Size(18.0, 18.0));
-            _thumbnailItemSize.SubscribePropertyChanged(nameof(_thumbnailItemSize.ItemSize), (s, e) => RaisePropertyChanged(nameof(ThumbnailItemSize)));
+            _thumbnailItemSize.SubscribePropertyChanged(nameof(_thumbnailItemSize.ItemSize), (s, e) => OnPropertyChanged(nameof(ThumbnailItemSize)));
 
-            Config.Current.PageList.AddPropertyChanged(nameof(PageListConfig.IsGroupBy),
+            Config.Current.PageList.SubscribePropertyChanged(nameof(PageListConfig.IsGroupBy),
                 (s, e) => UpdateGroupBy());
             UpdateItems();
 
@@ -76,7 +77,7 @@ namespace NeeView
 
         private void UpdateGroupBy()
         {
-            RaisePropertyChanged(nameof(IsGroupBy));
+            OnPropertyChanged(nameof(IsGroupBy));
 
             this.CollectionViewSource.GroupDescriptions.Clear();
             if (IsGroupBy)

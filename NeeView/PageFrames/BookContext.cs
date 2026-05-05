@@ -1,8 +1,8 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeLaboratory.Generators;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 
 namespace NeeView.PageFrames
@@ -10,8 +10,7 @@ namespace NeeView.PageFrames
     /// <summary>
     /// 現在ブック情報
     /// </summary>
-    [NotifyPropertyChanged]
-    public partial class BookContext : INotifyPropertyChanged, IDisposable, IBookPageContext, IBookPageAccessor
+    public partial class BookContext : ObservableObject, IDisposable, IBookPageContext, IBookPageAccessor
     {
         private readonly Book _book;
         private readonly BookPageAccessor _accessor;
@@ -27,7 +26,7 @@ namespace NeeView.PageFrames
             _disposables.Add(_book.SubscribePagesChanged(Book_PagesChanged));
 
             _disposables.Add(_book.Pages.SubscribePropertyChanged(nameof(BookPageCollection.SortMode),
-                (s, e) => RaisePropertyChanged(nameof(SortMode))));
+                (s, e) => OnPropertyChanged(nameof(SortMode))));
 
             _disposables.Add(_book.Pages.SubscribePagesSorting((s, e) => _isSortBusyCounter.Increment()));
             _disposables.Add(_book.Pages.SubscribePagesSorted((s, e) => _isSortBusyCounter.Decrement()));
@@ -35,9 +34,6 @@ namespace NeeView.PageFrames
 
             _accessor = new BookPageAccessor(_book.Pages);
         }
-
-        [Subscribable]
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         [Subscribable]
         public event EventHandler? PagesChanged;
@@ -71,8 +67,8 @@ namespace NeeView.PageFrames
                     _selectedRange = value;
                     _selectedPages = pages;
                     _book.SetCurrentPages(pages);
-                    RaisePropertyChanged();
-                    RaisePropertyChanged(nameof(SelectedPages));
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(SelectedPages));
                     SelectedRangeChanged?.Invoke(this, new PageRangeChangedEventArgs(_selectedRange, oldRange));
                 }
             }
@@ -128,7 +124,7 @@ namespace NeeView.PageFrames
 
         private void Book_PagesChanged(object? sender, EventArgs e)
         {
-            RaisePropertyChanged(nameof(Pages));
+            OnPropertyChanged(nameof(Pages));
             PagesChanged?.Invoke(this, e);
         }
 

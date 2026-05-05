@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -7,7 +7,7 @@ using System.Windows.Input;
 namespace NeeView
 {
     // タッチ処理
-    public class TouchInputForGestureEditor : BindableBase
+    public class TouchInputForGestureEditor : ObservableObject
     {
         private readonly TouchInputContext _context;
         private readonly FrameworkElement _sender;

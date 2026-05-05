@@ -1,53 +1,51 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace NeeView
 {
     /// <summary>
     /// 画面に表示する通知：通常
     /// </summary>
-    public class NormalInfoMessage : BindableBase
+    public class NormalInfoMessage : ObservableObject
     {
+        private BookMementoType _bookMementoIcon;
+        private double _displayTime = 1.0;
+        private string? _message;
+
         /// <summary>
         /// BookMementoIcon property.
         /// </summary>
         public BookMementoType BookMementoIcon
         {
-            get { return _BookMementoIcon; }
-            set { if (_BookMementoIcon != value) { _BookMementoIcon = value; RaisePropertyChanged(); } }
+            get { return _bookMementoIcon; }
+            set { SetProperty(ref _bookMementoIcon, value); }
         }
-
-        private BookMementoType _BookMementoIcon;
 
         /// <summary>
         /// DisplayTime property. (sec)
         /// </summary>
         public double DisplayTime
         {
-            get { return _dispTime; }
-            set { if (_dispTime != value) { _dispTime = value; RaisePropertyChanged(); } }
+            get { return _displayTime; }
+            set { SetProperty(ref _displayTime, value); }
         }
 
-        private double _dispTime = 1.0;
-
-
         // 通知テキスト
-        private string? _message;
         public string? Message
         {
             get { return _message; }
-            set { _message = value; RaisePropertyChanged(); }
+            set { _message = value; OnPropertyChanged(); }
         }
 
         /// <summary>
         /// 通知
         /// </summary>
         /// <param name="message"></param>
-        /// <param name="dispTime"></param>
+        /// <param name="displayTime"></param>
         /// <param name="bookmarkType"></param>
-        public void SetMessage(string message, double dispTime = 1.0, BookMementoType bookmarkType = BookMementoType.None)
+        public void SetMessage(string message, double displayTime = 1.0, BookMementoType bookmarkType = BookMementoType.None)
         {
             this.BookMementoIcon = bookmarkType;
-            this.DisplayTime = dispTime;
+            this.DisplayTime = displayTime;
             this.Message = message;
         }
     }

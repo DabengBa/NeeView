@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Text.Json.Serialization;
 
@@ -7,7 +7,7 @@ namespace NeeView
     /// <summary>
     /// フォルダーの並び順とかの保存される情報
     /// </summary>
-    public class FolderParameter : BindableBase
+    public class FolderParameter : ObservableObject
     {
         // TODO: Path to QueryPath
 
@@ -41,7 +41,7 @@ namespace NeeView
                     _folderOrder = value;
                     _seed = GenerateRandomSeed(_folderOrder);
                     Save();
-                    RaisePropertyChanged();
+                    OnPropertyChanged();
                 }
             }
         }
@@ -63,7 +63,7 @@ namespace NeeView
                 {
                     _isFolderRecursive = value;
                     Save();
-                    RaisePropertyChanged();
+                    OnPropertyChanged();
                 }
 
             }
@@ -154,7 +154,7 @@ namespace NeeView
             _folderOrder = FolderParameter.GetFolderOrder(_path, memento.FolderOrder);
             _isFolderRecursive = memento.IsFolderRecursive;
             _seed = GenerateRandomSeed(_folderOrder, memento.Seed);
-            RaisePropertyChanged(null);
+            OnPropertyChanged("");
         }
 
         #endregion

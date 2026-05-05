@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Properties;
 using System;
 using System.Globalization;
@@ -8,7 +8,7 @@ namespace NeeView
     /// <summary>
     /// 「指定ページに移動」コマンド用
     /// </summary>
-    public class PageSelectDialogModel : BindableBase
+    public class PageSelectDialogModel : ObservableObject
     {
         private int _value;
 

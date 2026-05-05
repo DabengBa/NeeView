@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeView.Collections.Generic;
 using NeeView.Properties;
 using System;
@@ -8,7 +9,7 @@ using System.Diagnostics;
 
 namespace NeeView
 {
-    public class BookmarkPopupContentViewModel : BindableBase
+    public class BookmarkPopupContentViewModel : ObservableObject
     {
         private readonly string _bookPath;
         private readonly BookmarkPopupEdit _edit;
@@ -34,7 +35,7 @@ namespace NeeView
             Debug.Assert(node is null || node.Parent == GetBookmarkEntry(_comboBoxCollection.SelectedItem));
 
             _edit = new(_bookPath, GetBookmarkEntry(_comboBoxCollection.SelectedItem), node);
-            _edit.SubscribePropertyChanged(nameof(_edit.Name), (s, e) => RaisePropertyChanged(nameof(Name)));
+            _edit.SubscribePropertyChanged(nameof(_edit.Name), (s, e) => OnPropertyChanged(nameof(Name)));
 
             if (_edit.IsEdit)
             {
@@ -86,7 +87,7 @@ namespace NeeView
 
         private void ComboBox_SelectedItemChanged(object? sender, PropertyChangedEventArgs e)
         {
-            RaisePropertyChanged(nameof(SelectedItem));
+            OnPropertyChanged(nameof(SelectedItem));
 
             if (_isTreeViewVisible)
             {

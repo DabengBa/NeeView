@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Properties;
 using System;
 using System.Diagnostics;
@@ -10,7 +10,7 @@ using System.Windows.Data;
 namespace NeeView
 {
 #if DEBUG
-    public class DebugMenu : BindableBase
+    public class DebugMenu : ObservableObject
     {
         private DebugWindow? _debugWindow;
 

@@ -1,11 +1,11 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Windows.Property;
 
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class ImageSvgConfig : BindableBase
+    public partial class ImageSvgConfig : ObservableObject
     {
         public static FileTypeCollection DefaultSupportFileTypes { get; } = new FileTypeCollection(".svg");
 

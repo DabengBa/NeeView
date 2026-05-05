@@ -1,10 +1,10 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Collections.Generic;
 using System;
 
 namespace NeeView.Setting
 {
-    public class ContextMenuSettingViewModel : BindableBase
+    public class ContextMenuSettingViewModel : ObservableObject
     {
         private MenuTree? _menuTree;
         private ContextMenuSource? _contextMenuSource;

@@ -176,7 +176,7 @@ namespace NeeView
         private static string GetEntryTypeName(ArchiveEntry entry, DeleteEntryType entryType)
         {
             if (entryType == DeleteEntryType.PlaylistEntry)
-            { 
+            {
                 return TextResources.GetString("Word.PlaylistItem");
             }
             else

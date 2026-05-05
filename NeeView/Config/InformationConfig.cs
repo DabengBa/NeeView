@@ -1,5 +1,5 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Properties;
 using NeeView.Windows.Property;
 using System.Collections.Generic;
@@ -11,11 +11,11 @@ using System.Windows;
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class InformationConfig : BindableBase
+    public partial class InformationConfig : ObservableObject
     {
         private static readonly string _defaultDateTimeFormat = TextResources.GetString("Information.DateFormat");
         private static readonly string _defaultMapProgramFormat = @"https://www.google.com/maps/place/{Lat}+{Lon}/";
-        
+
         [DefaultEquality] private GridLength _propertyHeaderWidth = new(128.0);
         [DefaultEquality] private string? _dateTimeFormat = null;
         [DefaultEquality] private string? _mapProgramFormat;
@@ -39,7 +39,7 @@ namespace NeeView
             if (_groupVisibilityMap[group] == isVisible) return false;
 
             _groupVisibilityMap[group] = isVisible;
-            RaisePropertyChanged(propertyName);
+            OnPropertyChanged(propertyName);
             return true;
         }
 

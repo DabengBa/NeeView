@@ -1,5 +1,6 @@
 ﻿//#define LOCAL_DEBUG
 
+using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.ComponentModel;
 using NeeLaboratory.Generators;
 using NeeView.Threading;
@@ -33,7 +34,7 @@ namespace NeeView
     /// FilmStrip : Model
     /// </summary>
     [LocalDebug]
-    public partial class FilmStrip : BindableBase, IDisposable
+    public partial class FilmStrip : ObservableObject, IDisposable
     {
         static FilmStrip() => Current = new FilmStrip();
         public static FilmStrip Current { get; }
@@ -67,7 +68,7 @@ namespace NeeView
                     switch (e.PropertyName)
                     {
                         case nameof(FilmStripConfig.IsVisibleNumber):
-                            RaisePropertyChanged(nameof(ThumbnailNumberVisibility));
+                            OnPropertyChanged(nameof(ThumbnailNumberVisibility));
                             break;
                         case nameof(FilmStripConfig.ImageWidth):
                             Update();
@@ -117,7 +118,7 @@ namespace NeeView
                 if (_isSliderDirectionReversed != value)
                 {
                     _isSliderDirectionReversed = value;
-                    RaisePropertyChanged();
+                    OnPropertyChanged();
                     UpdateItems();
                 }
             }
@@ -134,7 +135,7 @@ namespace NeeView
                 {
                     _items = value;
                     IsItemsDirty = true;
-                    RaisePropertyChanged();
+                    OnPropertyChanged();
                     CollectionChanged?.Invoke(this, EventArgs.Empty);
                     ValidateViewItems();
                 }
@@ -161,7 +162,7 @@ namespace NeeView
                     {
                         PageSelector.Current.SetSelectedIndex(this, GetIndexWithDirectionReverse(_selectedIndex), true);
                     }
-                    RaisePropertyChanged();
+                    OnPropertyChanged();
                 }
             }
         }
@@ -208,7 +209,7 @@ namespace NeeView
         private void Update()
         {
             UpdateItems();
-            RaisePropertyChanged(nameof(FilmStripVisibility));
+            OnPropertyChanged(nameof(FilmStripVisibility));
         }
 
         private void PageSelector_SelectionChanged(object? sender, EventArgs e)

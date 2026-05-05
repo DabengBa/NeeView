@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Collections;
 using NeeView.IO;
 using System;
@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace NeeView
 {
-    public class PlaylistItem : BindableBase, IHasPage, IHasName, IRenameable
+    public class PlaylistItem : ObservableObject, IHasPage, IHasName, IRenameable
     {
         private readonly PlaylistSourceItem _item;
         private string? _place;
@@ -38,11 +38,11 @@ namespace NeeView
                 {
                     _item.Path = ValidPath(value);
                     _place = null;
-                    RaisePropertyChanged();
-                    RaisePropertyChanged(nameof(Name));
-                    RaisePropertyChanged(nameof(Place));
-                    RaisePropertyChanged(nameof(DisplayPlace));
-                    RaisePropertyChanged(nameof(Detail));
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(Name));
+                    OnPropertyChanged(nameof(Place));
+                    OnPropertyChanged(nameof(DisplayPlace));
+                    OnPropertyChanged(nameof(Detail));
                 }
             }
         }
@@ -55,8 +55,8 @@ namespace NeeView
                 if (_item.Name != value)
                 {
                     _item.Name = value;
-                    RaisePropertyChanged();
-                    RaisePropertyChanged(nameof(IsNameChanged));
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(IsNameChanged));
                 }
             }
         }
@@ -152,8 +152,8 @@ namespace NeeView
                 if (_item.Invalid != value)
                 {
                     _item.Invalid = value;
-                    RaisePropertyChanged();
-                    RaisePropertyChanged(nameof(IsArchiveIconVisible));
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(IsArchiveIconVisible));
                 }
             }
         }
@@ -168,7 +168,7 @@ namespace NeeView
 
         public void UpdateDisplayPlace()
         {
-            RaisePropertyChanged(nameof(DisplayPlace));
+            OnPropertyChanged(nameof(DisplayPlace));
         }
 
         public Page GetPage()

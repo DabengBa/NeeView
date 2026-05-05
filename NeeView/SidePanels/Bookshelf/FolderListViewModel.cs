@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using NeeLaboratory.ComponentModel;
 using NeeView.Properties;
 using System;
 using System.Collections.Generic;
@@ -33,7 +34,7 @@ namespace NeeView
             _model.CollectionChanged +=
                 (s, e) => AppDispatcher.Invoke(() => Model_CollectionChanged(s, e));
 
-            _model.AddPropertyChanged(nameof(_model.SearchBoxModel),
+            _model.SubscribePropertyChanged(nameof(_model.SearchBoxModel),
                 (s, e) => OnPropertyChanged(nameof(SearchBoxModel)));
 
             MoreMenuDescription = new FolderListMoreMenuDescription(this);
@@ -139,7 +140,7 @@ namespace NeeView
         {
             _model.Sync();
         }
-        
+
         [RelayCommand]
         private void ToggleFolderRecursive()
         {

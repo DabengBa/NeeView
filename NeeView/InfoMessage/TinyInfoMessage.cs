@@ -1,35 +1,32 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace NeeView
 {
     /// <summary>
     /// 画面に表示する通知：小さく通知
     /// </summary>
-    public class TinyInfoMessage : BindableBase
+    public class TinyInfoMessage : ObservableObject
     {
+        private string? _message;
+        private double _displayTime = 1.0;
+
         /// <summary>
         /// Message property.
         /// </summary>
         public string? Message
         {
-            get { return _Message; }
-            set { _Message = value; }
+            get { return _message; }
+            set { _message = value; }
         }
-
-        private string? _Message;
-
 
         /// <summary>
         /// DisplayTime property. (sec)
         /// </summary>
         public double DisplayTime
         {
-            get { return _dispTime; }
-            set { if (_dispTime != value) { _dispTime = value; RaisePropertyChanged(); } }
+            get { return _displayTime; }
+            set { SetProperty(ref _displayTime, value); }
         }
-
-        private double _dispTime = 1.0;
-
 
         /// <summary>
         /// 通知
@@ -38,7 +35,7 @@ namespace NeeView
         public void SetMessage(string message)
         {
             this.Message = message;
-            RaisePropertyChanged(nameof(Message));
+            OnPropertyChanged(nameof(Message));
         }
     }
 }

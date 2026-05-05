@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Properties;
 using System.Windows;
 using System.Windows.Media.Imaging;
@@ -8,7 +8,7 @@ namespace NeeView
     /// <summary>
     /// VersionWindow の ViewModel
     /// </summary>
-    public class VersionWindowViewModel : BindableBase
+    public class VersionWindowViewModel : ObservableObject
     {
         public VersionWindowViewModel()
         {

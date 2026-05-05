@@ -1,4 +1,5 @@
-﻿using NeeView.Windows.Property;
+﻿using NeeLaboratory.ComponentModel;
+using NeeView.Windows.Property;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -44,7 +45,7 @@ namespace NeeView
 
             _elements = list.ToDictionary(e => e.Name);
 
-            foreach(var element in _elements.Values)
+            foreach (var element in _elements.Values)
             {
                 element.CreateDefaultMemento();
             }
@@ -57,7 +58,7 @@ namespace NeeView
             }
             _defaultMemento = collection;
 
-            Config.Current.Mouse.AddPropertyChanged(nameof(MouseConfig.IsGestureEnabled),
+            Config.Current.Mouse.SubscribePropertyChanged(nameof(MouseConfig.IsGestureEnabled),
                 (s, e) => UpdateGestureDragAction());
 
             UpdateGestureDragAction();

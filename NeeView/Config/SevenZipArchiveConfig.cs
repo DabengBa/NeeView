@@ -1,12 +1,12 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Windows.Property;
 using System.Windows;
 
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class SevenZipArchiveConfig : BindableBase
+    public partial class SevenZipArchiveConfig : ObservableObject
     {
         public static FileTypeCollection DefaultSupportFileTypes { get; } = new FileTypeCollection(".7z;.cb7;.cbr;.cbt;.cbz;.lzh;.rar;.zip");
 

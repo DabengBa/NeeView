@@ -31,7 +31,7 @@ namespace NeeView
                 if (_breadcrumb != value)
                 {
                     AttachBreadcrumb(value);
-                    RaisePropertyChanged(null);
+                    OnPropertyChanged("");
                 }
             }
         }
@@ -59,8 +59,8 @@ namespace NeeView
         {
             if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName == nameof(Breadcrumb.Children))
             {
-                RaisePropertyChanged(nameof(Children));
-                RaisePropertyChanged(nameof(HasChildren));
+                OnPropertyChanged(nameof(Children));
+                OnPropertyChanged(nameof(HasChildren));
             }
         }
 

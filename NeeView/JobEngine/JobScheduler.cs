@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.Generators;
 using System;
 using System.Collections.Generic;
@@ -11,12 +11,12 @@ namespace NeeView
     /// <summary>
     /// JOBスケジューラー
     /// </summary>
-    public partial class JobScheduler : BindableBase
+    public partial class JobScheduler : ObservableObject
     {
         [Conditional("DEBUG")]
         protected void DebugRaisePropertyChanged([CallerMemberName] string? propertyName = null)
         {
-            RaisePropertyChanged(propertyName);
+            OnPropertyChanged(propertyName);
         }
 
 

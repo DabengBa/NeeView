@@ -1,10 +1,10 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Windows;
 
 namespace NeeView
 {
-    public class PdfArchiveProfile : BindableBase
+    public class PdfArchiveProfile : ObservableObject
     {
         // 最大画像サイズで制限したサイズ
         public static Size SizeLimitedRenderSize

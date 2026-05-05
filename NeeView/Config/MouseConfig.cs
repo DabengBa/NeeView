@@ -1,6 +1,6 @@
-﻿using Generator.Equals;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeLaboratory;
-using NeeLaboratory.ComponentModel;
 using NeeView.Windows.Property;
 using System;
 using System.Windows;
@@ -8,7 +8,7 @@ using System.Windows;
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class MouseConfig : BindableBase
+    public partial class MouseConfig : ObservableObject
     {
         [DefaultEquality] private bool _isGestureEnabled = true;
         [DefaultEquality] private bool _isDragEnabled = true;

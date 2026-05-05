@@ -1,5 +1,5 @@
-﻿using CommunityToolkit.Mvvm.Input;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using NeeView.Properties;
 using System.Collections.Generic;
 using System.Globalization;
@@ -65,7 +65,7 @@ namespace NeeView.Setting
     /// <summary>
     /// ConflictDialog ViewModel
     /// </summary>
-    public class ResolveConflictDialogVM : BindableBase
+    public class ResolveConflictDialogVM : ObservableObject
     {
         private readonly ResolveConflictDialogContext _context;
 

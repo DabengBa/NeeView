@@ -33,14 +33,14 @@ namespace NeeView
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);
-            
+
             _vm?.Dispose();
         }
 
         protected override void OnContentRendered(EventArgs e)
         {
             base.OnContentRendered(e);
-            
+
             this.SaveButton.Focus();
         }
 

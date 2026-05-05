@@ -1,5 +1,5 @@
-﻿using Microsoft.Win32;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.Win32;
 using NeeView.Properties;
 using NeeView.Windows.Property;
 using System;
@@ -13,7 +13,7 @@ namespace NeeView
     /// ユーザー単位の設定になる(HKCU)。
     /// Zip版のみの機能で、インストーラー版はインストール時にHKLMに設定される。
     /// </summary>
-    public class ExplorerContextMenu : BindableBase
+    public class ExplorerContextMenu : ObservableObject
     {
         static ExplorerContextMenu() => Current = new ExplorerContextMenu();
         public static ExplorerContextMenu Current { get; }
@@ -58,7 +58,7 @@ namespace NeeView
                         Delete();
                     }
                     _isEnabled = Exists();
-                    RaisePropertyChanged();
+                    OnPropertyChanged();
                 }
             }
         }

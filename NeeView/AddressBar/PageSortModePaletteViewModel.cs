@@ -1,9 +1,10 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using System.Collections.Generic;
 
 namespace NeeView
 {
-    public class PageSortModePaletteViewModel : BindableBase
+    public class PageSortModePaletteViewModel : ObservableObject
     {
         private readonly PageSortModePaletteModel _model;
 
@@ -11,8 +12,8 @@ namespace NeeView
         public PageSortModePaletteViewModel()
         {
             _model = new PageSortModePaletteModel();
-            _model.AddPropertyChanged(nameof(_model.PageSortModeList),
-                (s, e) => RaisePropertyChanged(nameof(PageSortModeList)));
+            _model.SubscribePropertyChanged(nameof(_model.PageSortModeList),
+                (s, e) => OnPropertyChanged(nameof(PageSortModeList)));
         }
 
 

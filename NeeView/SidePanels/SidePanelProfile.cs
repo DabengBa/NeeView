@@ -1,13 +1,15 @@
-﻿namespace NeeView
+﻿using NeeLaboratory.ComponentModel;
+
+namespace NeeView
 {
     public class SidePanelProfile
     {
         public void Initialize()
         {
-            FontParameters.Current.AddPropertyChanged(nameof(FontParameters.DefaultFontName),
+            FontParameters.Current.SubscribePropertyChanged(nameof(FontParameters.DefaultFontName),
                 (s, e) => ValidatePanelListItemProfile());
 
-            FontParameters.Current.AddPropertyChanged(nameof(FontParameters.PaneFontSize),
+            FontParameters.Current.SubscribePropertyChanged(nameof(FontParameters.PaneFontSize),
                 (s, e) => ValidatePanelListItemProfile());
 
             ValidatePanelListItemProfile();

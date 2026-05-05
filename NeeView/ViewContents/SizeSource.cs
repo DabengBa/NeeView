@@ -1,15 +1,11 @@
-﻿using NeeLaboratory.Generators;
-using System.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Windows;
 using System.Windows.Data;
 
 namespace NeeView
 {
-    [NotifyPropertyChanged]
-    public partial class SizeSource : INotifyPropertyChanged
+    public partial class SizeSource : ObservableObject
     {
-        public event PropertyChangedEventHandler? PropertyChanged;
-
         private double _width;
         private double _height;
 

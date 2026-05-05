@@ -1,11 +1,10 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using System;
-using System.ComponentModel;
 
 namespace NeeView
 {
-    [NotifyPropertyChanged]
-    public partial class ViewPropertyControl : IViewPropertyControl
+    public partial class ViewPropertyControl : ObservableObject, IViewPropertyControl
     {
         private readonly ViewConfig _viewConfig;
         private readonly BookSettingConfig _bookSettingConfig;
@@ -17,16 +16,12 @@ namespace NeeView
 
             _bookSettingConfig.SubscribePropertyChanged(nameof(BookSettingConfig.AutoRotate), (s, e) =>
             {
-                RaisePropertyChanged(nameof(IsAutoRotateLeft));
-                RaisePropertyChanged(nameof(IsAutoRotateRight));
-                RaisePropertyChanged(nameof(IsAutoRotateForcedLeft));
-                RaisePropertyChanged(nameof(IsAutoRotateForcedRight));
+                OnPropertyChanged(nameof(IsAutoRotateLeft));
+                OnPropertyChanged(nameof(IsAutoRotateRight));
+                OnPropertyChanged(nameof(IsAutoRotateForcedLeft));
+                OnPropertyChanged(nameof(IsAutoRotateForcedRight));
             });
         }
-
-
-        [Subscribable]
-        public event PropertyChangedEventHandler? PropertyChanged;
 
 
         public bool IsAutoRotateLeft

@@ -1,11 +1,12 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 
 namespace NeeView
 {
     /// <summary>
     /// NowLoading : ViewModel
     /// </summary>
-    public class NowLoadingViewModel : BindableBase
+    public class NowLoadingViewModel : ObservableObject
     {
         private readonly NowLoading _model;
 
@@ -15,7 +16,7 @@ namespace NeeView
             _model = model;
 
             _model.SubscribePropertyChanged(nameof(_model.IsDisplayNowLoading),
-                (_, _) => AppDispatcher.Invoke(() => RaisePropertyChanged(nameof(IsDisplayNowLoading))));
+                (_, _) => AppDispatcher.Invoke(() => OnPropertyChanged(nameof(IsDisplayNowLoading))));
         }
 
 

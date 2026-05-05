@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeView.Windows;
 using NeeView.Windows.Media;
 using System;
@@ -14,8 +15,8 @@ namespace NeeView
     /// <summary>
     /// SidePanelFrameView.xaml の相互作用ロジック
     /// </summary>
-    [NotifyPropertyChanged]
-    public partial class SidePanelFrameView : UserControl, INotifyPropertyChanged
+    [INotifyPropertyChanged]
+    public partial class SidePanelFrameView : UserControl
     {
         private const double _splitterWidth = 8.0;
         private const double _panelDefaultWidth = 300.0;
@@ -196,9 +197,6 @@ namespace NeeView
         }
 
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-
         /// <summary>
         /// サイドバーの幅
         /// </summary>
@@ -214,7 +212,7 @@ namespace NeeView
         public SidePanelFrameViewModel? VM
         {
             get { return _vm; }
-            private set { if (_vm != value) { _vm = value; RaisePropertyChanged(); } }
+            private set { SetProperty(ref _vm, value); }
         }
 
         private Thickness _viewportMargin;
@@ -231,9 +229,9 @@ namespace NeeView
 
             CustomLayoutPanelManager.Initialize();
             var leftPanelViewModel = new LeftPanelViewModel(this.LeftIconList, CustomLayoutPanelManager.Current.LeftDock, LeftPanelElementContains);
-            leftPanelViewModel.AddPropertyChanged(nameof(leftPanelViewModel.SelectedItem), (s, e) => model.RaisePanelPropertyChanged());
+            leftPanelViewModel.SubscribePropertyChanged(nameof(leftPanelViewModel.SelectedItem), (s, e) => model.RaisePanelPropertyChanged());
             var rightPanelViewModel = new RightPanelViewModel(this.RightIconList, CustomLayoutPanelManager.Current.RightDock, RightPanelElementContains);
-            rightPanelViewModel.AddPropertyChanged(nameof(rightPanelViewModel.SelectedItem), (s, e) => model.RaisePanelPropertyChanged());
+            rightPanelViewModel.SubscribePropertyChanged(nameof(rightPanelViewModel.SelectedItem), (s, e) => model.RaisePanelPropertyChanged());
             this.VM = new SidePanelFrameViewModel(model, leftPanelViewModel, rightPanelViewModel);
             this.VM.PanelVisibilityChanged += (s, e) => UpdateCanvas();
 
@@ -384,8 +382,8 @@ namespace NeeView
             this.LeftPanel.IsVisibleChanged += LeftPanel_IsVisibleChanged;
             this.RightPanel.IsVisibleChanged += RightPanel_IsVisibleChanged;
 
-            vm.AddPropertyChanged(nameof(vm.IsLeftPanelActive), ViewModel_IsLeftPanelActiveChanged);
-            vm.AddPropertyChanged(nameof(vm.IsRightPanelActive), ViewModel_IsRightPanelActiveChanged);
+            vm.SubscribePropertyChanged(nameof(vm.IsLeftPanelActive), ViewModel_IsLeftPanelActiveChanged);
+            vm.SubscribePropertyChanged(nameof(vm.IsRightPanelActive), ViewModel_IsRightPanelActiveChanged);
 
             UpdateCanvas();
         }

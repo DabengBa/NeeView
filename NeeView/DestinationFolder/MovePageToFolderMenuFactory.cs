@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Properties;
 using System;
 using System.Windows.Data;
@@ -42,7 +42,7 @@ namespace NeeView
             }
         }
 
-        private class MoveableViewPageBindingSource : BindableBase
+        private class MoveableViewPageBindingSource : ObservableObject
         {
             private readonly IDestinationFolderOption _option;
             private readonly DestinationFolder _dummyFolder = new DestinationFolder();
@@ -58,7 +58,7 @@ namespace NeeView
 
             private void PageFrameBoxPresenter_ViewPageChanged(object? sender, ViewPageChangedEventArgs e)
             {
-                RaisePropertyChanged(nameof(AnyMoveableViewPages));
+                OnPropertyChanged(nameof(AnyMoveableViewPages));
             }
         }
     }

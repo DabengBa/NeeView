@@ -1,12 +1,11 @@
-﻿using Generator.Equals;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeLaboratory;
-using NeeLaboratory.ComponentModel;
 using NeeView.Text;
 using NeeView.Windows.Property;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
@@ -15,7 +14,7 @@ using System.Windows.Media;
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class BookConfig : BindableBase
+    public partial class BookConfig : ObservableObject
     {
         public static StringCollection DefaultExcludeRegexes { get; } = new StringCollection("^__MACOSX$;^\\.DS_Store$");
 

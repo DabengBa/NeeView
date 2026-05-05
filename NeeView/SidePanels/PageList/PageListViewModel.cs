@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using NeeLaboratory.ComponentModel;
 using NeeView.Properties;
 using System;
@@ -9,7 +10,7 @@ using System.Windows.Input;
 
 namespace NeeView
 {
-    public partial class PageListViewModel : BindableBase
+    public partial class PageListViewModel : ObservableObject
     {
         private readonly PageList _pageList;
         private readonly PageListConfig _pageListConfig;
@@ -20,11 +21,11 @@ namespace NeeView
             _pageList = pageList;
             _pageListConfig = Config.Current.PageList;
 
-            _pageList.AddPropertyChanged(nameof(PageList.PageSortModeList),
-                (s, e) => AppDispatcher.Invoke(() => RaisePropertyChanged(nameof(PageSortModeList))));
+            _pageList.SubscribePropertyChanged(nameof(PageList.PageSortModeList),
+                (s, e) => AppDispatcher.Invoke(() => OnPropertyChanged(nameof(PageSortModeList))));
 
-            _pageList.AddPropertyChanged(nameof(PageList.PageSortMode),
-                (s, e) => AppDispatcher.Invoke(() => RaisePropertyChanged(nameof(PageSortMode))));
+            _pageList.SubscribePropertyChanged(nameof(PageList.PageSortMode),
+                (s, e) => AppDispatcher.Invoke(() => OnPropertyChanged(nameof(PageSortMode))));
 
             _pageList.PageHistoryChanged +=
                 (s, e) => AppDispatcher.Invoke(() => UpdateMoveToHistoryCommandCanExecute());

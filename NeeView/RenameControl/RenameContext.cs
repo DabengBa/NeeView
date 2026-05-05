@@ -1,11 +1,11 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Properties;
 using System;
 using System.Linq;
 
 namespace NeeView
 {
-    public class RenameContext : BindableBase
+    public class RenameContext : ObservableObject
     {
         private static readonly char[] _invalidChars = System.IO.Path.GetInvalidFileNameChars();
 

@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeLaboratory.Generators;
 using NeeLaboratory.Threading.Tasks;
 using NeeView.ComponentModel;
@@ -7,7 +8,6 @@ using NeeView.Properties;
 using NeeView.Windows;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -48,8 +48,7 @@ namespace NeeView
     }
 
 
-    [NotifyPropertyChanged]
-    public partial class PageFrameBoxPresenter : INotifyPropertyChanged, IDragTransformContextFactory, IBookPageContext, IDisposable, INotifyPageFrameBoxChanged
+    public partial class PageFrameBoxPresenter : ObservableObject, IDragTransformContextFactory, IBookPageContext, IDisposable, INotifyPageFrameBoxChanged
     {
         public static PageFrameBoxPresenter Current { get; } = new PageFrameBoxPresenter();
 
@@ -89,9 +88,6 @@ namespace NeeView
             ApplicationDisposer.Current.Add(this);
         }
 
-
-        [Subscribable]
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         [Subscribable]
         public event EventHandler? PagesChanged;
@@ -296,7 +292,7 @@ namespace NeeView
         private void SetLoading(string? address)
         {
             _isLoading = !string.IsNullOrEmpty(address);
-            RaisePropertyChanged(nameof(IsLoading));
+            OnPropertyChanged(nameof(IsLoading));
             Loading?.Invoke(this, new BookPathEventArgs(address));
         }
 
@@ -311,7 +307,7 @@ namespace NeeView
             {
                 StagePageFrameBoxContext();
                 ReleasePageFrameBoxContext();
-                RaisePropertyChanged(null);
+                OnPropertyChanged("");
                 PagesChanged?.Invoke(this, EventArgs.Empty);
                 SelectedRangeChanged?.Invoke(this, PageRangeChangedEventArgs.Empty);
 
@@ -328,7 +324,7 @@ namespace NeeView
             // NOTE: 表示開始時の最初のサイズ変更を回避する
             using var key = PageFrameProfile.ReferenceSizeLocker.Lock();
 
-            RaisePropertyChanged(nameof(ViewNext));
+            OnPropertyChanged(nameof(ViewNext));
 
             await WaitStableAsync(box.Box, token);
 
@@ -336,7 +332,7 @@ namespace NeeView
 
             box.BookMementoControl.TrySaveBookMemento();
 
-            RaisePropertyChanged(null);
+            OnPropertyChanged("");
 
             PagesChanged?.Invoke(this, EventArgs.Empty);
             SelectedRangeChanged?.Invoke(this, new PageRangeChangedEventArgs(box.SelectedRange, PageRange.Empty));
@@ -514,13 +510,13 @@ namespace NeeView
 
         private void Box_PagesChanged(object? sender, EventArgs e)
         {
-            RaisePropertyChanged(nameof(Pages));
+            OnPropertyChanged(nameof(Pages));
             PagesChanged?.Invoke(this, e);
         }
 
         private void Box_SelectedRangeChanged(object? sender, PageRangeChangedEventArgs e)
         {
-            RaisePropertyChanged(nameof(SelectedRange));
+            OnPropertyChanged(nameof(SelectedRange));
             SelectedRangeChanged?.Invoke(this, e);
         }
 
@@ -695,7 +691,7 @@ namespace NeeView
         {
             _boxNext?.Dispose();
             _boxNext = _box;
-            RaisePropertyChanged(nameof(ViewNext));
+            OnPropertyChanged(nameof(ViewNext));
         }
 
         private void ReleasePageFrameBoxContext()
@@ -704,8 +700,8 @@ namespace NeeView
             _boxView = _boxNext;
             _boxView?.Box.SetVisibility(Visibility.Visible);
             _boxNext = null;
-            RaisePropertyChanged(nameof(View));
-            RaisePropertyChanged(nameof(ViewNext));
+            OnPropertyChanged(nameof(View));
+            OnPropertyChanged(nameof(ViewNext));
         }
 
         #endregion PageFrameBoxContext

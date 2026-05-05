@@ -1,11 +1,11 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Collections.Generic;
 using System;
 using System.Threading.Tasks;
 
 namespace NeeView
 {
-    public abstract class MenuElement : BindableBase, ITreeListNode, IEquatable<MenuElement>
+    public abstract class MenuElement : ObservableObject, ITreeListNode, IEquatable<MenuElement>
     {
         public MenuElement(MenuElementType type)
         {
@@ -28,8 +28,8 @@ namespace NeeView
             set
             {
                 Name = (value == DefaultLabel) ? null : value;
-                RaisePropertyChanged();
-                RaisePropertyChanged(nameof(DisplayLabel));
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(DisplayLabel));
             }
         }
 
@@ -44,7 +44,7 @@ namespace NeeView
 
         public void RaisePropertyChangedAll()
         {
-            RaisePropertyChanged(null);
+            OnPropertyChanged("");
         }
 
         public bool Equals(MenuElement? other)

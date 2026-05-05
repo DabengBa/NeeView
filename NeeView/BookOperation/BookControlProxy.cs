@@ -1,9 +1,9 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 
 namespace NeeView
 {
-    public class BookControlProxy : BindableBase, IBookControl, IDisposable
+    public class BookControlProxy : ObservableObject, IBookControl, IDisposable
     {
         private IBookControl? _source;
         private bool _disposedValue;
@@ -46,9 +46,9 @@ namespace NeeView
             Detach();
             Attach(source);
 
-            RaisePropertyChanged(nameof(IsBookmark));
-            RaisePropertyChanged(nameof(IsBusy));
-            RaisePropertyChanged(nameof(PageSortModeClass));
+            OnPropertyChanged(nameof(IsBookmark));
+            OnPropertyChanged(nameof(IsBusy));
+            OnPropertyChanged(nameof(PageSortModeClass));
         }
 
         private void Attach(IBookControl? source)
@@ -73,7 +73,7 @@ namespace NeeView
         private void Source_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             //Debug.WriteLine($"{e.PropertyName}: IsBusy={_source?.IsBusy}");
-            RaisePropertyChanged(e.PropertyName);
+            OnPropertyChanged(e.PropertyName);
         }
 
 

@@ -1,5 +1,5 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Windows.Property;
 using System;
 using System.Text.Json.Serialization;
@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class BookSettingConfig : BindableBase, ICloneable, IBookSetting, IHasAutoRotate
+    public partial class BookSettingConfig : ObservableObject, ICloneable, IBookSetting, IHasAutoRotate
     {
         [DefaultEquality] private string _page = "";
         [DefaultEquality] private PageMode _pageMode = PageMode.SinglePage;

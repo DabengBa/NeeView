@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Properties;
 using System;
 using System.Collections.Generic;
@@ -12,7 +12,7 @@ namespace NeeView.Setting
     /// <summary>
     /// MouseGestureSetting ViewModel
     /// </summary>
-    public class InputTouchSettingViewModel : BindableBase
+    public class InputTouchSettingViewModel : ObservableObject
     {
         private readonly IReadOnlyDictionary<string, CommandElement> _commandMap;
         private readonly string _key;
@@ -33,13 +33,13 @@ namespace NeeView.Setting
         public ObservableCollection<GestureElement> GestureToken
         {
             get { return _gestureToken; }
-            set { if (_gestureToken != value) { _gestureToken = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _gestureToken, value); }
         }
 
         public string? GestureTokenNote
         {
             get { return _gestureTokenNote; }
-            set { if (_gestureTokenNote != value) { _gestureTokenNote = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _gestureTokenNote, value); }
         }
 
         public TouchAreaMap TouchAreaMap { get; set; }
@@ -50,7 +50,7 @@ namespace NeeView.Setting
             var area = TouchAreaExtensions.GetTouchArea(pos.X / width, pos.Y / height);
 
             this.TouchAreaMap.Toggle(area);
-            RaisePropertyChanged(nameof(TouchAreaMap));
+            OnPropertyChanged(nameof(TouchAreaMap));
 
             UpdateGestureToken(this.TouchAreaMap);
         }

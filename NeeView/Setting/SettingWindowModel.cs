@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.IO.Search;
 using NeeView.Properties;
 using System;
@@ -12,7 +12,7 @@ namespace NeeView.Setting
     /// <summary>
     /// 設定画面 Model
     /// </summary>
-    public class SettingWindowModel : BindableBase
+    public class SettingWindowModel : ObservableObject
     {
         private class SettingItemRecord : ISearchItem
         {

@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeView.Windows;
 using System.Windows.Controls;
 
@@ -7,7 +8,7 @@ namespace NeeView
     /// <summary>
     /// MenuBar : Model
     /// </summary>
-    public class MenuBar : BindableBase
+    public class MenuBar : ObservableObject
     {
         private readonly WindowStateManager _windowStateManager;
         private bool _isMaximizeButtonMouseOver;
@@ -17,8 +18,8 @@ namespace NeeView
         {
             _windowStateManager = windowStateManager;
 
-            NeeView.MainMenu.Current.AddPropertyChanged(nameof(NeeView.MainMenu.Menu),
-                (s, e) => RaisePropertyChanged(nameof(MainMenu)));
+            NeeView.MainMenu.Current.SubscribePropertyChanged(nameof(NeeView.MainMenu.Menu),
+                (s, e) => OnPropertyChanged(nameof(MainMenu)));
         }
 
 

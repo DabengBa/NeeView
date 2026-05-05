@@ -1,13 +1,13 @@
-﻿using Generator.Equals;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using Microsoft.Win32;
-using NeeLaboratory.ComponentModel;
 using NeeView.Windows.Property;
 using System.Text.Json.Serialization;
 
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class MediaArchiveConfig : BindableBase, IMediaContext
+    public partial class MediaArchiveConfig : ObservableObject, IMediaContext
     {
         public static FileTypeCollection DefaultSupportFileTypes { get; } = new FileTypeCollection(".asf;.avi;.mp4;.mkv;.mov;.wmv");
 

@@ -1,10 +1,8 @@
-﻿using CommunityToolkit.Mvvm.Input;
-using NeeLaboratory.ComponentModel;
-using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -50,7 +48,7 @@ namespace NeeView
 
 
 
-    public partial class DevInfoViewModel : BindableBase
+    public partial class DevInfoViewModel : ObservableObject
     {
         public DevInfoViewModel()
         {
@@ -104,7 +102,7 @@ namespace NeeView
         public Point ContentPosition
         {
             get { return _contentPosition; }
-            set { _contentPosition = value; RaisePropertyChanged(); }
+            set { SetProperty(ref _contentPosition, value); }
         }
 
         // 開発用：コンテンツ座標情報更新
@@ -121,7 +119,7 @@ namespace NeeView
         public string? Message
         {
             get { return _Message; }
-            set { if (_Message != value) { _Message = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _Message, value); }
         }
 
 
@@ -197,8 +195,7 @@ namespace NeeView
 
 
 
-    [NotifyPropertyChanged]
-    public partial class DevTextElement : INotifyPropertyChanged, IComparable<DevTextElement>
+    public partial class DevTextElement : ObservableObject, IComparable<DevTextElement>
     {
         private string _key;
         private string? _text;
@@ -208,8 +205,6 @@ namespace NeeView
             _key = key;
             _text = text;
         }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         public string Key
         {

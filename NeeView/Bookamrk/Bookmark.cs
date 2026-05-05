@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Collections.Generic;
 using System;
 
@@ -9,7 +9,7 @@ namespace NeeView
     }
 
 
-    public class Bookmark : BindableBase, IBookmarkEntry, ICloneable
+    public class Bookmark : ObservableObject, IBookmarkEntry, ICloneable
     {
         private string? _name;
         private string _path;
@@ -37,7 +37,7 @@ namespace NeeView
                 {
                     _unit = null;
                     IsUnlinked = false;
-                    RaisePropertyChanged(null);
+                    OnPropertyChanged("");
                 }
             }
         }

@@ -42,7 +42,7 @@ namespace NeeView
                         image =>
                         {
                             _icon = image;
-                            RaisePropertyChanged(nameof(Icon));
+                            OnPropertyChanged(nameof(Icon));
                         });
                 }
 
@@ -102,7 +102,7 @@ namespace NeeView
         public override void RefreshIcon()
         {
             _iconInitialized = false;
-            RaisePropertyChanged(nameof(Icon));
+            OnPropertyChanged(nameof(Icon));
         }
 
         protected override void OnException(DirectoryNode sender, NotifyCrateDirectoryChildrenExcepionEventArgs e)

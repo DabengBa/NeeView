@@ -1,5 +1,5 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -31,7 +31,7 @@ namespace NeeView.Runtime.LayoutPanel
         }
     }
 
-    public class LayoutDockPanelContent : BindableBase
+    public class LayoutDockPanelContent : ObservableObject
     {
         private LayoutPanelCollection? _selectedItem;
         private LayoutPanelCollection? _lastSelectedItem;
@@ -77,7 +77,7 @@ namespace NeeView.Runtime.LayoutPanel
                     {
                         _lastSelectedItem = _selectedItem;
                     }
-                    RaisePropertyChanged();
+                    OnPropertyChanged();
                 }
             }
         }

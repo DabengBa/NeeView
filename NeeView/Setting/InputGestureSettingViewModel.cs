@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.Linq;
 using NeeView.Properties;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace NeeView.Setting
 {
-    public class InputGestureSettingViewModel : BindableBase
+    public class InputGestureSettingViewModel : ObservableObject
     {
         // すべてのコマンドのショートカット
         private readonly IReadOnlyDictionary<string, CommandElement> _commandMap;
@@ -44,7 +44,7 @@ namespace NeeView.Setting
         public ObservableCollection<InputGestureToken> GestureTokens
         {
             get { return _gestureTokens; }
-            set { if (_gestureTokens != value) { _gestureTokens = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _gestureTokens, value); }
         }
 
         // ウィンドウタイトル？

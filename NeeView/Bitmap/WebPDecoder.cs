@@ -197,7 +197,7 @@ namespace NeeView
                 }
 
                 byte* src = (byte*)rgbaPtr;
-                
+
                 var wb = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgra32, null);
                 int stride = wb.BackBufferStride;
                 int size = stride * height;

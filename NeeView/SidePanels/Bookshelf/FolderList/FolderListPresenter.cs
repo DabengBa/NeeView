@@ -1,4 +1,6 @@
-﻿namespace NeeView
+﻿using NeeLaboratory.ComponentModel;
+
+namespace NeeView
 {
     public interface IHasFolderListBox
     {
@@ -16,7 +18,7 @@
         public FolderListPresenter(FolderList folderList)
         {
             _folderList = folderList;
-            _folderList.FolderListConfig.AddPropertyChanged(nameof(FolderListConfig.PanelListItemStyle), (s, e) => UpdateFolderListBox());
+            _folderList.FolderListConfig.SubscribePropertyChanged(nameof(FolderListConfig.PanelListItemStyle), (s, e) => UpdateFolderListBox());
 
             _folderListBoxViewModel = new FolderListBoxViewModel(folderList);
 

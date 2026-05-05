@@ -1,10 +1,10 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 
 namespace NeeView
 {
     [Equatable(IgnoreInheritedMembers = true)]
-    public partial class ArchiveConfig : BindableBase
+    public partial class ArchiveConfig : ObservableObject
     {
         public ZipArchiveConfig Zip { get; set; } = new ZipArchiveConfig();
 

@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.ComponentModel;
 
 namespace NeeView
@@ -6,8 +6,7 @@ namespace NeeView
     /// <summary>
     /// 動画ページのリピートフラグのみ動画設定を使用する動画コントロール情報
     /// </summary>
-    [NotifyPropertyChanged]
-    public partial class PageMediaContext : IMediaContext
+    public partial class PageMediaContext : ObservableObject, IMediaContext
     {
         public static PageMediaContext Current { get; } = new PageMediaContext();
 
@@ -23,10 +22,6 @@ namespace NeeView
             _imageConfig = Config.Current.Image;
             _imageConfig.PropertyChanged += ImageConfig_PropertyChanged;
         }
-
-
-        [Subscribable]
-        public event PropertyChangedEventHandler? PropertyChanged;
 
 
         public bool IsMuted
@@ -59,11 +54,11 @@ namespace NeeView
             switch (e.PropertyName)
             {
                 case nameof(MediaArchiveConfig.IsMuted):
-                    RaisePropertyChanged(nameof(IsMuted));
+                    OnPropertyChanged(nameof(IsMuted));
                     break;
 
                 case nameof(MediaArchiveConfig.Volume):
-                    RaisePropertyChanged(nameof(Volume));
+                    OnPropertyChanged(nameof(Volume));
                     break;
             }
         }
@@ -73,7 +68,7 @@ namespace NeeView
             switch (e.PropertyName)
             {
                 case nameof(ImageConfig.IsMediaRepeat):
-                    RaisePropertyChanged(nameof(IsRepeat));
+                    OnPropertyChanged(nameof(IsRepeat));
                     break;
             }
         }

@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.PageFrames;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.Windows.Media;
 
 namespace NeeView
 {
-    public class NavigateThumbnailViewModel : BindableBase
+    public class NavigateThumbnailViewModel : ObservableObject
     {
         private readonly PageFrameBoxPresenter _presenter;
         private bool _isEnabled;

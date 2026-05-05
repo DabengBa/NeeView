@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeView.Windows;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -11,7 +12,7 @@ namespace NeeView
     /// <summary>
     /// MenuBar : ViewModel
     /// </summary>
-    public class MenuBarViewModel : BindableBase
+    public class MenuBarViewModel : ObservableObject
     {
         private MenuBar _model;
         private MainWindowCaptionEmulator _windowCaptionEmulator;
@@ -23,15 +24,15 @@ namespace NeeView
 
             InitializeWindowCaptionEmulator(control, model.WindowStateManager);
 
-            _model.AddPropertyChanged(nameof(MenuBar.MainMenu),
-                (s, e) => RaisePropertyChanged(nameof(MainMenu)));
+            _model.SubscribePropertyChanged(nameof(MenuBar.MainMenu),
+                (s, e) => OnPropertyChanged(nameof(MainMenu)));
         }
 
 
         public MenuBar Model
         {
             get { return _model; }
-            set { if (_model != value) { _model = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _model, value); }
         }
 
         public Menu? MainMenu => _model.MainMenu;
@@ -54,7 +55,7 @@ namespace NeeView
                 if (_windowCaptionEmulator.IsEnabled != value)
                 {
                     _windowCaptionEmulator.IsEnabled = value;
-                    RaisePropertyChanged();
+                    OnPropertyChanged();
                 }
             }
         }

@@ -1,12 +1,12 @@
-﻿using Generator.Equals;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeLaboratory;
-using NeeLaboratory.ComponentModel;
 using NeeView.Windows.Property;
 
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class ImageTrimConfig : BindableBase
+    public partial class ImageTrimConfig : ObservableObject
     {
         private const double _maxRate = 0.9;
 
@@ -36,7 +36,7 @@ namespace NeeView
                     if (_left + _right > _maxRate)
                     {
                         _right = _maxRate - _left;
-                        RaisePropertyChanged(nameof(Right));
+                        OnPropertyChanged(nameof(Right));
                     }
                 }
             }
@@ -53,7 +53,7 @@ namespace NeeView
                     if (_left + _right > _maxRate)
                     {
                         _left = _maxRate - _right;
-                        RaisePropertyChanged(nameof(Left));
+                        OnPropertyChanged(nameof(Left));
                     }
                 }
             }
@@ -71,7 +71,7 @@ namespace NeeView
                     if (_top + _bottom > _maxRate)
                     {
                         _bottom = _maxRate - _top;
-                        RaisePropertyChanged(nameof(Bottom));
+                        OnPropertyChanged(nameof(Bottom));
                     }
                 }
             }
@@ -88,7 +88,7 @@ namespace NeeView
                     if (_top + _bottom > _maxRate)
                     {
                         _top = _maxRate - _bottom;
-                        RaisePropertyChanged(nameof(Top));
+                        OnPropertyChanged(nameof(Top));
                     }
                 }
             }

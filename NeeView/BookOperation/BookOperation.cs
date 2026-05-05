@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.Generators;
 using NeeView.PageFrames;
 using System;
@@ -14,7 +14,7 @@ namespace NeeView
     /// <summary>
     /// 本の操作
     /// </summary>
-    public partial class BookOperation : BindableBase
+    public partial class BookOperation : ObservableObject
     {
         // System Object
         static BookOperation() => Current = new BookOperation();
@@ -93,8 +93,8 @@ namespace NeeView
             _playlist.SetSource(CreatePlaylistController(_box));
             _terminator.SetSource(CreatePageTerminator(_box));
 
-            RaisePropertyChanged(nameof(Book));
-            RaisePropertyChanged(nameof(Address));
+            OnPropertyChanged(nameof(Book));
+            OnPropertyChanged(nameof(Address));
         }
 
         private BookPageTerminator? CreatePageTerminator(PageFrameBox? box)

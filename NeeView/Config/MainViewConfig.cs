@@ -1,5 +1,5 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Windows;
 using NeeView.Windows.Property;
 using System.Windows;
@@ -7,7 +7,7 @@ using System.Windows;
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class MainViewConfig : BindableBase
+    public partial class MainViewConfig : ObservableObject
     {
         [DefaultEquality] private bool _isFloating;
         [DefaultEquality] private bool _isTopmost;

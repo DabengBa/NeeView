@@ -53,7 +53,7 @@ namespace NeeView
         }
 
         public string DefaultFileNameFormat { get; } = "";
-        
+
         public string EmptyMessage { get; } = "";
 
         public string HelpText { get; }

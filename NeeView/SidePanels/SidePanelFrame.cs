@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Windows;
 using System;
 using System.Diagnostics;
@@ -27,7 +27,7 @@ namespace NeeView
     /// <summary>
     /// NeeView用 サイドパネル管理
     /// </summary>
-    public class SidePanelFrame : BindableBase
+    public class SidePanelFrame : ObservableObject
     {
         static SidePanelFrame() => Current = new SidePanelFrame();
         public static SidePanelFrame Current { get; }
@@ -51,7 +51,7 @@ namespace NeeView
         public bool IsVisibleLocked
         {
             get { return _isVisibleLocked; }
-            set { if (_isVisibleLocked != value) { _isVisibleLocked = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _isVisibleLocked, value); }
         }
 
 
@@ -71,14 +71,14 @@ namespace NeeView
 
         public void RaisePanelPropertyChanged()
         {
-            RaisePropertyChanged(nameof(IsVisibleFolderList));
-            RaisePropertyChanged(nameof(IsVisibleHistoryList));
-            RaisePropertyChanged(nameof(IsVisibleBookmarkList));
-            RaisePropertyChanged(nameof(IsVisiblePageList));
-            RaisePropertyChanged(nameof(IsVisibleFileInfo));
-            RaisePropertyChanged(nameof(IsVisibleEffectInfo));
-            RaisePropertyChanged(nameof(IsVisibleNavigator));
-            RaisePropertyChanged(nameof(IsVisiblePlaylist));
+            OnPropertyChanged(nameof(IsVisibleFolderList));
+            OnPropertyChanged(nameof(IsVisibleHistoryList));
+            OnPropertyChanged(nameof(IsVisibleBookmarkList));
+            OnPropertyChanged(nameof(IsVisiblePageList));
+            OnPropertyChanged(nameof(IsVisibleFileInfo));
+            OnPropertyChanged(nameof(IsVisibleEffectInfo));
+            OnPropertyChanged(nameof(IsVisibleNavigator));
+            OnPropertyChanged(nameof(IsVisiblePlaylist));
         }
 
 

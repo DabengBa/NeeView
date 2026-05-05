@@ -346,7 +346,7 @@ namespace NeeView
             options.Converters.Add(new DiffJsonConverter<CopyBookToFolderAsCommandParameter>());
             options.Converters.Add(new DiffJsonConverter<MoveBookToFolderAsCommandParameter>());
             options.Converters.Add(new DiffJsonConverter<ToggleBookmarkCommandParameter>());
-          
+
             return options;
         }
     }

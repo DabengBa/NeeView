@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Properties;
 using System;
 using System.Windows;
@@ -6,7 +6,7 @@ using System.Windows.Media;
 
 namespace NeeView
 {
-    public class PlaylistPanel : BindableBase, IPanel
+    public class PlaylistPanel : ObservableObject, IPanel
     {
         private readonly LazyEx<PlaylistView> _view;
         private readonly PlaylistPresenter _presenter;

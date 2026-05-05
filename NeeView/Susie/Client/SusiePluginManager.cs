@@ -1,5 +1,6 @@
 ﻿//#define LOCAL_DEBUG
 
+using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.Collections.Specialized;
 using NeeLaboratory.ComponentModel;
 using NeeLaboratory.Generators;
@@ -22,7 +23,7 @@ using System.Windows.Interop;
 namespace NeeView
 {
     [LocalDebug]
-    public partial class SusiePluginManager : BindableBase
+    public partial class SusiePluginManager : ObservableObject
     {
         private static readonly Lazy<SusiePluginManager> _current = new();
         public static SusiePluginManager Current => _current.Value;
@@ -65,7 +66,7 @@ namespace NeeView
                     _INPlugins?.CollectionChanged -= Plugins_CollectionChanged;
                     _INPlugins = value;
                     _INPlugins.CollectionChanged += Plugins_CollectionChanged;
-                    RaisePropertyChanged(nameof(INPlugins));
+                    OnPropertyChanged(nameof(INPlugins));
                 }
             }
         }
@@ -82,7 +83,7 @@ namespace NeeView
                     _AMPlugins?.CollectionChanged -= Plugins_CollectionChanged;
                     _AMPlugins = value;
                     _AMPlugins.CollectionChanged += Plugins_CollectionChanged;
-                    RaisePropertyChanged(nameof(AMPlugins));
+                    OnPropertyChanged(nameof(AMPlugins));
                 }
             }
         }
@@ -113,17 +114,17 @@ namespace NeeView
             if (_isInitialized) return;
             _isInitialized = true;
 
-            Config.Current.Susie.AddPropertyChanged(nameof(SusieConfig.IsEnabled), (s, e) =>
+            Config.Current.Susie.SubscribePropertyChanged(nameof(SusieConfig.IsEnabled), (s, e) =>
             {
                 UpdateSusiePluginCollection();
             });
 
-            Config.Current.Susie.AddPropertyChanging(nameof(SusieConfig.SusiePluginPath), (s, e) =>
+            Config.Current.Susie.SubscribePropertyChanged(nameof(SusieConfig.SusiePluginPath), (s, e) =>
             {
                 CloseSusiePluginCollection();
             });
 
-            Config.Current.Susie.AddPropertyChanged(nameof(SusieConfig.SusiePluginPath), (s, e) =>
+            Config.Current.Susie.SubscribePropertyChanged(nameof(SusieConfig.SusiePluginPath), (s, e) =>
             {
                 UpdateSusiePluginCollection();
             });

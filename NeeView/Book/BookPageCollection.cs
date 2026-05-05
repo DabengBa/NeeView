@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.Collection;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.Collection;
 using NeeLaboratory.ComponentModel;
 using NeeLaboratory.Generators;
 using NeeLaboratory.IO.Search;
@@ -14,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace NeeView
 {
-    public partial class BookPageCollection : BindableBase, IReadOnlyList<Page>, IEnumerable<Page>, IDisposable
+    public partial class BookPageCollection : ObservableObject, IReadOnlyList<Page>, IEnumerable<Page>, IDisposable
     {
         private readonly PageThumbnailPool _thumbnailPool = new();
 
@@ -160,7 +161,7 @@ namespace NeeView
             {
                 if (disposing)
                 {
-                    this.ResetPropertyChanged();
+                    this.ClearObservableEvents();
                     this.PageRemoved = null;
                     this.PagesSorting = null;
                     this.PagesSorted = null;

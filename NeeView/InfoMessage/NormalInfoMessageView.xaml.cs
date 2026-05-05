@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -8,8 +8,8 @@ namespace NeeView
     /// <summary>
     /// NormalInfoMessageView.xaml の相互作用ロジック
     /// </summary>
-    [NotifyPropertyChanged]
-    public partial class NormalInfoMessageView : UserControl, INotifyPropertyChanged
+    [INotifyPropertyChanged]
+    public partial class NormalInfoMessageView : UserControl
     {
         private NormalInfoMessageViewModel? _vm;
 
@@ -19,9 +19,6 @@ namespace NeeView
             InitializeComponent();
             this.Root.DataContext = this;
         }
-
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
 
         public NormalInfoMessage Source

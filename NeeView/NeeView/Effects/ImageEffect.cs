@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeView.Windows.Property;
 using System.Collections.Generic;
 using System.Windows.Media.Effects;
@@ -8,7 +9,7 @@ namespace NeeView.Effects
     /// <summary>
     /// 画像エフェクト
     /// </summary>
-    public class ImageEffect : BindableBase
+    public class ImageEffect : ObservableObject
     {
         static ImageEffect() => Current = new ImageEffect();
         public static ImageEffect Current { get; }
@@ -39,12 +40,12 @@ namespace NeeView.Effects
 
             Config.Current.ImageEffect.SubscribePropertyChanged(nameof(ImageEffectConfig.IsEnabled), (s, e) =>
             {
-                RaisePropertyChanged(nameof(Effect));
+                OnPropertyChanged(nameof(Effect));
             });
 
             Config.Current.ImageEffect.SubscribePropertyChanged(nameof(ImageEffectConfig.EffectType), (s, e) =>
             {
-                RaisePropertyChanged(nameof(Effect));
+                OnPropertyChanged(nameof(Effect));
                 UpdateEffectParameters();
             });
 
@@ -60,7 +61,7 @@ namespace NeeView.Effects
         public PropertyDocument? EffectParameters
         {
             get { return _effectParameters; }
-            set { if (_effectParameters != value) { _effectParameters = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _effectParameters, value); }
         }
 
 

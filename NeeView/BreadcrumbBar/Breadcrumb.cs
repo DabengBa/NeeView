@@ -1,10 +1,10 @@
 ﻿
-using NeeLaboratory.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.Generic;
 
 namespace NeeView
 {
-    public abstract class Breadcrumb : BindableBase
+    public abstract class Breadcrumb : ObservableObject
     {
         public abstract QueryPath Path { get; }
         public abstract bool HasName { get; }

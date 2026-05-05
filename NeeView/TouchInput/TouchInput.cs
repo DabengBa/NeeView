@@ -1,5 +1,6 @@
 ﻿//#define LOCAL_DEBUG
 
+using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.ComponentModel;
 using NeeLaboratory.Generators;
 using System;
@@ -29,7 +30,7 @@ namespace NeeView
 
     // タッチ処理
     [LocalDebug]
-    public partial class TouchInput : BindableBase
+    public partial class TouchInput : ObservableObject
     {
         private static int _serialCount;
 

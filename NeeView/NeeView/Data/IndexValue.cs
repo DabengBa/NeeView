@@ -1,5 +1,5 @@
-﻿using NeeLaboratory;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory;
 using NeeView.Windows.Property;
 using System;
 using System.Collections.Generic;
@@ -33,7 +33,7 @@ namespace NeeView.Data
     /// テーブル値 基底
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    abstract public class IndexValue<T> : BindableBase, IIndexValue
+    abstract public class IndexValue<T> : ObservableObject, IIndexValue
         where T : struct
     {
         private readonly List<T> _values;
@@ -136,7 +136,7 @@ namespace NeeView.Data
                 _property.Value = value;
             }
 
-            RaisePropertyChanged(null);
+            OnPropertyChanged("");
             ValueChanged?.Invoke(this, new ValueChangedEventArgs<T>() { NewValue = value });
         }
 
@@ -148,7 +148,7 @@ namespace NeeView.Data
         public void Update()
         {
             _index = IndexOfNear(Value, _values);
-            RaisePropertyChanged(null);
+            OnPropertyChanged("");
         }
     }
 

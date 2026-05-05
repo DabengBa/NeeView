@@ -56,7 +56,7 @@ namespace NeeView
             {
                 return Size.Empty;
             }
-        
+
             return GetImageSourcePixelSize(rectangle);
         }
 

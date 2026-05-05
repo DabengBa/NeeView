@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Runtime.LayoutPanel;
 using NeeView.Windows;
 using System;
@@ -8,7 +8,7 @@ using System.Windows.Controls;
 
 namespace NeeView
 {
-    public class SidePanelDropAcceptor : BindableBase
+    public class SidePanelDropAcceptor : ObservableObject
     {
         /// <summary>
         /// ドロップ受け入れ先コントロール.

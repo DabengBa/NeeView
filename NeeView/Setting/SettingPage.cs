@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Properties;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +11,7 @@ namespace NeeView.Setting
     /// <summary>
     /// 設定ウィンドウのページ
     /// </summary>
-    public class SettingPage : BindableBase
+    public class SettingPage : ObservableObject
     {
         private UIElement? _content;
         private bool _isSelected;
@@ -56,7 +56,7 @@ namespace NeeView.Setting
         public bool IsSelected
         {
             get { return _isSelected; }
-            set { if (_isSelected != value) { _isSelected = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _isSelected, value); }
         }
 
         // 最初から開いた状態にする
@@ -178,7 +178,7 @@ namespace NeeView.Setting
         {
             Items = items;
             _content = null;
-            RaisePropertyChanged(nameof(Content));
+            OnPropertyChanged(nameof(Content));
         }
 
         public IEnumerable<SettingItem> GetItemCollection()

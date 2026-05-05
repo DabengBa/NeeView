@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.ComponentModel;
 using System.Windows;
@@ -9,8 +9,7 @@ namespace NeeView.PageFrames
     /// PageFrame環境パラメータ
     /// TODO: PageFramesPanel 共通のパラメータのようなものにしたい
     /// </summary>
-    [NotifyPropertyChanged]
-    public partial class PageFrameProfile : INotifyPropertyChanged, IStaticFrame, IDisposable
+    public partial class PageFrameProfile : ObservableObject, IStaticFrame, IDisposable
     {
         /// <summary>
         /// キャンバスサイズをリファレンスサイズに設定する許可
@@ -42,10 +41,6 @@ namespace NeeView.PageFrames
             _settingConfig.PropertyChanged += BookSettingConfig_PropertyChanged;
             _mainViewConfig.PropertyChanged += MainViewConfig_PropertyChanged;
         }
-
-
-        [Subscribable]
-        public event PropertyChangedEventHandler? PropertyChanged;
 
 
         public bool IsStaticFrame => !_config.Book.IsPanorama;
@@ -124,11 +119,11 @@ namespace NeeView.PageFrames
             switch (e.PropertyName)
             {
                 case nameof(BookConfig.FrameSpace):
-                    RaisePropertyChanged(nameof(FrameMargin));
+                    OnPropertyChanged(nameof(FrameMargin));
                     break;
 
                 case nameof(BookConfig.IsPanorama):
-                    RaisePropertyChanged(nameof(IsStaticFrame));
+                    OnPropertyChanged(nameof(IsStaticFrame));
                     break;
             }
         }
@@ -142,15 +137,15 @@ namespace NeeView.PageFrames
             switch (e.PropertyName)
             {
                 case nameof(MainViewConfig.IsFloating):
-                    RaisePropertyChanged(nameof(ReferenceSize));
+                    OnPropertyChanged(nameof(ReferenceSize));
                     break;
 
                 case nameof(MainViewConfig.IsAutoStretch):
-                    RaisePropertyChanged(nameof(ReferenceSize));
+                    OnPropertyChanged(nameof(ReferenceSize));
                     break;
 
                 case nameof(MainViewConfig.ReferenceSize):
-                    RaisePropertyChanged(nameof(ReferenceSize));
+                    OnPropertyChanged(nameof(ReferenceSize));
                     break;
             }
         }

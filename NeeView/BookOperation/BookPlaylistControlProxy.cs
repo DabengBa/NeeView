@@ -1,11 +1,11 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
 
 namespace NeeView
 {
-    public class BookPlaylistControlProxy : BindableBase, IBookPlaylistControl, IDisposable
+    public class BookPlaylistControlProxy : ObservableObject, IBookPlaylistControl, IDisposable
     {
         private BookPlaylistControl? _source;
         private bool _disposedValue;
@@ -49,7 +49,7 @@ namespace NeeView
             Attach(source);
 
             UpdateMarkers();
-            RaisePropertyChanged(nameof(IsMarked));
+            OnPropertyChanged(nameof(IsMarked));
         }
 
         private void Attach(BookPlaylistControl? source)
@@ -87,7 +87,7 @@ namespace NeeView
         {
             if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName == srcName)
             {
-                RaisePropertyChanged(dstName);
+                OnPropertyChanged(dstName);
             }
         }
 

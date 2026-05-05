@@ -1,11 +1,12 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 
 namespace NeeView.Setting
 {
     /// <summary>
     /// 設定画面 ViewModel
     /// </summary>
-    public class SettingWindowViewModel : BindableBase
+    public class SettingWindowViewModel : ObservableObject
     {
         private SettingWindowModel _model;
 
@@ -14,7 +15,7 @@ namespace NeeView.Setting
         {
             _model = model;
 
-            _model.SubscribePropertyChanged(nameof(_model.CurrentPage), (s, e) => RaisePropertyChanged(nameof(CurrentPage)));
+            _model.SubscribePropertyChanged(nameof(_model.CurrentPage), (s, e) => OnPropertyChanged(nameof(CurrentPage)));
             _model.ResetAliveCount();
         }
 

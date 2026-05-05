@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeView.Properties;
 using NeeView.Windows.Property;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using System.Globalization;
 
 namespace NeeView.Setting
 {
-    public class CommandParameterViewModel : BindableBase
+    public class CommandParameterViewModel : ObservableObject
     {
         private readonly IReadOnlyDictionary<string, CommandElement> _commandMap;
         private readonly string _key;
@@ -53,7 +54,7 @@ namespace NeeView.Setting
         public PropertyDocument? PropertyDocument
         {
             get { return _propertyDocument; }
-            set { if (_propertyDocument != value) { _propertyDocument = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _propertyDocument, value); }
         }
 
         public string? Note { get; private set; }
@@ -86,7 +87,7 @@ namespace NeeView.Setting
             if (_propertyDocument != null && defaultParameter != null)
             {
                 _propertyDocument.Set(defaultParameter);
-                RaisePropertyChanged(nameof(PropertyDocument));
+                OnPropertyChanged(nameof(PropertyDocument));
             }
         }
     }

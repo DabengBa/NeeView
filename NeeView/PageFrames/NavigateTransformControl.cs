@@ -1,14 +1,12 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media.Animation;
 
 namespace NeeView.PageFrames
 {
-    [NotifyPropertyChanged]
-    public partial class NavigateTransformControl : ITransformControl, INotifyPropertyChanged
+    public partial class NavigateTransformControl : ObservableObject, ITransformControl
     {
         private PageFrameBoxPresenter _presenter;
         private PageFrameTransformAccessor? _source;
@@ -20,10 +18,6 @@ namespace NeeView.PageFrames
 
             UpdateSource();
         }
-
-        [Subscribable]
-        public event PropertyChangedEventHandler? PropertyChanged;
-
 
         public double Scale => _source?.Scale ?? 1.0;
 
@@ -51,7 +45,7 @@ namespace NeeView.PageFrames
             if (source is null) return;
             _source = source;
             _source.TransformChanged += Source_TransformChanged;
-            RaisePropertyChanged(null);
+            OnPropertyChanged("");
         }
 
         private void Detach()
@@ -66,19 +60,19 @@ namespace NeeView.PageFrames
             switch (e.Action)
             {
                 case TransformAction.Scale:
-                    RaisePropertyChanged(nameof(Scale));
+                    OnPropertyChanged(nameof(Scale));
                     break;
                 case TransformAction.Angle:
-                    RaisePropertyChanged(nameof(Angle));
+                    OnPropertyChanged(nameof(Angle));
                     break;
                 case TransformAction.Point:
-                    RaisePropertyChanged(nameof(Point));
+                    OnPropertyChanged(nameof(Point));
                     break;
                 case TransformAction.FlipHorizontal:
-                    RaisePropertyChanged(nameof(IsFlipHorizontal));
+                    OnPropertyChanged(nameof(IsFlipHorizontal));
                     break;
                 case TransformAction.FlipVertical:
-                    RaisePropertyChanged(nameof(IsFlipVertical));
+                    OnPropertyChanged(nameof(IsFlipVertical));
                     break;
             }
         }

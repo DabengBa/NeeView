@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Media.Imaging.Metadata;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +11,7 @@ using System.Windows.Media.Effects;
 namespace NeeView
 {
 
-    public class FileInformationSource : BindableBase, IRenameable
+    public class FileInformationSource : ObservableObject, IRenameable
     {
         private List<FileInformationRecord>? _properties;
 

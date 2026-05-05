@@ -1,10 +1,10 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
 
 namespace NeeView
 {
-    public class SystemVisualParameters : BindableBase
+    public class SystemVisualParameters : ObservableObject
     {
         static SystemVisualParameters() => Current = new SystemVisualParameters();
         public static SystemVisualParameters Current { get; }

@@ -1,5 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
-using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using System;
 using System.ComponentModel;
 using System.Globalization;
@@ -10,8 +10,8 @@ using System.Windows.Media.Animation;
 
 namespace NeeView.PageFrames
 {
-    [NotifyPropertyChanged]
-    public partial class PageFrameScrollViewer : Grid, IPointControl, INotifyPropertyChanged, IScrollable
+    [INotifyPropertyChanged]
+    public partial class PageFrameScrollViewer : Grid, IPointControl, IScrollable
     {
         private readonly PageFrameContext _context;
         private readonly Canvas _rootCanvas;
@@ -80,9 +80,6 @@ namespace NeeView.PageFrames
         }
 #endif
 
-        [Subscribable]
-        public event PropertyChangedEventHandler? PropertyChanged;
-
 
         public PageFrameViewTransform Transform => _transform;
 
@@ -137,7 +134,7 @@ namespace NeeView.PageFrames
 
             //Debug.WriteLine($"## {{{Point:f0}}} to {{{value:f0}}} ({span.TotalMilliseconds}): inertia={inertia}");
             _transform.SetPoint(value, span, easeX, easeY);
-            RaisePropertyChanged(nameof(Point));
+            OnPropertyChanged(nameof(Point));
         }
 
         public void AddPoint(Vector value, TimeSpan span)

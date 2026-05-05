@@ -1,5 +1,6 @@
 ﻿//#define LOCAL_DEBUG
 
+using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.ComponentModel;
 using NeeLaboratory.Generators;
 using System;
@@ -17,7 +18,7 @@ namespace NeeView
     /// Jpegで保持し、必要に応じてBitmapSourceを生成
     /// </summary>
     [LocalDebug]
-    public partial class Thumbnail : BindableBase, IThumbnail, IDisposable
+    public partial class Thumbnail : ObservableObject, IThumbnail, IDisposable
     {
         /// <summary>
         /// 開発用：キャッシュ読み込み無効
@@ -142,15 +143,15 @@ namespace NeeView
                     _image = value;
                     _imageSource = null;
                     LocalWriteLine($"Image={_image is not null}");
-                    RaisePropertyChanged();
-                    RaisePropertyChanged(nameof(IsValid));
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(IsValid));
                     if (_image != null)
                     {
                         Touched?.Invoke(this, EventArgs.Empty);
-                        RaisePropertyChanged(nameof(ImageSource));
-                        RaisePropertyChanged(nameof(IsUniqueImage));
-                        RaisePropertyChanged(nameof(IsNormalImage));
-                        RaisePropertyChanged(nameof(Background));
+                        OnPropertyChanged(nameof(ImageSource));
+                        OnPropertyChanged(nameof(IsUniqueImage));
+                        OnPropertyChanged(nameof(IsNormalImage));
+                        OnPropertyChanged(nameof(Background));
                     }
                 }
             }
@@ -236,7 +237,7 @@ namespace NeeView
                         _imageSource = imageSource;
                         ThumbnailLifetimeManagement.Current.Add(this);
                         LocalWriteLine("Create ImageSourceAsync done.");
-                        RaisePropertyChanged(nameof(ImageSource));
+                        OnPropertyChanged(nameof(ImageSource));
                     }
                     else
                     {
@@ -297,7 +298,7 @@ namespace NeeView
             _imageSource = thumbnail._imageSource;
             if (_imageSource is not null)
             {
-                RaisePropertyChanged(nameof(ImageSource));
+                OnPropertyChanged(nameof(ImageSource));
             }
 
             IsCacheReadEnabled = true;
@@ -507,7 +508,7 @@ namespace NeeView
                 {
                     _image = null;
                     Touched = null;
-                    ResetPropertyChanged();
+                    this.ClearObservableEvents();
                 }
 
                 _disposedValue = true;

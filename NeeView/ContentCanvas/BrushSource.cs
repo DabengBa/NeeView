@@ -1,4 +1,5 @@
-﻿using Generator.Equals;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeLaboratory.ComponentModel;
 using NeeView.Windows.Property;
 using System;
@@ -35,7 +36,7 @@ namespace NeeView
     /// 単色ブラシ、画像タイルブラシ対応
     /// </summary>
     [Equatable(IgnoreInheritedMembers = true)]
-    public partial class BrushSource : BindableBase, ICloneable
+    public partial class BrushSource : ObservableObject, ICloneable
     {
         public static Dictionary<BrushType, string> BrushTypeList => AliasNameExtensions.GetAliasNameDictionary<BrushType>();
 
@@ -54,21 +55,21 @@ namespace NeeView
         public BrushType Type
         {
             get { return _type; }
-            set { if (_type != value) { _type = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _type, value); }
         }
 
         [PropertyMember]
         public Color Color
         {
             get { return _color; }
-            set { if (_color != value) { _color = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _color, value); }
         }
 
         [PropertyMember]
         public string? ImageFileName
         {
             get { return _imageFileName; }
-            set { if (_imageFileName != value) { _imageFileName = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _imageFileName, value); }
         }
 
 
@@ -77,7 +78,7 @@ namespace NeeView
             _type = BrushType.SolidColor;
             _color = Colors.LightGray;
             _imageFileName = null;
-            RaisePropertyChanged(null);
+            OnPropertyChanged("");
         }
 
         public Brush CreateBackBrush()
@@ -143,7 +144,7 @@ namespace NeeView
         public object Clone()
         {
             var clone = (BrushSource)MemberwiseClone();
-            clone.ResetPropertyChanged();
+            clone.ClearObservableEvents();
             return clone;
         }
     }

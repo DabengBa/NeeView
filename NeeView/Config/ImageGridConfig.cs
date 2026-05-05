@@ -1,5 +1,5 @@
-﻿using Generator.Equals;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Generator.Equals;
 using NeeView.Windows.Property;
 using System.ComponentModel;
 using System.Windows.Media;
@@ -7,7 +7,7 @@ using System.Windows.Media;
 namespace NeeView
 {
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
-    public partial class ImageGridConfig : BindableBase
+    public partial class ImageGridConfig : ObservableObject
     {
         [DefaultEquality] private bool _isEnabled;
         [DefaultEquality] private Color _color = Color.FromArgb(0x80, 0x80, 0x80, 0x80);

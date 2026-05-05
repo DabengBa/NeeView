@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeView.PageFrames;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,7 +10,7 @@ namespace NeeView
     /// <summary>
     /// ウィンドウタイトル
     /// </summary>
-    public class WindowTitle : BindableBase
+    public class WindowTitle : ObservableObject
     {
         static WindowTitle() => Current = new WindowTitle();
         public static WindowTitle Current { get; }
@@ -29,7 +30,7 @@ namespace NeeView
             _presenter = MainViewComponent.Current.PageFrameBoxPresenter;
 
             _titleString = new TitleString();
-            _titleString.AddPropertyChanged(nameof(TitleString.Title), TitleString_TitleChanged);
+            _titleString.SubscribePropertyChanged(nameof(TitleString.Title), TitleString_TitleChanged);
 
             _defaultWindowTitle = $"{Environment.ApplicationName} {Environment.DisplayVersion}";
 
@@ -64,7 +65,7 @@ namespace NeeView
         public string Title
         {
             get { return _title; }
-            private set { _title = value; RaisePropertyChanged(); }
+            private set { _title = value; OnPropertyChanged(); }
         }
 
 

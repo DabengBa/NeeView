@@ -25,7 +25,7 @@ namespace NeeView
                 if (SetProperty(ref _name, value))
                 {
                     Source = _name;
-                    RaisePropertyChanged(nameof(DisplayName));
+                    OnPropertyChanged(nameof(DisplayName));
                 }
             }
         }

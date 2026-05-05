@@ -1,10 +1,8 @@
-﻿using NeeLaboratory.ComponentModel;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+
 namespace NeeView
 {
-    public class AppState : BindableBase
+    public class AppState : ObservableObject
     {
         private static readonly AppState _instance = new AppState();
         public static AppState Instance => _instance;

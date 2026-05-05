@@ -1,5 +1,5 @@
-﻿using NeeLaboratory;
-using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory;
 using NeeView.Collections.Generic;
 using NeeView.PageFrames;
 using System;
@@ -12,7 +12,7 @@ namespace NeeView
     /// <summary>
     /// 画像コントロール
     /// </summary>
-    public class NavigateModel : BindableBase
+    public class NavigateModel : ObservableObject
     {
         static NavigateModel() => Current = new NavigateModel();
         public static NavigateModel Current { get; }
@@ -148,20 +148,20 @@ namespace NeeView
             {
                 case null:
                 case "":
-                    RaisePropertyChanged("");
+                    OnPropertyChanged("");
                     break;
 
                 case nameof(NavigateTransformControl.Angle):
-                    RaisePropertyChanged(nameof(Angle));
+                    OnPropertyChanged(nameof(Angle));
                     break;
                 case nameof(NavigateTransformControl.Scale):
-                    RaisePropertyChanged(nameof(Scale));
+                    OnPropertyChanged(nameof(Scale));
                     break;
                 case nameof(NavigateTransformControl.IsFlipHorizontal):
-                    RaisePropertyChanged(nameof(IsFlipHorizontal));
+                    OnPropertyChanged(nameof(IsFlipHorizontal));
                     break;
                 case nameof(NavigateTransformControl.IsFlipVertical):
-                    RaisePropertyChanged(nameof(IsFlipVertical));
+                    OnPropertyChanged(nameof(IsFlipVertical));
                     break;
             }
         }
@@ -172,32 +172,32 @@ namespace NeeView
             {
                 case null:
                 case "":
-                    RaisePropertyChanged("");
+                    OnPropertyChanged("");
                     break;
 
                 case nameof(ViewConfig.IsKeepAngle):
-                    RaisePropertyChanged(nameof(IsKeepAngle));
+                    OnPropertyChanged(nameof(IsKeepAngle));
                     break;
                 case nameof(ViewConfig.IsKeepAngleBooks):
-                    RaisePropertyChanged(nameof(IsKeepAngleBooks));
+                    OnPropertyChanged(nameof(IsKeepAngleBooks));
                     break;
                 case nameof(ViewConfig.IsScaleStretchTracking):
-                    RaisePropertyChanged(nameof(IsScaleStretchTracking));
+                    OnPropertyChanged(nameof(IsScaleStretchTracking));
                     break;
                 case nameof(ViewConfig.IsKeepScale):
-                    RaisePropertyChanged(nameof(IsKeepScale));
+                    OnPropertyChanged(nameof(IsKeepScale));
                     break;
                 case nameof(ViewConfig.IsKeepScaleBooks):
-                    RaisePropertyChanged(nameof(IsKeepScaleBooks));
+                    OnPropertyChanged(nameof(IsKeepScaleBooks));
                     break;
                 case nameof(ViewConfig.IsKeepFlip):
-                    RaisePropertyChanged(nameof(IsKeepFlip));
+                    OnPropertyChanged(nameof(IsKeepFlip));
                     break;
                 case nameof(ViewConfig.IsKeepFlipBooks):
-                    RaisePropertyChanged(nameof(IsKeepFlipBooks));
+                    OnPropertyChanged(nameof(IsKeepFlipBooks));
                     break;
                 case nameof(ViewConfig.IsRotateStretchEnabled):
-                    RaisePropertyChanged(nameof(IsRotateStretchEnabled));
+                    OnPropertyChanged(nameof(IsRotateStretchEnabled));
                     break;
             }
         }

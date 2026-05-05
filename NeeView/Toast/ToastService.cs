@@ -1,11 +1,11 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.Windows.Threading;
 
 namespace NeeView
 {
-    public class ToastService : BindableBase
+    public class ToastService : ObservableObject
     {
         static ToastService() => Current = new ToastService();
         public static ToastService Current { get; }

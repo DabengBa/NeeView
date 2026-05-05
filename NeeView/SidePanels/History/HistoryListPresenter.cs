@@ -1,4 +1,6 @@
-﻿namespace NeeView
+﻿using NeeLaboratory.ComponentModel;
+
+namespace NeeView
 {
     public class HistoryListPresenter
     {
@@ -18,7 +20,7 @@
             _historyListView.Created +=
                 (s, e) => UpdateListBoxContent(false);
 
-            Config.Current.History.AddPropertyChanged(nameof(HistoryConfig.PanelListItemStyle),
+            Config.Current.History.SubscribePropertyChanged(nameof(HistoryConfig.PanelListItemStyle),
                 (s, e) => UpdateListBoxContent());
         }
 

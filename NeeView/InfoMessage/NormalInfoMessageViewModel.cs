@@ -1,4 +1,5 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using NeeLaboratory.ComponentModel;
 using NeeView.ComponentModel;
 using System;
 using System.Windows;
@@ -8,7 +9,7 @@ namespace NeeView
     /// <summary>
     /// NormalInfoMessage : ViewModel
     /// </summary>
-    public class NormalInfoMessageViewModel : BindableBase
+    public class NormalInfoMessageViewModel : ObservableObject
     {
         private readonly WeakBindableBase<NormalInfoMessage> _model;
         private int _changeCount;
@@ -18,25 +19,25 @@ namespace NeeView
         {
             _model = new WeakBindableBase<NormalInfoMessage>(model);
 
-            _model.AddPropertyChanged(nameof(NormalInfoMessage.Message),
+            _model.SubscribePropertyChanged(nameof(NormalInfoMessage.Message),
                 (s, e) =>
                 {
                     if (!string.IsNullOrWhiteSpace(_model.Model.Message)) ChangeCount++;
-                    RaisePropertyChanged(nameof(Message));
-                    RaisePropertyChanged(nameof(Visibility));
+                    OnPropertyChanged(nameof(Message));
+                    OnPropertyChanged(nameof(Visibility));
                 });
 
-            _model.AddPropertyChanged(nameof(NormalInfoMessage.BookMementoIcon),
+            _model.SubscribePropertyChanged(nameof(NormalInfoMessage.BookMementoIcon),
                 (s, e) =>
                 {
-                    RaisePropertyChanged(nameof(BookmarkIconVisibility));
-                    RaisePropertyChanged(nameof(HistoryIconVisibility));
+                    OnPropertyChanged(nameof(BookmarkIconVisibility));
+                    OnPropertyChanged(nameof(HistoryIconVisibility));
                 });
 
-            _model.AddPropertyChanged(nameof(NormalInfoMessage.DisplayTime),
+            _model.SubscribePropertyChanged(nameof(NormalInfoMessage.DisplayTime),
                 (s, e) =>
                 {
-                    RaisePropertyChanged(nameof(DisplayTime));
+                    OnPropertyChanged(nameof(DisplayTime));
                 });
         }
 

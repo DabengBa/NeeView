@@ -1,6 +1,6 @@
 ﻿//#define LOCAL_DEBUG
 
-using NeeLaboratory.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.Generators;
 using System;
 using System.Collections.Generic;
@@ -11,7 +11,7 @@ namespace NeeView
     /// ブックのメモリ管理
     /// </summary>
     [LocalDebug]
-    public partial class BookMemoryService : BindableBase, IBookMemoryService, IDisposable
+    public partial class BookMemoryService : ObservableObject, IBookMemoryService, IDisposable
     {
         private readonly MemoryPool _contentPool = new("BookMemory");
         private bool _disposedValue;
@@ -50,7 +50,7 @@ namespace NeeView
 
             _contentPool.Add(content);
             LocalDebug.WriteLine($"AddPageContent: {TotalSize / 1024 / 1024} MB (+{content.MemorySize / 1024:N0} KB)");
-            RaisePropertyChanged("");
+            OnPropertyChanged("");
         }
 
         public void AddPictureSource(IMemoryElement pictureSource)
@@ -59,7 +59,7 @@ namespace NeeView
 
             _contentPool.Add(pictureSource);
             LocalDebug.WriteLine($"AddPictureSource: {TotalSize / 1024 / 1024} MB (+{pictureSource.MemorySize / 1024:N0} KB)");
-            RaisePropertyChanged("");
+            OnPropertyChanged("");
         }
 
         public void Cleanup(int origin, int direction)
@@ -68,7 +68,7 @@ namespace NeeView
 
             _contentPool.Cleanup(LimitSize, new PageDistanceComparer(origin, direction));
 
-            RaisePropertyChanged("");
+            OnPropertyChanged("");
         }
 
         // 削除優先順位用のコンペア
@@ -141,7 +141,7 @@ namespace NeeView
             if (_disposedValue) return;
 
             _contentPool.Cleanup();
-            RaisePropertyChanged("");
+            OnPropertyChanged("");
         }
 
     }

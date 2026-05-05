@@ -1,12 +1,10 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 
 namespace NeeView
 {
-    [NotifyPropertyChanged]
-    public partial class ViewPageBindingSource : INotifyPropertyChanged
+    public partial class ViewPageBindingSource : ObservableObject
     {
         public static ViewPageBindingSource Default { get; } = new ViewPageBindingSource(PageFrameBoxPresenter.Current);
 
@@ -19,15 +17,13 @@ namespace NeeView
             _presenter.ViewPageChanged += PageFrameBoxPresenter_ViewPageChanged;
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-
         public IReadOnlyList<Page> ViewPages => _presenter.ViewPages;
 
         public bool AnyViewPages => ViewPages.Any();
 
         private void PageFrameBoxPresenter_ViewPageChanged(object? sender, ViewPageChangedEventArgs e)
         {
-            RaisePropertyChanged("");
+            OnPropertyChanged("");
         }
     }
 }

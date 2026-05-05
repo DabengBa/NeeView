@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.Generators;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeView.Properties;
 using System;
 using System.ComponentModel;
@@ -9,8 +9,8 @@ using System.Windows.Input;
 
 namespace NeeView
 {
-    [NotifyPropertyChanged]
-    public partial class ProgressDialog : Window, INotifyPropertyChanged
+    [INotifyPropertyChanged]
+    public partial class ProgressDialog : Window
     {
         private readonly Progress<ProgressInfo> _progress;
         private readonly CancellationTokenSource _tokenSource = new();
@@ -50,8 +50,6 @@ namespace NeeView
             };
         }
 
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         public event EventHandler? Canceled;
 

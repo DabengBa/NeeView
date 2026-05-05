@@ -1,4 +1,4 @@
-﻿using NeeLaboratory.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using PhotoSauce.MagicScaler;
 using System;
 using System.Threading;
@@ -12,7 +12,7 @@ namespace NeeView
     /// <summary>
     /// エントリに対応する表示画像
     /// </summary>
-    public class Picture : BindableBase
+    public class Picture : ObservableObject
     {
         private readonly IPictureSource _pictureSource;
 
@@ -48,7 +48,7 @@ namespace NeeView
         public ImageSource? ImageSource
         {
             get { return _imageSource; }
-            set { if (_imageSource != value) { _imageSource = value; RaisePropertyChanged(); } }
+            set { SetProperty(ref _imageSource, value); }
         }
 
         /// <summary>
